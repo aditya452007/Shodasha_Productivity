@@ -213,7 +213,7 @@ function GooeyTabsIcon({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
       aria-hidden
-      className={cn("inline-flex shrink-0 empty:hidden [&_svg]:size-4", className)}
+      className={cn("inline-flex shrink-0 empty:hidden [&_svg]:size-5", className)}
       {...props}
     />
   )
@@ -222,7 +222,7 @@ function GooeyTabsIcon({ className, ...props }: ComponentProps<"span">) {
 function GooeyTabsLabel({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
-      className={cn("min-w-0 overflow-hidden select-none whitespace-nowrap text-xs font-semibold tracking-wide", className)}
+      className={cn("min-w-0 overflow-hidden select-none whitespace-nowrap text-xs font-bold tracking-wide", className)}
       {...props}
     />
   )
@@ -259,15 +259,15 @@ function getGooeyTabParts(
 
 function gooeyTabGridClass(isSelected: boolean, hasIcon: boolean, hasLabel: boolean) {
   if (hasIcon && hasLabel) {
-    return isSelected ? "grid-cols-[auto_1fr] gap-2 px-4" : "grid-cols-[auto_0fr] gap-0 px-3"
+    return isSelected ? "grid-cols-[auto_1fr] gap-2 px-4" : "grid-cols-[auto_0fr] gap-0 px-2.5"
   }
   if (hasIcon) {
-    return isSelected ? "grid-cols-[auto] px-4" : "grid-cols-[auto] px-3"
+    return isSelected ? "grid-cols-[auto] px-4" : "grid-cols-[auto] px-2.5"
   }
   if (hasLabel) {
-    return isSelected ? "grid-cols-[1fr] gap-0 px-4" : "grid-cols-[0fr] gap-0 px-3"
+    return isSelected ? "grid-cols-[1fr] gap-0 px-4" : "grid-cols-[0fr] gap-0 px-2.5"
   }
-  return isSelected ? "px-4" : "px-3"
+  return isSelected ? "px-4" : "px-2.5"
 }
 
 function GooeyTabsTab({
@@ -307,14 +307,14 @@ function GooeyTabsTab({
       }}
       className={cn(
         tabFocusClass("rounded-full"),
-        "relative grid h-9 cursor-pointer items-center overflow-visible text-white shadow-xs font-semibold",
-        "transition-[grid-template-columns,gap,padding,margin,border-radius] duration-200 ease-in-out motion-reduce:transition-none",
+        "relative grid h-10 cursor-pointer items-center overflow-visible text-white shadow-md font-semibold",
+        "transition-[grid-template-columns,gap,padding,margin,border-radius] duration-300 ease-out motion-reduce:transition-none",
         gooeyTabGridClass(isSelected, hasIcon, hasVisibleLabel),
         color,
         {
-          "mx-2": isSelected && activeIndex !== 0 && activeIndex !== count - 1,
-          "mr-2": isSelected && activeIndex === 0,
-          "ml-2": isSelected && activeIndex === count - 1,
+          "mx-4": isSelected && activeIndex !== 0 && activeIndex !== count - 1,
+          "mr-4": isSelected && activeIndex === 0,
+          "ml-4": isSelected && activeIndex === count - 1,
         },
         className
       )}

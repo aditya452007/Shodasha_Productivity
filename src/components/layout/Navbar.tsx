@@ -18,7 +18,7 @@ import {
 const navItems = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard, color: 'bg-emerald-600 hover:bg-emerald-700' },
   { label: 'Board', href: '/board', icon: Kanban, color: 'bg-teal-600 hover:bg-teal-700' },
-  { label: 'Habits', href: '/habits', icon: CalendarCheck, color: 'bg-indigo-600 hover:bg-indigo-700' },
+  { label: 'Habits', href: '/habits', icon: CalendarCheck, color: 'bg-violet-600 hover:bg-violet-700' },
   { label: 'Timeline', href: '/timeline', icon: LineChart, color: 'bg-amber-600 hover:bg-amber-700' },
   { label: 'Settings', href: '/settings', icon: Settings, color: 'bg-stone-700 hover:bg-stone-800' },
 ]
@@ -39,7 +39,7 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--bg-surface)]/90 backdrop-blur-md transition-colors">
+    <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--bg-surface)]/80 backdrop-blur-md transition-colors">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Brand Logo & Name */}
         <Link href="/" className="flex items-center gap-3 group">
@@ -56,14 +56,14 @@ export function Navbar() {
           </div>
         </Link>
 
-        {/* Central Gooey Tabs Navigation */}
-        <div className="flex items-center justify-center">
+        {/* Central Floating Gooey Tabs Navigation — No Outer Background Container */}
+        <div className="flex items-center justify-center py-1">
           <GooeyTabs
             activeIndex={currentActiveIndex}
             onActiveIndexChange={handleTabChange}
-            intensity={5}
-            contrast={16}
-            lightness={-5}
+            intensity={6}
+            contrast={18}
+            lightness={-7}
           >
             <GooeyTabs.List aria-label="Main Navigation">
               {navItems.map((item) => {

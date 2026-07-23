@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { Navbar } from '@/components/layout/Navbar'
+import { AgentationWrapper } from '@/components/common/AgentationWrapper'
 
 export const metadata: Metadata = {
   title: 'Shodasha — Personal Productivity & Activity Tracker',
@@ -15,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-8">
           {children}
         </main>
+        <AgentationWrapper />
       </body>
     </html>
   )
