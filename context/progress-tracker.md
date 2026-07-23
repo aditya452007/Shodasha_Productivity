@@ -4,13 +4,13 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-**Phase 3 — Implement: Board (Kanban Task Management)**
+**Phase 3 — Implement: Habits (Monthly Calendar Matrix & Heatmap)**
 
-App Shell, Navigation Bar, Dashboard, and full interactive Kanban Board implemented with `@dnd-kit/core` drag and drop.
+App Shell, Navigation Bar, Dashboard, full interactive Kanban Board, and Habits feature (`/habits`) implemented.
 
 ## Current Goal
 
-Complete Board feature & proceed to Habits feature (Calendar + Heatmap).
+Proceed to Timeline feature (`/timeline` - daily activity log & analytics).
 
 ## Completed
 
@@ -30,22 +30,22 @@ Complete Board feature & proceed to Habits feature (Calendar + Heatmap).
 - [x] Zustand state stores created & extended (`uiStore`, `taskStore`, `habitStore`, `timeEntryStore`)
 - [x] Premium Animata Gooey Tabs navigation (`src/components/ui/gooey-tabs.tsx`) integrated into `Navbar.tsx`
 - [x] Dashboard feature components (`TodayProgressCard`, `QuickTaskInput`, `HabitQuickToggle`, `TimeDistributionChart`, `RecentActivityFeed`)
-- [x] Board feature (`/board`):
-  - Feature Spec written at `Feature_docs/board/spec.md`
-  - `KanbanBoard.tsx` with `@dnd-kit/core`, wrapping grid layout, column drag-and-drop, and hydration fixes
-  - `KanbanColumn.tsx` with `@dnd-kit/sortable`, Apple-style spring animations, and `motion.div`
-  - `KanbanCard.tsx` with framer-motion drag animations and translation transitions
-  - `KanbanCard.tsx` with drag handle, quick completion toggle, tag badges, linked habit badge
-  - `TaskModal.tsx` for editing task title, description, column, tags, due date, linked habit
-  - `AddColumnModal.tsx` for creating custom columns
+- [x] Board feature (`/board`) with Kanban drag-and-drop & task modals
+- [x] Habits feature (`/habits`):
+  - Feature Spec written at `Feature_docs/habits/spec.md`
+  - Component evaluations saved to `Feature_docs/habits/heatmap-component.md` & `calendar-component.md`
+  - `HabitStatsCard.tsx` with streak tracking, 30-day check-in counts, and completion rates
+  - `HabitCalendar.tsx` monthly matrix grid with day-of-week headers, month navigation, and interactive check-ins
+  - `HabitHeatmap.tsx` 24-week contribution graph with multi-tier emerald intensity levels & hover tooltips
+  - `AddHabitModal.tsx` modal for creating/editing habits with color picker & linked Kanban task selector
+  - One-way habit completion auto-completing linked task in `taskStore`
 
 ## Next Up
 
-1. Implement Habits feature — calendar + heatmap (`/habits`)
-2. Implement Timeline — activity analytics (`/timeline`)
-3. Implement Settings — app categories, preferences (`/settings`)
-4. Polish pass (Phase 4) — entry animations, reduced-motion, edge states
-5. Verify pass (Phase 5) — build, lint, typecheck
+1. Implement Timeline feature — daily activity log & analytics (`/timeline`)
+2. Implement Settings — app categories, preferences (`/settings`)
+3. Polish pass (Phase 4) — entry animations, reduced-motion, edge states
+4. Verify pass (Phase 5) — build, lint, typecheck
 
 ## Open Questions
 
