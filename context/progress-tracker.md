@@ -4,13 +4,13 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-**Phase 0 — Design Brief** (final stretch)
+**Phase 3 — Implement: Dashboard & App Shell**
 
-All architecture gaps addressed, anti-slop gates defined, full project blueprint ready.
+App Shell, Navigation Bar, Design System tokens, Zustand stores, and full interactive Dashboard page implemented.
 
 ## Current Goal
 
-Complete Phase 0 — ready to begin Phase 1 (component docs fetch).
+Complete Dashboard section & proceed to Board feature (Kanban).
 
 ## Completed
 
@@ -25,35 +25,36 @@ Complete Phase 0 — ready to begin Phase 1 (component docs fetch).
 - [x] Anti-slop rules defined (ui-context.md + ai-workflow-rules.md)
 - [x] Context files all updated (7 files, all filled from templates)
 - [x] AGENTS.md written (5-phase SDLC)
-- [x] 10 senior-engineer gaps resolved:
-  - Concurrent DB access → WAL mode
-  - Idle/lock/sleep handling → end_reason field
-  - First-run bootstrap → schema creation + seed data
-  - Data pruning → 6-month auto-prune
-  - App categorization → app_categories table
-  - Startup registration → Tauri-managed Run registry
-  - Schema migrations → schema_version table
-  - Tauri v2 capabilities → capabilities/default.json
-  - Logging → tracing crate to files
-  - Build pipeline → npm run build orchestrates all 3 builds
+- [x] Implementation Plan created & approved (`implementation_plan.md`)
+- [x] Design system CSS tokens & theme variables (`src/app/globals.css`)
+- [x] Zustand state stores created:
+  - `uiStore.ts` (theme, tracking status, tab state)
+  - `taskStore.ts` (kanban tasks, statuses, quick-add, toggle, delete)
+  - `habitStore.ts` (habits, daily check-ins, auto-completing linked tasks)
+  - `timeEntryStore.ts` (foreground window time entries, focus time breakdown by category)
+- [x] Premium Animata Gooey Tabs navigation (`src/components/ui/gooey-tabs.tsx` & `navbar_gooey_tabs.md`) integrated into `Navbar.tsx`
+- [x] App Shell & Navbar (`src/components/layout/Navbar.tsx`) with Top Tab Bar, live tracking pulse indicator, and theme switcher
+- [x] Dashboard feature components created:
+  - `TodayProgressCard` (daily briefing, focus time counter, task/habit/streak statistics)
+  - `QuickTaskInput` (fast inline task creation into 'To Do' column)
+  - `HabitQuickToggle` (interactive daily habit check-in list with linked task auto-completion)
+  - `TimeDistributionChart` (focus time category breakdown bar & metrics)
+  - `RecentActivityFeed` (realtime stream of task updates & window focus switches)
+- [x] Route shells created for `/board`, `/habits`, `/timeline`, `/settings`
 
 ## Next Up
 
-1. Component docs fetch (Phase 1) — dispatch sub-agents to copy real code from libraries
-2. Project scaffold (Phase 2) — install Tauri, Next.js, Tailwind, Zustand, dependencies
-3. Implement Board feature (Phase 3) — kanban with @dnd-kit
-4. Implement Habits feature — calendar + heatmap
-5. Implement Timeline — activity analytics
-6. Implement Dashboard — stats + quick actions
-7. Implement Settings — app categories, preferences
-8. Polish pass (Phase 4) — animations, reduced-motion, edge states
-9. Verify pass (Phase 5) — build, lint, typecheck
+1. Implement Board feature (Phase 3) — kanban with @dnd-kit drag & drop
+2. Implement Habits feature — calendar + heatmap
+3. Implement Timeline — activity analytics
+4. Implement Settings — app categories, preferences
+5. Polish pass (Phase 4) — entry animations, reduced-motion, edge states
+6. Verify pass (Phase 5) — build, lint, typecheck
 
 ## Open Questions
 
-- Poll interval default for activity tracker (configurable, but what default?)
+- Poll interval default for activity tracker (configurable, default 30s)
 - Export format besides CSV? (deferred)
-- How to handle idle time in tracking? (skip short idle gaps vs. split entries)
 
 ## Architecture Decisions
 
