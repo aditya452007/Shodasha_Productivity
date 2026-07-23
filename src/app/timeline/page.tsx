@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Activity } from 'lucide-react'
+import { Activity, Sparkles } from 'lucide-react'
 import { CategoryFilterBar } from '@/components/timeline/CategoryFilterBar'
 import { ActivityDistributionChart } from '@/components/timeline/ActivityDistributionChart'
 import { TimelineStream } from '@/components/timeline/TimelineStream'
@@ -10,33 +10,36 @@ import { TimelineStream } from '@/components/timeline/TimelineStream'
 export default function TimelinePage() {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
-      className="space-y-6 max-w-7xl mx-auto pb-12"
+      transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
+      className="space-y-8 max-w-7xl mx-auto pb-16 px-2 sm:px-4"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Header with Eyebrow Tag & Macro-Whitespace */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Activity className="size-6 text-[var(--accent)]" />
-            <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-              Activity Timeline & Analytics
-            </h1>
+          {/* Eyebrow Micro Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--accent)] bg-[var(--accent-muted)] border border-[var(--accent)]/20 mb-2">
+            <Sparkles className="size-3" />
+            <span>Windows Activity Analytics • Realtime Session Logs</span>
           </div>
-          <p className="text-sm text-[var(--text-secondary)]">
-            Review passive Windows activity tracking logs, Deep Work ratios, and task attribution.
+
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-primary)]">
+            Activity Timeline
+          </h1>
+          <p className="text-sm text-[var(--text-secondary)] mt-1 max-w-2xl">
+            Passive Windows foreground window polling, Deep Work ratios, app categories, and Kanban task attribution.
           </p>
         </div>
       </div>
 
-      {/* Filter & Control Bar */}
+      {/* Floating Glass Filter & Control Bar */}
       <CategoryFilterBar />
 
-      {/* Analytics Chart */}
+      {/* Time Distribution Analytics Chart */}
       <ActivityDistributionChart />
 
-      {/* Chronological Activity Feed */}
+      {/* Chronological Activity Feed Stream */}
       <TimelineStream />
     </motion.div>
   )

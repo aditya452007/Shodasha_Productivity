@@ -8,9 +8,9 @@ import {
   Terminal,
   Moon,
   CheckCircle2,
-  Tag,
   Clock,
   Layers,
+  ChevronRight,
   LucideIcon,
 } from 'lucide-react'
 import { useTimeEntryStore, TimeEntry } from '@/stores/timeEntryStore'
@@ -49,24 +49,33 @@ export function TimelineStream() {
   const entries = getFilteredEntries()
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="font-display font-semibold text-base text-[var(--text-primary)]">
-          Activity Log ({entries.length} Sessions)
-        </h3>
-        <span className="text-xs text-[var(--text-secondary)]">Chronological Feed</span>
+        <div>
+          <h3 className="font-display font-bold text-lg text-[var(--text-primary)]">
+            Activity Log Stream
+          </h3>
+          <p className="text-xs text-[var(--text-secondary)]">
+            Chronological session history ({entries.length} logged sessions)
+          </p>
+        </div>
+        <span className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-surface-hover)] border border-[var(--border)] px-3 py-1 rounded-xl">
+          Live Sync Active
+        </span>
       </div>
 
       {entries.length === 0 ? (
-        <div className="bg-[var(--bg-surface)] border border-[var(--border)] shadow-xs rounded-2xl p-12 text-center">
-          <Clock className="size-8 mx-auto text-[var(--text-muted)] mb-3" />
-          <p className="text-sm font-medium text-[var(--text-primary)]">No activity logs found</p>
-          <p className="text-xs text-[var(--text-secondary)] mt-1">
-            Try adjusting your search query or category filters.
-          </p>
+        <div className="p-2 rounded-[2.25rem] bg-stone-900/5 dark:bg-white/5 ring-1 ring-stone-900/5 dark:ring-white/10">
+          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[calc(2.25rem-0.5rem)] p-12 text-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
+            <Clock className="size-8 mx-auto text-[var(--text-muted)] mb-3" />
+            <p className="text-sm font-semibold text-[var(--text-primary)]">No matching window activity logs</p>
+            <p className="text-xs text-[var(--text-secondary)] mt-1">
+              Try adjusting your search query or category filters.
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-4 before:bottom-4 before:w-0.5 before:bg-[var(--border)]">
+        <div className="relative pl-6 sm:pl-8 space-y-4 before:absolute before:left-3 sm:before:left-3.5 before:top-4 before:bottom-4 before:w-0.5 before:bg-[var(--border)]">
           {entries.map((entry, index) => {
             const isIdle = entry.endReason === 'idle'
             const cat = categories[entry.appName] || 'neutral'
@@ -76,93 +85,98 @@ export function TimelineStream() {
             return (
               <motion.div
                 key={entry.id}
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ type: 'spring', bounce: 0, duration: 0.3, delay: index * 0.04 }}
+                transition={{ type: 'spring', bounce: 0, duration: 0.4, delay: index * 0.04 }}
                 className="relative group"
               >
-                {/* Timeline Node Dot */}
+                {/* Timeline Dot with Glow Ring */}
                 <div
-                  className={`absolute -left-[1.875rem] top-5 size-3.5 rounded-full ring-4 ring-[var(--bg-base)] transition-transform group-hover:scale-125 ${
+                  className={`absolute -left-[1.95rem] sm:-left-[2.15rem] top-6 size-4 rounded-full ring-4 ring-[var(--bg-base)] transition-transform group-hover:scale-125 ${
                     isIdle
                       ? 'bg-stone-400'
                       : cat === 'work'
-                      ? 'bg-emerald-500'
+                      ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]'
                       : cat === 'distraction'
-                      ? 'bg-red-500'
-                      : 'bg-amber-500'
+                      ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                      : 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]'
                   }`}
                 />
 
-                {/* Stream Item Card */}
-                <div className="bg-[var(--bg-surface)] border border-[var(--border)] shadow-xs rounded-2xl p-5 hover:border-[var(--border-strong)] transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="flex items-start gap-4 flex-1 min-w-0">
-                    <div className="p-3 rounded-xl bg-[var(--bg-surface-hover)] text-[var(--text-secondary)] shrink-0">
-                      {isIdle ? <Moon className="size-5 text-stone-400" /> : <AppIcon className="size-5" />}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <span className="font-display font-semibold text-base text-[var(--text-primary)]">
-                          {entry.appName}
-                        </span>
-
-                        {isIdle ? (
-                          <span className="text-xs px-2.5 py-0.5 rounded-full bg-stone-500/10 text-stone-600 dark:text-stone-400 border border-stone-500/20 font-medium">
-                            System Idle / Locked
-                          </span>
-                        ) : (
-                          <span
-                            className={`text-xs px-2.5 py-0.5 rounded-full border font-medium capitalize ${
-                              cat === 'work'
-                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                                : cat === 'distraction'
-                                ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
-                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
-                            }`}
-                          >
-                            {cat === 'work' ? 'Deep Work' : cat}
-                          </span>
-                        )}
-
-                        {/* Linked Task Badge / Selector */}
-                        {linkedTask ? (
-                          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full bg-[var(--accent-muted)] text-[var(--accent)] font-medium border border-[var(--accent)]/20">
-                            <CheckCircle2 className="size-3" />
-                            Task: {linkedTask.title}
-                          </span>
-                        ) : (
-                          <select
-                            value=""
-                            onChange={(e) => linkTaskToTimeEntry(entry.id, e.target.value || undefined)}
-                            className="text-[11px] bg-[var(--bg-surface-hover)] text-[var(--text-muted)] hover:text-[var(--text-secondary)] border border-transparent hover:border-[var(--border)] rounded-lg px-2 py-0.5 transition-colors cursor-pointer"
-                          >
-                            <option value="" disabled>
-                              + Link Task
-                            </option>
-                            {tasks.map((t) => (
-                              <option key={t.id} value={t.id}>
-                                {t.title}
-                              </option>
-                            ))}
-                          </select>
-                        )}
+                {/* Doppelrand Double-Bezel Stream Card */}
+                <div className="p-1.5 rounded-[2rem] bg-stone-900/5 dark:bg-white/5 ring-1 ring-stone-900/5 dark:ring-white/10 group-hover:ring-stone-900/15 dark:group-hover:ring-white/20 transition-all">
+                  <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[calc(2rem-0.375rem)] p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] flex flex-col md:flex-row md:items-center justify-between gap-4 group-hover:scale-[1.005] active:scale-[0.995] transition-transform">
+                    <div className="flex items-start gap-4 flex-1 min-w-0">
+                      {/* Nested App Icon Core */}
+                      <div className="p-3 rounded-2xl bg-[var(--bg-surface-hover)] text-[var(--text-secondary)] ring-1 ring-stone-900/5 dark:ring-white/10 shrink-0 group-hover:text-[var(--accent)] transition-colors">
+                        {isIdle ? <Moon className="size-5 text-stone-400" /> : <AppIcon className="size-5" />}
                       </div>
 
-                      <p className="text-xs text-[var(--text-secondary)] font-mono truncate max-w-xl">
-                        {entry.windowTitle}
-                      </p>
-                    </div>
-                  </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
+                          <span className="font-display font-bold text-base text-[var(--text-primary)]">
+                            {entry.appName}
+                          </span>
 
-                  {/* Duration & Timestamp */}
-                  <div className="flex md:flex-col items-center md:items-end justify-between text-right shrink-0 border-t md:border-t-0 pt-2 md:pt-0 border-[var(--border)]">
-                    <span className="font-mono text-sm font-bold text-[var(--text-primary)]">
-                      {formatDuration(entry.durationSeconds)}
-                    </span>
-                    <span className="text-xs text-[var(--text-muted)] font-mono">
-                      {formatTimeRange(entry.startTime, entry.endTime)}
-                    </span>
+                          {isIdle ? (
+                            <span className="text-xs px-3 py-0.5 rounded-full bg-stone-500/10 text-stone-600 dark:text-stone-400 border border-stone-500/20 font-medium">
+                              System Idle / Locked
+                            </span>
+                          ) : (
+                            <span
+                              className={`text-xs px-3 py-0.5 rounded-full border font-medium capitalize ${
+                                cat === 'work'
+                                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                  : cat === 'distraction'
+                                  ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
+                                  : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                              }`}
+                            >
+                              {cat === 'work' ? 'Deep Work' : cat}
+                            </span>
+                          )}
+
+                          {/* Button-in-Button Task Link Badge */}
+                          {linkedTask ? (
+                            <span className="inline-flex items-center gap-1.5 text-xs pl-3 pr-1.5 py-0.5 rounded-full bg-[var(--accent-muted)] text-[var(--accent)] font-semibold border border-[var(--accent)]/30">
+                              <span>Task: {linkedTask.title}</span>
+                              <div className="size-4 rounded-full bg-[var(--accent)] text-[var(--bg-surface)] flex items-center justify-center">
+                                <CheckCircle2 className="size-3" />
+                              </div>
+                            </span>
+                          ) : (
+                            <select
+                              value=""
+                              onChange={(e) => linkTaskToTimeEntry(entry.id, e.target.value || undefined)}
+                              className="text-xs bg-[var(--bg-surface-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-[var(--border)] rounded-xl px-2.5 py-1 transition-colors cursor-pointer outline-none"
+                            >
+                              <option value="" disabled>
+                                + Link Kanban Task
+                              </option>
+                              {tasks.map((t) => (
+                                <option key={t.id} value={t.id}>
+                                  {t.title}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
+
+                        <p className="text-xs text-[var(--text-secondary)] font-mono truncate max-w-xl">
+                          {entry.windowTitle}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Duration & Timestamp */}
+                    <div className="flex md:flex-col items-center md:items-end justify-between text-right shrink-0 border-t md:border-t-0 pt-3 md:pt-0 border-[var(--border)]">
+                      <span className="font-mono text-base font-extrabold text-[var(--text-primary)]">
+                        {formatDuration(entry.durationSeconds)}
+                      </span>
+                      <span className="text-xs text-[var(--text-muted)] font-mono font-medium">
+                        {formatTimeRange(entry.startTime, entry.endTime)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </motion.div>
