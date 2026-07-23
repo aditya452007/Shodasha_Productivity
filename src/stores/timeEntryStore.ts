@@ -29,18 +29,21 @@ export interface AppStatItem {
   sessionsCount: number
 }
 
-export interface HourlyPoint {
-  hour: string
-  focusMinutes: number
-  idleMinutes: number
+export interface CumulativePoint {
+  timestamp: string // e.g. "08:00", "10:00", "12:00", "14:00", "16:00", "18:00"
+  cumulativeFocusMins: number // Monotonically increasing
+  cumulativeTotalMins: number // Monotonically increasing (includes idle)
 }
 
 export interface TimeKPIs {
+  computerOnTimeSeconds: number
+  activeFocusSeconds: number
+  idleTimeSeconds: number
   focusEfficiency: number
   contextSwitches: number
-  peakHour: string
   deepWorkRatio: number
-  totalFocusSeconds: number
+  topAppName: string
+  topAppDurationSeconds: number
 }
 
 interface TimeEntryState {
@@ -64,7 +67,7 @@ interface TimeEntryState {
   getFilteredFocusSeconds: () => number
   getCategoryBreakdownFiltered: () => { category: CategoryType; label: string; seconds: number; percentage: number }[]
   getTopAppsFiltered: () => AppStatItem[]
-  getHourlyTrendFiltered: () => HourlyPoint[]
+  getCumulativeScreenTimeFiltered: () => CumulativePoint[]
   getKPIsFiltered: () => TimeKPIs
 }
 
@@ -87,28 +90,28 @@ const initialEntries: TimeEntry[] = [
     id: 'te-1',
     appName: 'Code.exe',
     windowTitle: 'Shodasha_Productivity — timeEntryStore.ts',
-    startTime: new Date(now - 3600 * 1000 * 4.5).toISOString(),
-    endTime: new Date(now - 3600 * 1000 * 2.5).toISOString(),
-    durationSeconds: 7200, // 2h
-    createdAt: new Date(now - 3600 * 1000 * 4.5).toISOString(),
+    startTime: new Date(now - 3600 * 1000 * 5).toISOString(),
+    endTime: new Date(now - 3600 * 1000 * 3).toISOString(),
+    durationSeconds: 7200, // 2h (09:00 - 11:00)
+    createdAt: new Date(now - 3600 * 1000 * 5).toISOString(),
   },
   {
     id: 'te-2',
     appName: 'WindowsTerminal.exe',
     windowTitle: 'PowerShell — npm run dev',
-    startTime: new Date(now - 3600 * 1000 * 2.5).toISOString(),
-    endTime: new Date(now - 3600 * 1000 * 2.1).toISOString(),
-    durationSeconds: 1440, // 24 mins
-    createdAt: new Date(now - 3600 * 1000 * 2.5).toISOString(),
+    startTime: new Date(now - 3600 * 1000 * 3).toISOString(),
+    endTime: new Date(now - 3600 * 1000 * 2.5).toISOString(),
+    durationSeconds: 1800, // 30 mins (11:00 - 11:30)
+    createdAt: new Date(now - 3600 * 1000 * 3).toISOString(),
   },
   {
     id: 'te-3',
     appName: 'chrome.exe',
     windowTitle: 'Tailwind CSS v4 Documentation',
-    startTime: new Date(now - 3600 * 1000 * 2.1).toISOString(),
+    startTime: new Date(now - 3600 * 1000 * 2.5).toISOString(),
     endTime: new Date(now - 3600 * 1000 * 1.8).toISOString(),
-    durationSeconds: 1080, // 18 mins
-    createdAt: new Date(now - 3600 * 1000 * 2.1).toISOString(),
+    durationSeconds: 2520, // 42 mins (11:30 - 12:12)
+    createdAt: new Date(now - 3600 * 1000 * 2.5).toISOString(),
   },
   {
     id: 'te-4',
@@ -116,7 +119,7 @@ const initialEntries: TimeEntry[] = [
     windowTitle: 'Shodasha Design System Specs',
     startTime: new Date(now - 3600 * 1000 * 1.8).toISOString(),
     endTime: new Date(now - 3600 * 1000 * 0.8).toISOString(),
-    durationSeconds: 3600, // 1h
+    durationSeconds: 3600, // 1h (12:12 - 13:12)
     createdAt: new Date(now - 3600 * 1000 * 1.8).toISOString(),
   },
   {
@@ -124,23 +127,23 @@ const initialEntries: TimeEntry[] = [
     appName: 'youtube.com',
     windowTitle: 'Lo-Fi Chill Beats for Coding',
     startTime: new Date(now - 3600 * 1000 * 0.8).toISOString(),
-    endTime: new Date(now - 3600 * 1000 * 0.4).toISOString(),
-    durationSeconds: 1440, // 24 mins
+    endTime: new Date(now - 3600 * 1000 * 0.3).toISOString(),
+    durationSeconds: 1800, // 30 mins (13:12 - 13:42)
     createdAt: new Date(now - 3600 * 1000 * 0.8).toISOString(),
   },
   {
     id: 'te-6',
     appName: 'Code.exe',
     windowTitle: 'Lock Screen / Idle Period',
-    startTime: new Date(now - 3600 * 1000 * 0.4).toISOString(),
+    startTime: new Date(now - 3600 * 1000 * 0.3).toISOString(),
     endTime: new Date().toISOString(),
     endReason: 'idle',
-    durationSeconds: 1440, // 24 mins idle
-    createdAt: new Date(now - 3600 * 1000 * 0.4).toISOString(),
+    durationSeconds: 1080, // 18 mins idle
+    createdAt: new Date(now - 3600 * 1000 * 0.3).toISOString(),
   },
 ]
 
-const initialWidgetOrder = ['kpi-grid', 'hourly-line-chart', 'category-ring-chart', 'top-apps-bar-chart', 'activity-stream']
+const initialWidgetOrder = ['kpi-grid', 'cumulative-screentime-chart', 'category-ring-chart', 'top-apps-bar-chart', 'activity-stream']
 
 export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
   entries: initialEntries,
@@ -307,39 +310,18 @@ export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
     return result.sort((a, b) => b.totalSeconds - a.totalSeconds)
   },
 
-  getHourlyTrendFiltered: () => {
-    const filtered = get().getFilteredEntries()
-
-    // Map 24 hours (or 6 representative key intervals: 08:00, 10:00, 12:00, 14:00, 16:00, 18:00)
-    const hours = ['09:00', '11:00', '13:00', '15:00', '17:00', '19:00']
-    const buckets: Record<string, { focus: number; idle: number }> = {
-      '09:00': { focus: 45, idle: 5 },
-      '11:00': { focus: 55, idle: 0 },
-      '13:00': { focus: 20, idle: 30 },
-      '15:00': { focus: 50, idle: 10 },
-      '17:00': { focus: 40, idle: 5 },
-      '19:00': { focus: 25, idle: 15 },
-    }
-
-    filtered.forEach((entry) => {
-      const d = new Date(entry.startTime)
-      const hrNum = d.getHours()
-      const label = `${String(Math.floor(hrNum / 2) * 2 + 1).padStart(2, '0')}:00`
-      if (buckets[label]) {
-        const mins = Math.round((entry.durationSeconds || 0) / 60)
-        if (entry.endReason === 'idle') {
-          buckets[label].idle += mins
-        } else {
-          buckets[label].focus += mins
-        }
-      }
-    })
-
-    return hours.map((h) => ({
-      hour: h,
-      focusMinutes: buckets[h].focus,
-      idleMinutes: buckets[h].idle,
-    }))
+  getCumulativeScreenTimeFiltered: () => {
+    // Cumulative screen time accumulates monotonically throughout the day
+    // 08:00 → 10:00 → 12:00 → 14:00 → 16:00 → 18:00
+    const points: CumulativePoint[] = [
+      { timestamp: '08:00', cumulativeFocusMins: 0, cumulativeTotalMins: 0 },
+      { timestamp: '10:00', cumulativeFocusMins: 90, cumulativeTotalMins: 95 },
+      { timestamp: '12:00', cumulativeFocusMins: 184, cumulativeTotalMins: 195 },
+      { timestamp: '14:00', cumulativeFocusMins: 244, cumulativeTotalMins: 260 },
+      { timestamp: '16:00', cumulativeFocusMins: 310, cumulativeTotalMins: 330 },
+      { timestamp: '18:00', cumulativeFocusMins: 380, cumulativeTotalMins: 410 },
+    ]
+    return points
   },
 
   getKPIsFiltered: () => {
@@ -365,12 +347,18 @@ export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
     const focusEfficiency = Math.round((focusSec / totalTracked) * 100)
     const deepWorkRatio = Math.round((workSec / (focusSec || 1)) * 100)
 
+    const topApps = get().getTopAppsFiltered()
+    const topApp = topApps[0]
+
     return {
+      computerOnTimeSeconds: totalTracked,
+      activeFocusSeconds: focusSec,
+      idleTimeSeconds: idleSec,
       focusEfficiency,
       contextSwitches: filtered.length,
-      peakHour: '10:00 AM – 12:00 PM',
       deepWorkRatio,
-      totalFocusSeconds: focusSec,
+      topAppName: topApp ? topApp.appName : 'Code.exe',
+      topAppDurationSeconds: topApp ? topApp.totalSeconds : focusSec,
     }
   },
 }))

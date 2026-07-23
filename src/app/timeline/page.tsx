@@ -7,7 +7,7 @@ import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { CategoryFilterBar } from '@/components/timeline/CategoryFilterBar'
 import {
   AnalyticsKPIGrid,
-  HourlyTrendWidget,
+  CumulativeScreenTimeWidget,
   DistributionChartsWidget,
 } from '@/components/timeline/ActivityDistributionChart'
 import { TimelineStream } from '@/components/timeline/TimelineStream'
@@ -22,8 +22,8 @@ export default function TimelinePage() {
       content: <AnalyticsKPIGrid />,
     },
     {
-      id: 'hourly-line-chart',
-      content: <HourlyTrendWidget />,
+      id: 'cumulative-screentime-chart',
+      content: <CumulativeScreenTimeWidget />,
     },
     {
       id: 'category-ring-chart',
@@ -48,14 +48,14 @@ export default function TimelinePage() {
           {/* Eyebrow Micro Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--accent)] bg-[var(--accent-muted)] border border-[var(--accent)]/20 mb-2">
             <Sparkles className="size-3" />
-            <span>Windows Activity Analytics • Customizable Drag & Drop Dashboard</span>
+            <span>Windows Activity Analytics • Cumulative Screen Time Dashboard</span>
           </div>
 
           <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-primary)]">
             Activity Timeline & Analytics
           </h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1 max-w-2xl">
-            Modular analytics suite with line trends, donut ratios, app bar graphs, and draggable widget customization.
+            Cumulative screen time accumulation, Computer On-Time KPIs, top application duration bar chart, and draggable layout grid.
           </p>
         </div>
 

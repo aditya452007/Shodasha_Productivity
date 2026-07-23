@@ -5,11 +5,11 @@ import {
   Clock,
   ShieldCheck,
   Zap,
-  Repeat,
-  Sparkles,
+  Laptop,
   TrendingUp,
   BarChart3,
   PieChartIcon,
+  Moon,
 } from 'lucide-react'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { KPICard } from '@/components/ui/charts/KPICard'
@@ -31,73 +31,86 @@ export function AnalyticsKPIGrid() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <KPICard
-        eyebrow="PRODUCTIVITY"
-        title="Focus Efficiency"
-        value={`${kpis.focusEfficiency}%`}
-        trend="+4.2%"
-        trendType="positive"
-        icon={Zap}
-        subtitle="Active vs idle ratio"
-      />
-      <KPICard
-        eyebrow="DURATION"
-        title="Active Focus Time"
-        value={formatDuration(kpis.totalFocusSeconds)}
-        trend="On Track"
+        eyebrow="SYSTEM ON-TIME"
+        title="Computer On Time Today"
+        value={formatDuration(kpis.computerOnTimeSeconds)}
+        trend="Power Active"
         trendType="positive"
         icon={Clock}
-        subtitle="Tracked window duration"
+        subtitle="Total system active session"
       />
       <KPICard
-        eyebrow="QUALITY"
-        title="Deep Work Ratio"
-        value={`${kpis.deepWorkRatio}%`}
-        trend="+8%"
+        eyebrow="FOCUS LOGS"
+        title="Active Screen Time"
+        value={formatDuration(kpis.activeFocusSeconds)}
+        trend={`${kpis.focusEfficiency}% Active`}
         trendType="positive"
-        icon={ShieldCheck}
-        subtitle="Target: 60%+ Deep Work"
+        icon={Zap}
+        subtitle="Active window foreground time"
       />
       <KPICard
-        eyebrow="WORKFLOW"
-        title="Context Switches"
-        value={`${kpis.contextSwitches} Logs`}
-        trend="Optimal"
+        eyebrow="IDLE / LOCKED"
+        title="Lock Screen & Sleep"
+        value={formatDuration(kpis.idleTimeSeconds)}
+        trend="Excluded"
         trendType="neutral"
-        icon={Repeat}
-        subtitle="Window switch count"
+        icon={Moon}
+        subtitle="Excluded from focus duration"
+      />
+      <KPICard
+        eyebrow="MOST USED APP"
+        title="Top Application"
+        value={kpis.topAppName}
+        trend={formatDuration(kpis.topAppDurationSeconds)}
+        trendType="positive"
+        icon={Laptop}
+        subtitle="Primary workflow application"
       />
     </div>
   )
 }
 
-export function HourlyTrendWidget() {
-  const { getHourlyTrendFiltered } = useTimeEntryStore()
-  const trendData = getHourlyTrendFiltered()
+export function CumulativeScreenTimeWidget() {
+  const { getCumulativeScreenTimeFiltered } = useTimeEntryStore()
+  const points = getCumulativeScreenTimeFiltered()
 
-  const chartPoints = trendData.map((d) => ({
-    label: d.hour,
-    value: d.focusMinutes,
-    value2: d.idleMinutes,
+  const chartData = points.map((p) => ({
+    label: p.timestamp,
+    value: p.cumulativeFocusMins,
+    value2: p.cumulativeTotalMins,
   }))
 
   return (
     <div className="p-2 rounded-[2.25rem] bg-stone-900/5 dark:bg-white/5 ring-1 ring-stone-900/5 dark:ring-white/10 shadow-xs">
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[calc(2.25rem-0.5rem)] p-6 sm:p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-2xl bg-[var(--accent-muted)] text-[var(--accent)] border border-[var(--accent)]/20">
               <TrendingUp className="size-5" />
             </div>
             <div>
               <h3 className="font-display font-bold text-base text-[var(--text-primary)]">
-                Hourly Focus & Idle Velocity
+                Cumulative Screen Time Growth
               </h3>
-              <p className="text-xs text-[var(--text-secondary)]">24-hour interval activity trend line</p>
+              <p className="text-xs text-[var(--text-secondary)]">
+                Continuous monotonic accumulation of active computer hours throughout the day
+              </p>
             </div>
           </div>
+
+          <span className="text-xs font-mono text-[var(--text-secondary)] bg-[var(--bg-surface-hover)] border border-[var(--border)] px-3 py-1 rounded-xl w-max">
+            Monotonic Trajectory
+          </span>
         </div>
 
-        <LineChart data={chartPoints} height={190} />
+        <LineChart
+          data={chartData}
+          height={210}
+          series1Label="Cumulative Active Focus Time"
+          series2Label="Total System On-Time (inc. Idle)"
+          series1Color="#059669"
+          series2Color="#a8a29e"
+        />
       </div>
     </div>
   )
@@ -134,7 +147,8 @@ export function DistributionChartsWidget() {
         : a.category === 'distraction'
         ? '#dc2626'
         : '#d97706',
-    sublabel: formatDuration(a.totalSeconds),
+    formattedDuration: formatDuration(a.totalSeconds),
+    sessionsCount: a.sessionsCount,
   }))
 
   return (
@@ -148,9 +162,9 @@ export function DistributionChartsWidget() {
             </div>
             <div>
               <h3 className="font-display font-bold text-base text-[var(--text-primary)]">
-                Category Breakdown
+                Category Time Distribution
               </h3>
-              <p className="text-xs text-[var(--text-secondary)]">Deep Work vs. General & Distraction ratio</p>
+              <p className="text-xs text-[var(--text-secondary)]">Proportion of Deep Work vs. General Tools & Distraction</p>
             </div>
           </div>
 
@@ -167,9 +181,9 @@ export function DistributionChartsWidget() {
             </div>
             <div>
               <h3 className="font-display font-bold text-base text-[var(--text-primary)]">
-                Top Applications Share
+                Most Used Applications
               </h3>
-              <p className="text-xs text-[var(--text-secondary)]">Most used executables & time allocation</p>
+              <p className="text-xs text-[var(--text-secondary)]">Ranking executables by logged active duration</p>
             </div>
           </div>
 
