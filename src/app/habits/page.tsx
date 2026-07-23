@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Plus, Flame } from 'lucide-react'
+import { Plus, Flame, Award } from 'lucide-react'
 import { HabitStatsCard } from '@/components/habits/HabitStatsCard'
+import { HabitAnalyticsDashboard } from '@/components/habits/HabitAnalyticsDashboard'
+import { HabitAchievements } from '@/components/habits/HabitAchievements'
 import { HabitCalendar } from '@/components/habits/HabitCalendar'
 import { HabitHeatmap } from '@/components/habits/HabitHeatmap'
 import { AddHabitModal } from '@/components/habits/AddHabitModal'
@@ -35,34 +37,52 @@ export default function HabitsPage() {
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-              Habits & Heatmap
+              Habits Dashboard & Analytics
             </h1>
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-[var(--accent-emerald)] border border-emerald-500/20">
               <Flame className="w-3.5 h-3.5" /> Daily Consistency
             </span>
           </div>
           <p className="text-sm text-[var(--text-secondary)] mt-1">
-            Build lasting routines, track daily progress, and view 24-week consistency heatmaps.
+            Build routines, track trends with line & ring charts, unlock achievements, and view 24-week heatmaps.
           </p>
         </div>
 
         <button
           onClick={handleOpenAddModal}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--accent-emerald)] text-white text-xs font-semibold hover:opacity-90 transition-all shadow-xs self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--accent-emerald)] text-white text-xs font-semibold hover:opacity-90 transition-all shadow-xs self-start sm:self-auto active:scale-95"
         >
           <Plus className="w-4 h-4" />
           New Habit
         </button>
       </motion.div>
 
-      {/* Habits Statistics Cards */}
+      {/* Habits Summary Metrics Cards */}
       <HabitStatsCard />
 
-      {/* Main Monthly Calendar Matrix */}
+      {/* 14-Day Line Trend Chart & Completion Rings */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, delay: 0.05 }}
+      >
+        <HabitAnalyticsDashboard />
+      </motion.div>
+
+      {/* Milestone Achievements System & Unlocks Log */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, delay: 0.1 }}
+      >
+        <HabitAchievements />
+      </motion.div>
+
+      {/* Main Monthly Calendar Matrix Grid */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, delay: 0.15 }}
       >
         <HabitCalendar
           onOpenAddModal={handleOpenAddModal}
@@ -74,7 +94,7 @@ export default function HabitsPage() {
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, delay: 0.15 }}
+        transition={{ duration: 0.25, delay: 0.2 }}
       >
         <HabitHeatmap />
       </motion.div>

@@ -63,17 +63,18 @@ export function HabitStatsCard() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2, delay: 0.05 }}
-        className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4 flex items-center gap-3 shadow-xs hover:border-[var(--border-default)] transition-colors"
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+        className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
       >
-        <div className="p-2.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+        <div className="p-3 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
           <Flame className="w-5 h-5" />
         </div>
         <div>
-          <div className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider">
+          <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
             Current Streak
           </div>
-          <div className="text-2xl font-bold font-display text-[var(--text-primary)]">
+          <div className="text-2xl font-extrabold font-display text-[var(--text-primary)] mt-0.5">
             {stats.currentStreak} {stats.currentStreak === 1 ? 'day' : 'days'}
           </div>
         </div>
@@ -83,17 +84,18 @@ export function HabitStatsCard() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2, delay: 0.1 }}
-        className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4 flex items-center gap-3 shadow-xs hover:border-[var(--border-default)] transition-colors"
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: 'spring', bounce: 0, duration: 0.3, delay: 0.05 }}
+        className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
       >
-        <div className="p-2.5 rounded-lg bg-emerald-500/10 text-[var(--accent-emerald)]">
+        <div className="p-3 rounded-xl bg-emerald-500/10 text-[var(--accent-emerald)] shrink-0">
           <CheckCircle2 className="w-5 h-5" />
         </div>
         <div>
-          <div className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider">
+          <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
             Today&apos;s Progress
           </div>
-          <div className="text-2xl font-bold font-display text-[var(--text-primary)]">
+          <div className="text-2xl font-extrabold font-display text-[var(--text-primary)] mt-0.5">
             {stats.todayCompletedCount} / {habits.length} ({stats.todayCompletionRate}%)
           </div>
         </div>
@@ -103,17 +105,18 @@ export function HabitStatsCard() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2, delay: 0.15 }}
-        className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4 flex items-center gap-3 shadow-xs hover:border-[var(--border-default)] transition-colors"
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: 'spring', bounce: 0, duration: 0.3, delay: 0.1 }}
+        className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
       >
-        <div className="p-2.5 rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400">
+        <div className="p-3 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 shrink-0">
           <CalendarCheck className="w-5 h-5" />
         </div>
         <div>
-          <div className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider">
+          <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
             30-Day Check-ins
           </div>
-          <div className="text-2xl font-bold font-display text-[var(--text-primary)]">
+          <div className="text-2xl font-extrabold font-display text-[var(--text-primary)] mt-0.5">
             {stats.last30DaysCount} check-ins
           </div>
         </div>
@@ -123,17 +126,18 @@ export function HabitStatsCard() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2, delay: 0.2 }}
-        className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4 flex items-center gap-3 shadow-xs hover:border-[var(--border-default)] transition-colors"
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: 'spring', bounce: 0, duration: 0.3, delay: 0.15 }}
+        className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
       >
-        <div className="p-2.5 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
+        <div className="p-3 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 shrink-0">
           <Trophy className="w-5 h-5" />
         </div>
         <div>
-          <div className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider">
+          <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
             Active Habits
           </div>
-          <div className="text-2xl font-bold font-display text-[var(--text-primary)]">
+          <div className="text-2xl font-extrabold font-display text-[var(--text-primary)] mt-0.5">
             {habits.length} Habits
           </div>
         </div>
