@@ -66,17 +66,17 @@ export function HabitHeatmap() {
     return { weeks, totalDays }
   }, [habits, records])
 
-  // Color mappings for intensity levels matching Emerald palette
+  // Color mappings for high-contrast vibrant intensity levels in light & dark mode
   const getCellBg = (level: number) => {
     switch (level) {
       case 1:
-        return 'bg-emerald-200 dark:bg-emerald-950/80 border-emerald-300 dark:border-emerald-800'
+        return 'bg-emerald-300 dark:bg-emerald-900 border-emerald-400 dark:border-emerald-700 shadow-xs'
       case 2:
-        return 'bg-emerald-400 dark:bg-emerald-700/80 border-emerald-500 dark:border-emerald-600'
+        return 'bg-emerald-400 dark:bg-emerald-700 border-emerald-500 dark:border-emerald-600 shadow-xs'
       case 3:
-        return 'bg-[var(--accent-emerald)] border-emerald-600'
+        return 'bg-emerald-500 dark:bg-emerald-500 border-emerald-600 dark:border-emerald-400 shadow-xs'
       case 4:
-        return 'bg-emerald-800 dark:bg-emerald-500 border-emerald-900'
+        return 'bg-emerald-700 dark:bg-emerald-400 border-emerald-800 dark:border-emerald-300 shadow-xs font-bold'
       default:
         return 'bg-[var(--bg-tertiary)] border-[var(--border-subtle)]'
     }
@@ -85,53 +85,53 @@ export function HabitHeatmap() {
   return (
     <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-xs">
       {/* Header & Legend */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-[var(--border-subtle)] pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-[var(--accent-emerald)]/10 text-[var(--accent-emerald)]">
+          <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
             <Activity className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-base font-bold font-display text-[var(--text-primary)]">
-              Habit Consistency Heatmap
+              24-Week Consistency Heatmap
             </h3>
             <p className="text-xs text-[var(--text-secondary)]">
-              Daily habit check-in intensity over the past 24 weeks
+              Historical habit check-in intensity across 168 days
             </p>
           </div>
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)]">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-tertiary)]">
           <span>Less</span>
           <div className="flex gap-1 items-center mx-1">
-            <span className="w-3 h-3 rounded-xs bg-[var(--bg-tertiary)] border border-[var(--border-subtle)]" />
-            <span className="w-3 h-3 rounded-xs bg-emerald-200 dark:bg-emerald-950/80" />
-            <span className="w-3 h-3 rounded-xs bg-emerald-400 dark:bg-emerald-700/80" />
-            <span className="w-3 h-3 rounded-xs bg-[var(--accent-emerald)]" />
-            <span className="w-3 h-3 rounded-xs bg-emerald-800 dark:bg-emerald-500" />
+            <span className="w-3.5 h-3.5 rounded-xs bg-[var(--bg-tertiary)] border border-[var(--border-subtle)]" />
+            <span className="w-3.5 h-3.5 rounded-xs bg-emerald-300 dark:bg-emerald-900 border border-emerald-400" />
+            <span className="w-3.5 h-3.5 rounded-xs bg-emerald-400 dark:bg-emerald-700 border border-emerald-500" />
+            <span className="w-3.5 h-3.5 rounded-xs bg-emerald-500 dark:bg-emerald-500 border border-emerald-600" />
+            <span className="w-3.5 h-3.5 rounded-xs bg-emerald-700 dark:bg-emerald-400 border border-emerald-800" />
           </div>
           <span>More</span>
         </div>
       </div>
 
       {/* Heatmap Grid Container */}
-      <div className="overflow-x-auto pb-2">
+      <div className="overflow-x-auto pb-2 pt-1">
         <div className="flex gap-1.5 min-w-[650px] justify-between">
           {heatmapData.weeks.map((week, wIdx) => (
             <div key={wIdx} className="flex flex-col gap-1.5">
               {week.map((day) => (
                 <motion.div
                   key={day.dateStr}
-                  whileHover={{ scale: 1.35, zIndex: 10 }}
-                  transition={{ type: 'spring', stiffness: 350, damping: 20 }}
-                  className={`w-3.5 h-3.5 rounded-xs border transition-colors cursor-pointer relative group ${getCellBg(
+                  whileHover={{ scale: 1.4, zIndex: 30 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                  className={`w-3.5 h-3.5 rounded-xs border transition-all cursor-pointer relative group ${getCellBg(
                     day.level
                   )}`}
                 >
-                  {/* Tooltip on Hover */}
+                  {/* Tooltip on Hover directly over cell */}
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 pointer-events-none">
-                    <div className="bg-gray-900 text-white text-[11px] font-medium py-1.5 px-2.5 rounded-md whitespace-nowrap shadow-lg border border-gray-800">
-                      <div className="font-semibold text-emerald-400">
+                    <div className="bg-gray-950 text-white text-xs font-medium py-1.5 px-3 rounded-xl whitespace-nowrap shadow-2xl border border-gray-800">
+                      <div className="font-bold text-emerald-400">
                         {day.dateStr}
                       </div>
                       <div className="text-gray-300">
@@ -139,7 +139,7 @@ export function HabitHeatmap() {
                       </div>
                       {day.habitNames.length > 0 && (
                         <div className="text-[10px] text-gray-400 mt-1 border-t border-gray-800 pt-1">
-                          • {day.habitNames.join(', ')}
+                          {day.habitNames.join(', ')}
                         </div>
                       )}
                     </div>
@@ -151,10 +151,10 @@ export function HabitHeatmap() {
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-tertiary)] mt-3 border-t border-[var(--border-subtle)] pt-3">
-        <Info className="w-3.5 h-3.5 text-[var(--accent-emerald)] shrink-0" />
+      <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-tertiary)] mt-3 border-t border-[var(--border-subtle)] pt-3">
+        <Info className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
         <span>
-          Darker green cells represent days with higher habit completion counts.
+          Darker green cells represent days with higher habit completion volume.
         </span>
       </div>
     </div>

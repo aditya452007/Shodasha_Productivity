@@ -9,6 +9,9 @@ import {
   GripVertical,
   Link as LinkIcon,
   Info,
+  Sparkles,
+  Zap,
+  Flame,
 } from 'lucide-react'
 import {
   DndContext,
@@ -31,9 +34,11 @@ import { useTaskStore } from '@/stores/taskStore'
 // Sortable Wrapper Component for Analytics Widgets
 function SortableWidgetCard({
   id,
+  className = '',
   children,
 }: {
   id: string
+  className?: string
   children: React.ReactNode
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -49,15 +54,15 @@ function SortableWidgetCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-xs relative transition-shadow ${
-        isDragging ? 'shadow-2xl ring-2 ring-[var(--accent-emerald)] opacity-95' : ''
-      }`}
+      className={`rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-xs relative transition-all ${
+        isDragging ? 'shadow-2xl ring-2 ring-[var(--accent-emerald)] opacity-95 scale-[1.01]' : ''
+      } ${className}`}
     >
       {/* Drag Handle Grip in Header */}
       <button
         {...attributes}
         {...listeners}
-        className="absolute top-4 right-4 p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] cursor-grab active:cursor-grabbing transition-colors"
+        className="absolute top-5 right-5 p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] cursor-grab active:cursor-grabbing transition-colors"
         title="Drag to reorder chart widget"
       >
         <GripVertical className="w-4 h-4" />
@@ -72,7 +77,7 @@ export function HabitAnalyticsDashboard() {
   const records = useHabitStore((s) => s.records)
   const tasks = useTaskStore((s) => s.tasks)
 
-  const [widgetOrder, setWidgetOrder] = useState(['widget-line', 'widget-[rings]', 'widget-bar'])
+  const [widgetOrder, setWidgetOrder] = useState(['widget-line', 'widget-rings', 'widget-bar'])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -89,8 +94,8 @@ export function HabitAnalyticsDashboard() {
     }
   }
 
-  // Hover state for Line Chart Data Point Tooltip (Cursor Following)
-  const [hoveredPoint, setHoveredPoint] = useState<{
+  // Tooltip states for individual charts
+  const [hoveredLinePoint, setHoveredLinePoint] = useState<{
     dateStr: string
     label: string
     count: number
@@ -99,7 +104,21 @@ export function HabitAnalyticsDashboard() {
     y: number
   } | null>(null)
 
-  // 1. Calculate 14-Day Completion Line Trend Data with explicit coordinates
+  const [hoveredBarDay, setHoveredBarDay] = useState<{
+    day: string
+    count: number
+    percentage: number
+    avgPerWeek: string
+  } | null>(null)
+
+  const [hoveredRingHabit, setHoveredRingHabit] = useState<{
+    name: string
+    rate: number
+    doneCount: number
+    linkedTaskTitle?: string
+  } | null>(null)
+
+  // 1. Calculate 14-Day Trajectory Line Trend Data
   const trendData = useMemo(() => {
     const today = new Date()
     const days: { dateStr: string; label: string; count: number; percentage: number }[] = []
@@ -122,20 +141,18 @@ export function HabitAnalyticsDashboard() {
     return days
   }, [habits, records])
 
-  // Chart Dimensions & Axis Margin Offsets
+  // Wide Chart Viewport Coordinates
+  const chartWidth = 800
+  const chartHeight = 220
   const paddingLeft = 45
-  const paddingBottom = 30
-  const paddingTop = 20
-  const paddingRight = 20
-  const chartWidth = 560
-  const chartHeight = 200
+  const paddingRight = 25
+  const paddingTop = 25
+  const paddingBottom = 35
 
   const innerWidth = chartWidth - paddingLeft - paddingRight
   const innerHeight = chartHeight - paddingTop - paddingBottom
-
   const maxVal = Math.max(habits.length, 1)
 
-  // Calculate points with X & Y pixel positions relative to SVG viewport
   const points = useMemo(() => {
     if (trendData.length === 0) return []
     return trendData.map((d, idx) => {
@@ -145,7 +162,6 @@ export function HabitAnalyticsDashboard() {
     })
   }, [trendData, maxVal, innerWidth, innerHeight, paddingLeft, paddingTop])
 
-  // SVG Line & Area Path strings
   const linePathD = useMemo(() => {
     if (points.length < 2) return ''
     let d = `M ${points[0].x} ${points[0].y}`
@@ -166,7 +182,7 @@ export function HabitAnalyticsDashboard() {
     return `${linePathD} L ${points[points.length - 1].x} ${chartHeight - paddingBottom} L ${points[0].x} ${chartHeight - paddingBottom} Z`
   }, [linePathD, points, chartHeight, paddingBottom])
 
-  // 2. Day-of-Week Frequency Distribution Data (Bar Chart)
+  // 2. Day-of-Week Frequency Distribution Data
   const dayOfWeekDistribution = useMemo(() => {
     const daysName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     const counts = [0, 0, 0, 0, 0, 0, 0]
@@ -179,59 +195,107 @@ export function HabitAnalyticsDashboard() {
       const dayIdx = d.getDay()
 
       habits.forEach((h) => {
-        if (records[`${h.id}_${dateStr}`]) {
-          counts[dayIdx]++
-        }
+        if (records[`${h.id}_${dateStr}`]) counts[dayIdx]++
       })
     }
 
+    const totalCheckIns = counts.reduce((a, b) => a + b, 0)
     const maxDayCount = Math.max(...counts, 1)
+
     return daysName.map((name, idx) => ({
       day: name,
       count: counts[idx],
       heightPercentage: Math.round((counts[idx] / maxDayCount) * 100),
+      percentage: totalCheckIns > 0 ? Math.round((counts[idx] / totalCheckIns) * 100) : 0,
+      avgPerWeek: (counts[idx] / 12).toFixed(1),
     }))
   }, [habits, records])
 
-  // Widget Render Maps
+  // 3. Performance Insights Calculation
+  const highlights = useMemo(() => {
+    // Peak day of week
+    let peakDay = dayOfWeekDistribution[0]
+    dayOfWeekDistribution.forEach((d) => {
+      if (d.count > peakDay.count) peakDay = d
+    })
+
+    // Top habit
+    const today = new Date()
+    let topHabitName = 'N/A'
+    let maxDone = -1
+
+    habits.forEach((h) => {
+      let count = 0
+      for (let i = 0; i < 30; i++) {
+        const d = new Date(today)
+        d.setDate(today.getDate() - i)
+        const dateStr = d.toISOString().split('T')[0]
+        if (records[`${h.id}_${dateStr}`]) count++
+      }
+      if (count > maxDone) {
+        maxDone = count
+        topHabitName = h.name
+      }
+    })
+
+    const topHabitRate = Math.round((maxDone / 30) * 100)
+
+    return {
+      peakDayName: peakDay.day,
+      peakDayCount: peakDay.count,
+      topHabitName,
+      topHabitRate: Math.max(topHabitRate, 0),
+    }
+  }, [dayOfWeekDistribution, habits, records])
+
+  // Render Widget Helper
   const renderWidget = (id: string) => {
     if (id === 'widget-line') {
       return (
-        <SortableWidgetCard key={id} id={id}>
-          <div className="flex items-center justify-between gap-3 mb-3">
+        <SortableWidgetCard key={id} id={id} className="col-span-full">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-[var(--accent-emerald)]/10 text-[var(--accent-emerald)]">
+              <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                 <TrendingUp className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold font-display text-[var(--text-primary)]">
-                  14-Day Trajectory Trend
+                <h3 className="text-lg font-bold font-display text-[var(--text-primary)]">
+                  14-Day Completion Trajectory
                 </h3>
                 <p className="text-xs text-[var(--text-secondary)]">
-                  Daily check-in volume curve with defined X & Y axes
+                  Continuous volume trend with explicit X & Y axes and gradient velocity
                 </p>
               </div>
             </div>
-            <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-[var(--accent-emerald)] text-[11px] font-semibold border border-emerald-500/20 mr-7">
-              Live Curve
-            </span>
+
+            <div className="flex items-center gap-2 self-start sm:self-auto mr-8">
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-semibold border border-emerald-500/30">
+                <Flame className="w-3.5 h-3.5" /> High Precision Curve
+              </span>
+            </div>
           </div>
 
-          {/* Line Chart SVG with Defined Axes */}
+          {/* Full Width Line Chart SVG */}
           <div className="relative mt-2">
             <svg
               viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-              className="w-full h-48 overflow-visible"
+              className="w-full h-64 overflow-visible"
             >
               <defs>
-                <linearGradient id="emeraldAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--accent-emerald)" stopOpacity="0.35" />
-                  <stop offset="100%" stopColor="var(--accent-emerald)" stopOpacity="0.0" />
+                <linearGradient id="vibrantEmeraldGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
                 </linearGradient>
+
+                <filter id="emeraldGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
               </defs>
 
-              {/* Y-Axis Gridlines and Ticks (0, 50%, 100%) */}
-              {[0, 0.5, 1].map((ratio, idx) => {
+              {/* Y-Axis Horizontal Gridlines & Values */}
+              {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
                 const yPos = paddingTop + innerHeight * (1 - ratio)
                 const valLabel = Math.round(maxVal * ratio)
                 return (
@@ -242,89 +306,93 @@ export function HabitAnalyticsDashboard() {
                       x2={chartWidth - paddingRight}
                       y2={yPos}
                       stroke="var(--border-subtle)"
-                      strokeDasharray={ratio === 0 ? undefined : '3 3'}
-                      opacity={ratio === 0 ? 0.8 : 0.4}
+                      strokeDasharray={ratio === 0 ? undefined : '4 4'}
+                      opacity={ratio === 0 ? 0.9 : 0.4}
                     />
                     <text
-                      x={paddingLeft - 8}
+                      x={paddingLeft - 10}
                       y={yPos + 4}
                       textAnchor="end"
-                      className="fill-[var(--text-tertiary)] text-[10px] font-semibold font-display"
+                      className="fill-[var(--text-secondary)] text-[11px] font-semibold font-display"
                     >
                       {valLabel}
                     </text>
                   </g>
-                );
+                )
               })}
 
-              {/* X-Axis Ticks & Labels */}
-              {points.map((pt, idx) => {
-                if (idx % 2 !== 0 && idx !== points.length - 1) return null
-                return (
-                  <g key={idx}>
-                    <line
-                      x1={pt.x}
-                      y1={chartHeight - paddingBottom}
-                      x2={pt.x}
-                      y2={chartHeight - paddingBottom + 4}
-                      stroke="var(--border-subtle)"
-                    />
-                    <text
-                      x={pt.x}
-                      y={chartHeight - paddingBottom + 16}
-                      textAnchor="middle"
-                      className="fill-[var(--text-tertiary)] text-[10px] font-medium"
-                    >
-                      {pt.label}
-                    </text>
-                  </g>
-                );
-              })}
+              {/* X-Axis Ticks & Dates */}
+              {points.map((pt, idx) => (
+                <g key={idx}>
+                  <line
+                    x1={pt.x}
+                    y1={chartHeight - paddingBottom}
+                    x2={pt.x}
+                    y2={chartHeight - paddingBottom + 6}
+                    stroke="var(--border-subtle)"
+                    opacity="0.7"
+                  />
+                  <text
+                    x={pt.x}
+                    y={chartHeight - paddingBottom + 20}
+                    textAnchor="middle"
+                    className="fill-[var(--text-secondary)] text-[11px] font-medium"
+                  >
+                    {pt.label}
+                  </text>
+                </g>
+              ))}
 
-              {/* Gradient Area */}
-              <path d={areaPathD} fill="url(#emeraldAreaGradient)" />
+              {/* Gradient Area Fill */}
+              <path d={areaPathD} fill="url(#vibrantEmeraldGradient)" />
 
-              {/* Defined High-Contrast Trend Line */}
+              {/* High-Contrast Bold Vibrant Trend Line */}
               <motion.path
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
+                transition={{ duration: 0.9, ease: 'easeOut' }}
                 d={linePathD}
                 fill="none"
-                stroke="var(--accent-emerald)"
-                strokeWidth="3.5"
+                stroke="#10b981"
+                strokeWidth="4"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                filter="url(#emeraldGlow)"
               />
 
-              {/* Data Points with Dynamic Cursor Tooltip Trigger */}
+              {/* Vibrant Data Point Nodes */}
               {points.map((pt, idx) => (
-                <circle
-                  key={idx}
-                  cx={pt.x}
-                  cy={pt.y}
-                  r="5"
-                  className="fill-[var(--bg-secondary)] stroke-[var(--accent-emerald)] stroke-[3] hover:r-7 transition-all cursor-pointer"
-                  onMouseEnter={() => setHoveredPoint(pt)}
-                  onMouseLeave={() => setHoveredPoint(null)}
-                />
+                <g key={idx} className="group cursor-pointer">
+                  <circle
+                    cx={pt.x}
+                    cy={pt.y}
+                    r="6"
+                    className="fill-[#10b981] stroke-[var(--bg-secondary)] stroke-[2.5] hover:r-8 transition-all"
+                    onMouseEnter={() => setHoveredLinePoint(pt)}
+                    onMouseLeave={() => setHoveredLinePoint(null)}
+                  />
+                </g>
               ))}
             </svg>
 
-            {/* Dynamic Floating Tooltip positioned over the hovered point */}
-            {hoveredPoint && (
+            {/* Dynamic Cursor Tooltip */}
+            {hoveredLinePoint && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 5 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="absolute pointer-events-none z-30 transform -translate-x-1/2 -translate-y-full"
+                className="absolute pointer-events-none z-40 transform -translate-x-1/2 -translate-y-full"
                 style={{
-                  left: `${(hoveredPoint.x / chartWidth) * 100}%`,
-                  top: `${(hoveredPoint.y / chartHeight) * 100 - 8}%`,
+                  left: `${(hoveredLinePoint.x / chartWidth) * 100}%`,
+                  top: `${(hoveredLinePoint.y / chartHeight) * 100 - 6}%`,
                 }}
               >
-                <div className="bg-gray-950 text-white text-xs py-1.5 px-3 rounded-lg shadow-xl border border-gray-800 flex items-center gap-2 whitespace-nowrap">
-                  <span className="font-semibold text-emerald-400">{hoveredPoint.label}:</span>
-                  <span>{hoveredPoint.count} / {habits.length} done ({hoveredPoint.percentage}%)</span>
+                <div className="bg-gray-950 text-white text-xs py-2 px-3.5 rounded-xl shadow-2xl border border-gray-800 whitespace-nowrap">
+                  <div className="font-bold text-emerald-400 mb-0.5">
+                    {hoveredLinePoint.label}
+                  </div>
+                  <div className="text-gray-300 font-medium">
+                    {hoveredLinePoint.count} / {habits.length} habits done ({hoveredLinePoint.percentage}%)
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -333,24 +401,24 @@ export function HabitAnalyticsDashboard() {
       )
     }
 
-    if (id === 'widget-[rings]') {
+    if (id === 'widget-rings') {
       return (
         <SortableWidgetCard key={id} id={id}>
           <div className="flex items-center gap-2.5 mb-4 border-b border-[var(--border-subtle)] pb-3">
-            <div className="p-2 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400">
+            <div className="p-2.5 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400">
               <Target className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-base font-bold font-display text-[var(--text-primary)]">
-                Per-Habit Completion
+                Per-Habit Performance Rings
               </h3>
               <p className="text-xs text-[var(--text-secondary)]">
-                30-day performance rings
+                30-day completion rate & linked task details
               </p>
             </div>
           </div>
 
-          {/* Habit Ring Cards List */}
+          {/* List of Habit Ring Cards with Hover Tooltips */}
           <div className="space-y-3">
             {habits.map((habit) => {
               const today = new Date()
@@ -363,32 +431,42 @@ export function HabitAnalyticsDashboard() {
               }
 
               const rate = Math.round((doneCount / 30) * 100)
-              const circumference = 2 * Math.PI * 14
+              const circumference = 2 * Math.PI * 15
               const strokeDashoffset = circumference - (rate / 100) * circumference
               const linkedTask = tasks.find((t) => t.id === habit.linkedTaskId)
 
               return (
                 <div
                   key={habit.id}
-                  className="flex items-center justify-between p-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] hover:border-[var(--border-default)] transition-colors"
+                  onMouseEnter={() =>
+                    setHoveredRingHabit({
+                      name: habit.name,
+                      rate,
+                      doneCount,
+                      linkedTaskTitle: linkedTask?.title,
+                    })
+                  }
+                  onMouseLeave={() => setHoveredRingHabit(null)}
+                  className="relative flex items-center justify-between p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] hover:border-[var(--border-default)] transition-colors group cursor-pointer"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="relative w-9 h-9 shrink-0 flex items-center justify-center">
-                      <svg className="w-9 h-9 transform -rotate-90">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    {/* Ring SVG */}
+                    <div className="relative w-10 h-10 shrink-0 flex items-center justify-center">
+                      <svg className="w-10 h-10 transform -rotate-90">
                         <circle
-                          cx="18"
-                          cy="18"
-                          r="14"
+                          cx="20"
+                          cy="20"
+                          r="15"
                           stroke="var(--border-subtle)"
-                          strokeWidth="3"
+                          strokeWidth="3.5"
                           fill="transparent"
                         />
                         <circle
-                          cx="18"
-                          cy="18"
-                          r="14"
+                          cx="20"
+                          cy="20"
+                          r="15"
                           stroke={habit.color}
-                          strokeWidth="3.5"
+                          strokeWidth="4"
                           fill="transparent"
                           strokeDasharray={circumference}
                           strokeDashoffset={strokeDashoffset}
@@ -396,22 +474,22 @@ export function HabitAnalyticsDashboard() {
                           className="transition-all duration-700 ease-out"
                         />
                       </svg>
-                      <span className="absolute text-[10px] font-bold font-display text-[var(--text-primary)]">
+                      <span className="absolute text-[11px] font-extrabold font-display text-[var(--text-primary)]">
                         {rate}%
                       </span>
                     </div>
 
                     <div className="min-w-0">
-                      <div className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                      <div className="text-xs font-bold text-[var(--text-primary)] truncate">
                         {habit.name}
                       </div>
                       {linkedTask ? (
-                        <div className="text-[10px] text-[var(--text-tertiary)] truncate flex items-center gap-1 mt-0.5">
-                          <LinkIcon className="w-3 h-3" /> {linkedTask.title}
+                        <div className="text-[11px] text-[var(--text-tertiary)] truncate flex items-center gap-1 mt-0.5">
+                          <LinkIcon className="w-3 h-3 text-[var(--accent-emerald)]" /> {linkedTask.title}
                         </div>
                       ) : (
-                        <div className="text-[10px] text-[var(--text-tertiary)]">
-                          {doneCount} / 30 days completed
+                        <div className="text-[11px] text-[var(--text-tertiary)] mt-0.5">
+                          {doneCount} / 30 check-in days
                         </div>
                       )}
                     </div>
@@ -420,6 +498,21 @@ export function HabitAnalyticsDashboard() {
               )
             })}
           </div>
+
+          {/* Hover Tooltip for Ring Card */}
+          {hoveredRingHabit && (
+            <div className="mt-3 p-3 rounded-xl bg-gray-950 text-white text-xs border border-gray-800 shadow-xl">
+              <div className="font-bold text-emerald-400">{hoveredRingHabit.name}</div>
+              <div className="text-gray-300 mt-1">
+                Completed {hoveredRingHabit.doneCount} out of 30 days ({hoveredRingHabit.rate}% consistency).
+                {hoveredRingHabit.linkedTaskTitle && (
+                  <span className="text-gray-400 block mt-0.5">
+                    Auto-completes task: &quot;{hoveredRingHabit.linkedTaskTitle}&quot;
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </SortableWidgetCard>
       )
     }
@@ -428,37 +521,61 @@ export function HabitAnalyticsDashboard() {
       return (
         <SortableWidgetCard key={id} id={id}>
           <div className="flex items-center gap-2.5 mb-4 border-b border-[var(--border-subtle)] pb-3">
-            <div className="p-2 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400">
+            <div className="p-2.5 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400">
               <BarChart3 className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-base font-bold font-display text-[var(--text-primary)]">
-                Day-of-Week Frequency
+                Weekday Frequency Distribution
               </h3>
               <p className="text-xs text-[var(--text-secondary)]">
-                Check-ins by weekday (last 90 days)
+                Historical check-in volume by day of week (last 90 days)
               </p>
             </div>
           </div>
 
-          {/* Bar Chart Bars */}
-          <div className="flex items-end justify-between h-36 pt-4 gap-2">
+          {/* High-Contrast Vibrant Bars */}
+          <div className="flex items-end justify-between h-44 pt-4 gap-2.5">
             {dayOfWeekDistribution.map((item) => (
-              <div key={item.day} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
-                <div className="w-full bg-[var(--bg-tertiary)] rounded-t-lg relative h-full flex items-end overflow-hidden">
+              <div
+                key={item.day}
+                className="flex-1 flex flex-col items-center gap-2 group h-full justify-end cursor-pointer"
+                onMouseEnter={() => setHoveredBarDay(item)}
+                onMouseLeave={() => setHoveredBarDay(null)}
+              >
+                {/* Count Badge on top of bar */}
+                <span className="text-[10px] font-bold font-display text-[var(--text-secondary)] group-hover:text-[var(--accent-emerald)] transition-colors">
+                  {item.count}
+                </span>
+
+                <div className="w-full bg-[var(--bg-tertiary)] rounded-t-xl relative h-full flex items-end overflow-hidden border border-[var(--border-subtle)]">
                   <motion.div
                     initial={{ height: 0 }}
                     animate={{ height: `${item.heightPercentage}%` }}
                     transition={{ duration: 0.6, ease: 'easeOut' }}
-                    className="w-full bg-[var(--accent-emerald)] rounded-t-lg group-hover:bg-emerald-500 transition-colors"
+                    className="w-full bg-gradient-to-t from-emerald-600 to-teal-400 dark:from-emerald-500 dark:to-emerald-300 rounded-t-lg group-hover:brightness-110 transition-all border-t border-emerald-300"
                   />
                 </div>
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] group-hover:text-[var(--accent-emerald)] transition-colors">
+
+                <span className="text-xs font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-emerald)] transition-colors">
                   {item.day}
                 </span>
               </div>
             ))}
           </div>
+
+          {/* Hover Tooltip for Bar Chart */}
+          {hoveredBarDay && (
+            <div className="mt-3 p-3 rounded-xl bg-gray-950 text-white text-xs border border-gray-800 shadow-xl">
+              <div className="font-bold text-sky-400">{hoveredBarDay.day} Frequency</div>
+              <div className="text-gray-300 mt-1">
+                {hoveredBarDay.count} total check-ins ({hoveredBarDay.percentage}% of overall activity).
+                <span className="block text-gray-400 mt-0.5">
+                  Average ~{hoveredBarDay.avgPerWeek} check-ins per {hoveredBarDay.day}.
+                </span>
+              </div>
+            </div>
+          )}
         </SortableWidgetCard>
       )
     }
@@ -467,22 +584,52 @@ export function HabitAnalyticsDashboard() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      {/* Performance Highlight Insight Banner */}
+      <div className="rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-[var(--bg-secondary)] to-violet-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-[var(--accent-emerald)] text-white shadow-xs">
+            <Sparkles className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-[var(--accent-emerald)] uppercase tracking-wider">
+              Performance Insight
+            </div>
+            <div className="text-sm font-semibold text-[var(--text-primary)]">
+              Peak consistency day is <span className="font-bold text-[var(--accent-emerald)]">{highlights.peakDayName}</span> ({highlights.peakDayCount} check-ins). Top habit: <span className="font-bold text-violet-500">{highlights.topHabitName}</span> ({highlights.topHabitRate}% 30-day rate).
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] shrink-0">
+          <Zap className="w-3.5 h-3.5 text-amber-500" />
+          <span>Drag widgets to reorder</span>
+        </div>
+      </div>
+
+      {/* Instructions Bar */}
       <div className="flex items-center justify-between text-xs text-[var(--text-tertiary)] px-1">
         <span className="flex items-center gap-1.5">
-          <Info className="w-3.5 h-3.5 text-[var(--accent-emerald)]" />
-          Drag widget cards using the grip icon in the top right to customize your dashboard layout.
+          <Info className="w-3.5 h-3.5 text-[var(--accent-emerald)] shrink-0" />
+          Drag widget cards using the grip handles to customize your analytics layout.
         </span>
       </div>
 
+      {/* Drag & Drop Reorderable Widgets Container */}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={widgetOrder} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {widgetOrder.map((id) => renderWidget(id))}
+          <div className="space-y-6">
+            {/* Render Full-Width Top Line Chart */}
+            {widgetOrder.filter((id) => id === 'widget-line').map((id) => renderWidget(id))}
+
+            {/* Render 2-Column Supporting Charts Grid Below */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {widgetOrder.filter((id) => id !== 'widget-line').map((id) => renderWidget(id))}
+            </div>
           </div>
         </SortableContext>
       </DndContext>
