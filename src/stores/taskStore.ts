@@ -4,7 +4,7 @@ export interface Task {
   id: string
   title: string
   description?: string
-  status: 'todo' | 'in_progress' | 'done'
+  status: string // Column ID (e.g. 'todo', 'in_progress', 'done', or custom column id)
   order: number
   dueDate?: string
   tags?: string[]
@@ -22,10 +22,16 @@ export interface KanbanColumn {
 interface TaskState {
   tasks: Task[]
   columns: KanbanColumn[]
-  addTask: (title: string, status?: 'todo' | 'in_progress' | 'done', description?: string) => void
+  addTask: (title: string, status?: string, description?: string, tags?: string[], dueDate?: string, linkedHabitId?: string) => void
+  updateTask: (id: string, updates: Partial<Task>) => void
   toggleTaskStatus: (id: string) => void
-  moveTask: (id: string, targetStatus: 'todo' | 'in_progress' | 'done') => void
+  moveTask: (id: string, targetStatus: string) => void
+  reorderTasks: (activeId: string, overId: string, newStatus?: string) => void
   deleteTask: (id: string) => void
+  addColumn: (name: string) => void
+  renameColumn: (id: string, name: string) => void
+  reorderColumns: (activeId: string, overId: string) => void
+  deleteColumn: (id: string) => void
 }
 
 const initialTasks: Task[] = [
@@ -52,6 +58,7 @@ const initialTasks: Task[] = [
   {
     id: 't-3',
     title: 'Complete morning deep work session',
+    description: 'Focus block for core architecture',
     status: 'done',
     order: 2,
     tags: ['Habit Linked'],
@@ -70,7 +77,7 @@ const initialColumns: KanbanColumn[] = [
 export const useTaskStore = create<TaskState>((set) => ({
   tasks: initialTasks,
   columns: initialColumns,
-  addTask: (title, status = 'todo', description) =>
+  addTask: (title, status = 'todo', description, tags, dueDate, linkedHabitId) =>
     set((state) => {
       const newTask: Task = {
         id: `t-${Date.now()}`,
@@ -78,11 +85,22 @@ export const useTaskStore = create<TaskState>((set) => ({
         description,
         status,
         order: state.tasks.filter((t) => t.status === status).length,
+        tags: tags || [],
+        dueDate,
+        linkedHabitId,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }
       return { tasks: [newTask, ...state.tasks] }
     }),
+  updateTask: (id, updates) =>
+    set((state) => ({
+      tasks: state.tasks.map((task) =>
+        task.id === id
+          ? { ...task, ...updates, updatedAt: new Date().toISOString() }
+          : task
+      ),
+    })),
   toggleTaskStatus: (id) =>
     set((state) => ({
       tasks: state.tasks.map((task) => {
@@ -97,8 +115,62 @@ export const useTaskStore = create<TaskState>((set) => ({
         task.id === id ? { ...task, status: targetStatus, updatedAt: new Date().toISOString() } : task
       ),
     })),
+  reorderTasks: (activeId, overId, newStatus) =>
+    set((state) => {
+      const tasks = [...state.tasks]
+      const activeIndex = tasks.findIndex((t) => t.id === activeId)
+      if (activeIndex === -1) return { tasks }
+
+      const activeTask = { ...tasks[activeIndex] }
+      if (newStatus && activeTask.status !== newStatus) {
+        activeTask.status = newStatus
+      }
+
+      tasks.splice(activeIndex, 1)
+
+      const overIndex = tasks.findIndex((t) => t.id === overId)
+      if (overIndex !== -1) {
+        tasks.splice(overIndex, 0, activeTask)
+      } else {
+        tasks.push(activeTask)
+      }
+
+      return { tasks }
+    }),
   deleteTask: (id) =>
     set((state) => ({
       tasks: state.tasks.filter((task) => task.id !== id),
     })),
+  addColumn: (name) =>
+    set((state) => {
+      const newCol: KanbanColumn = {
+        id: `col-${Date.now()}`,
+        name,
+        order: state.columns.length,
+      }
+      return { columns: [...state.columns, newCol] }
+    }),
+  renameColumn: (id, name) =>
+    set((state) => ({
+      columns: state.columns.map((col) => (col.id === id ? { ...col, name } : col)),
+    })),
+  deleteColumn: (id) =>
+    set((state) => ({
+      columns: state.columns.filter((col) => col.id !== id),
+      tasks: state.tasks.map((task) => (task.id === id ? { ...task, status: 'todo' } : task)),
+    })),
+  reorderColumns: (activeId, overId) =>
+    set((state) => {
+      const columns = [...state.columns]
+      const activeIndex = columns.findIndex((c) => c.id === activeId)
+      const overIndex = columns.findIndex((c) => c.id === overId)
+      
+      if (activeIndex !== -1 && overIndex !== -1) {
+        const [activeCol] = columns.splice(activeIndex, 1)
+        columns.splice(overIndex, 0, activeCol)
+        // Update order property
+        columns.forEach((col, index) => { col.order = index })
+      }
+      return { columns }
+    }),
 }))

@@ -4,13 +4,13 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-**Phase 3 — Implement: Dashboard & App Shell**
+**Phase 3 — Implement: Board (Kanban Task Management)**
 
-App Shell, Navigation Bar, Design System tokens, Zustand stores, and full interactive Dashboard page implemented.
+App Shell, Navigation Bar, Dashboard, and full interactive Kanban Board implemented with `@dnd-kit/core` drag and drop.
 
 ## Current Goal
 
-Complete Dashboard section & proceed to Board feature (Kanban).
+Complete Board feature & proceed to Habits feature (Calendar + Heatmap).
 
 ## Completed
 
@@ -27,29 +27,25 @@ Complete Dashboard section & proceed to Board feature (Kanban).
 - [x] AGENTS.md written (5-phase SDLC)
 - [x] Implementation Plan created & approved (`implementation_plan.md`)
 - [x] Design system CSS tokens & theme variables (`src/app/globals.css`)
-- [x] Zustand state stores created:
-  - `uiStore.ts` (theme, tracking status, tab state)
-  - `taskStore.ts` (kanban tasks, statuses, quick-add, toggle, delete)
-  - `habitStore.ts` (habits, daily check-ins, auto-completing linked tasks)
-  - `timeEntryStore.ts` (foreground window time entries, focus time breakdown by category)
-- [x] Premium Animata Gooey Tabs navigation (`src/components/ui/gooey-tabs.tsx` & `navbar_gooey_tabs.md`) integrated into `Navbar.tsx`
-- [x] App Shell & Navbar (`src/components/layout/Navbar.tsx`) with Top Tab Bar, live tracking pulse indicator, and theme switcher
-- [x] Dashboard feature components created:
-  - `TodayProgressCard` (daily briefing, focus time counter, task/habit/streak statistics)
-  - `QuickTaskInput` (fast inline task creation into 'To Do' column)
-  - `HabitQuickToggle` (interactive daily habit check-in list with linked task auto-completion)
-  - `TimeDistributionChart` (focus time category breakdown bar & metrics)
-  - `RecentActivityFeed` (realtime stream of task updates & window focus switches)
-- [x] Route shells created for `/board`, `/habits`, `/timeline`, `/settings`
+- [x] Zustand state stores created & extended (`uiStore`, `taskStore`, `habitStore`, `timeEntryStore`)
+- [x] Premium Animata Gooey Tabs navigation (`src/components/ui/gooey-tabs.tsx`) integrated into `Navbar.tsx`
+- [x] Dashboard feature components (`TodayProgressCard`, `QuickTaskInput`, `HabitQuickToggle`, `TimeDistributionChart`, `RecentActivityFeed`)
+- [x] Board feature (`/board`):
+  - Feature Spec written at `Feature_docs/board/spec.md`
+  - `KanbanBoard.tsx` with `@dnd-kit/core`, wrapping grid layout, column drag-and-drop, and hydration fixes
+  - `KanbanColumn.tsx` with `@dnd-kit/sortable`, Apple-style spring animations, and `motion.div`
+  - `KanbanCard.tsx` with framer-motion drag animations and translation transitions
+  - `KanbanCard.tsx` with drag handle, quick completion toggle, tag badges, linked habit badge
+  - `TaskModal.tsx` for editing task title, description, column, tags, due date, linked habit
+  - `AddColumnModal.tsx` for creating custom columns
 
 ## Next Up
 
-1. Implement Board feature (Phase 3) — kanban with @dnd-kit drag & drop
-2. Implement Habits feature — calendar + heatmap
-3. Implement Timeline — activity analytics
-4. Implement Settings — app categories, preferences
-5. Polish pass (Phase 4) — entry animations, reduced-motion, edge states
-6. Verify pass (Phase 5) — build, lint, typecheck
+1. Implement Habits feature — calendar + heatmap (`/habits`)
+2. Implement Timeline — activity analytics (`/timeline`)
+3. Implement Settings — app categories, preferences (`/settings`)
+4. Polish pass (Phase 4) — entry animations, reduced-motion, edge states
+5. Verify pass (Phase 5) — build, lint, typecheck
 
 ## Open Questions
 
