@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Plus, Flame, Award } from 'lucide-react'
+import { Plus, Flame } from 'lucide-react'
 import { HabitStatsCard } from '@/components/habits/HabitStatsCard'
 import { HabitAnalyticsDashboard } from '@/components/habits/HabitAnalyticsDashboard'
 import { HabitAchievements } from '@/components/habits/HabitAchievements'
@@ -37,14 +37,14 @@ export default function HabitsPage() {
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-              Habits Dashboard & Analytics
+              Habits Dashboard & Performance
             </h1>
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-[var(--accent-emerald)] border border-emerald-500/20">
               <Flame className="w-3.5 h-3.5" /> Daily Consistency
             </span>
           </div>
           <p className="text-sm text-[var(--text-secondary)] mt-1">
-            Build routines, track trends with line & ring charts, unlock achievements, and view 24-week heatmaps.
+            Track daily streaks, reorder analytics widgets, log habit check-ins, and unlock milestone achievements.
           </p>
         </div>
 
@@ -57,10 +57,10 @@ export default function HabitsPage() {
         </button>
       </motion.div>
 
-      {/* Habits Summary Metrics Cards */}
+      {/* 1. Top Section — Quick Summary Metrics Cards */}
       <HabitStatsCard />
 
-      {/* 14-Day Line Trend Chart & Completion Rings */}
+      {/* 2. Reorderable Analytics Dashboard (Line Chart, Completion Rings, Weekday Bar Chart) */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -69,20 +69,11 @@ export default function HabitsPage() {
         <HabitAnalyticsDashboard />
       </motion.div>
 
-      {/* Milestone Achievements System & Unlocks Log */}
+      {/* 3. Habits Tracker — Monthly Calendar Matrix Grid */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, delay: 0.1 }}
-      >
-        <HabitAchievements />
-      </motion.div>
-
-      {/* Main Monthly Calendar Matrix Grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, delay: 0.15 }}
       >
         <HabitCalendar
           onOpenAddModal={handleOpenAddModal}
@@ -90,7 +81,16 @@ export default function HabitsPage() {
         />
       </motion.div>
 
-      {/* 24-Week Consistency Heatmap */}
+      {/* 4. Milestone Achievements System & Unlocks Log */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, delay: 0.15 }}
+      >
+        <HabitAchievements />
+      </motion.div>
+
+      {/* 5. 24-Week Consistency Heatmap */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}

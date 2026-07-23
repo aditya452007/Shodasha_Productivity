@@ -2,7 +2,7 @@ export interface Achievement {
   id: string
   title: string
   description: string
-  icon: string // emoji or icon key
+  iconName: 'sprout' | 'zap' | 'brain' | 'star' | 'gem' | 'flame' | 'trophy'
   targetCount: number // days streak or total check-in days needed
   type: 'streak' | 'total_checkins'
   category: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'legendary'
@@ -21,7 +21,7 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     id: 'streak-7',
     title: 'Seedling Routine',
     description: 'Maintain a continuous 7-day habit check-in streak.',
-    icon: '🌱',
+    iconName: 'sprout',
     targetCount: 7,
     type: 'streak',
     category: 'bronze',
@@ -30,7 +30,7 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     id: 'streak-15',
     title: 'Momentum Master',
     description: 'Reach a 15-day continuous streak of habit consistency.',
-    icon: '⚡',
+    iconName: 'zap',
     targetCount: 15,
     type: 'streak',
     category: 'silver',
@@ -39,7 +39,7 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     id: 'streak-21',
     title: 'Habit Formation Protocol',
     description: 'Complete 21 consecutive days to wire new neural pathways.',
-    icon: '🧠',
+    iconName: 'brain',
     targetCount: 21,
     type: 'streak',
     category: 'gold',
@@ -48,7 +48,7 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     id: 'streak-30',
     title: 'Monthly Titan',
     description: 'Unstoppable! Achieve a full 30-day continuous streak.',
-    icon: '🌟',
+    iconName: 'star',
     targetCount: 30,
     type: 'streak',
     category: 'gold',
@@ -57,7 +57,7 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     id: 'total-90',
     title: 'Quarterly Sentinel',
     description: 'Log 90 total habit check-in days across your journey.',
-    icon: '💎',
+    iconName: 'gem',
     targetCount: 90,
     type: 'total_checkins',
     category: 'platinum',
@@ -66,7 +66,7 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     id: 'total-180',
     title: 'Half-Year Vanguard',
     description: 'Log 180 total habit check-in days with unshakeable resolve.',
-    icon: '🔥',
+    iconName: 'flame',
     targetCount: 180,
     type: 'total_checkins',
     category: 'diamond',
@@ -75,7 +75,7 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     id: 'total-365',
     title: 'Legendary Consistency',
     description: 'Achieve 365 total check-in days. True mastery of time.',
-    icon: '🏆',
+    iconName: 'trophy',
     targetCount: 365,
     type: 'total_checkins',
     category: 'legendary',

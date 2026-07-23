@@ -2,9 +2,43 @@
 
 import { useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Award, Lock, CheckCircle2, Sparkles, ShieldCheck } from 'lucide-react'
+import {
+  Award,
+  Lock,
+  CheckCircle2,
+  Sparkles,
+  ShieldCheck,
+  Sprout,
+  Zap,
+  Brain,
+  Star,
+  Gem,
+  Flame,
+  Trophy,
+} from 'lucide-react'
 import { useHabitStore } from '@/stores/habitStore'
-import { computeAchievementsProgress } from '@/lib/achievements'
+import { computeAchievementsProgress, Achievement } from '@/lib/achievements'
+
+function renderAchievementIcon(iconName: Achievement['iconName']) {
+  switch (iconName) {
+    case 'sprout':
+      return <Sprout className="w-5 h-5 text-emerald-500" />
+    case 'zap':
+      return <Zap className="w-5 h-5 text-amber-500" />
+    case 'brain':
+      return <Brain className="w-5 h-5 text-violet-500" />
+    case 'star':
+      return <Star className="w-5 h-5 text-yellow-500" />
+    case 'gem':
+      return <Gem className="w-5 h-5 text-sky-500" />
+    case 'flame':
+      return <Flame className="w-5 h-5 text-rose-500" />
+    case 'trophy':
+      return <Trophy className="w-5 h-5 text-amber-400" />
+    default:
+      return <Award className="w-5 h-5 text-[var(--accent-emerald)]" />
+  }
+}
 
 export function HabitAchievements() {
   const habits = useHabitStore((s) => s.habits)
@@ -97,7 +131,9 @@ export function HabitAchievements() {
             >
               {/* Category Ribbon / Badge */}
               <div className="flex items-center justify-between gap-2 mb-3">
-                <span className="text-2xl">{achievement.icon}</span>
+                <div className="p-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] shadow-xs">
+                  {renderAchievementIcon(achievement.iconName)}
+                </div>
                 <span
                   className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${
                     unlocked
@@ -140,17 +176,19 @@ export function HabitAchievements() {
                 </div>
               </div>
 
-              {/* Hover Tooltip */}
-              <div className="absolute inset-0 bg-gray-950/90 p-3.5 text-white flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none rounded-xl">
-                <div className="flex items-center gap-1.5 text-amber-400 text-xs font-bold font-display mb-1">
-                  <ShieldCheck className="w-4 h-4" /> {achievement.title}
+              {/* Dynamic Hover Tooltip Card */}
+              <div className="absolute inset-0 bg-gray-950/95 p-4 text-white flex flex-col justify-between opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none rounded-xl">
+                <div>
+                  <div className="flex items-center gap-1.5 text-amber-400 text-xs font-bold font-display mb-1">
+                    <ShieldCheck className="w-4 h-4" /> {achievement.title}
+                  </div>
+                  <p className="text-[11px] text-gray-300 leading-relaxed">
+                    {achievement.description}
+                  </p>
                 </div>
-                <p className="text-[11px] text-gray-300 mb-2 leading-relaxed">
-                  {achievement.description}
-                </p>
-                <div className="text-[10px] font-semibold text-emerald-400 border-t border-gray-800 pt-1.5">
+                <div className="text-[10px] font-semibold text-emerald-400 border-t border-gray-800 pt-2">
                   {unlocked
-                    ? '🎉 Achievement Unlocked!'
+                    ? 'Achievement Unlocked'
                     : `Requires ${achievement.targetCount - currentProgress} more ${
                         achievement.type === 'streak' ? 'consecutive streak days' : 'total check-in days'
                       }.`}
