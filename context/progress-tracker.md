@@ -4,13 +4,13 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-**Phase 3 — Implement: Habits (Monthly Calendar Matrix & Heatmap)**
+**Phase 5 — Verify: Timeline (Activity Log & Time Analytics)**
 
-App Shell, Navigation Bar, Dashboard, full interactive Kanban Board, and Habits feature (`/habits`) implemented.
+App Shell, Navigation Bar, Dashboard, full interactive Kanban Board, Habits feature (`/habits`), and Timeline feature (`/timeline`) implemented and verified.
 
 ## Current Goal
 
-Proceed to Timeline feature (`/timeline` - daily activity log & analytics).
+Proceed to Settings feature (`/settings` - app categories, tracking preferences, data management).
 
 ## Completed
 
@@ -39,13 +39,21 @@ Proceed to Timeline feature (`/timeline` - daily activity log & analytics).
   - `HabitHeatmap.tsx` 24-week contribution graph with multi-tier emerald intensity levels & hover tooltips
   - `AddHabitModal.tsx` modal for creating/editing habits with color picker & linked Kanban task selector
   - One-way habit completion auto-completing linked task in `taskStore`
+- [x] Timeline feature (`/timeline`):
+  - Feature Spec written at `Feature_docs/timeline/spec.md`
+  - Component documentation fetched to `Feature_docs/timeline/` (`animated-timeline.md`, `table.md`, `segmented-control.md`, `search-field.md`)
+  - Extended `timeEntryStore.ts` with time filters (Today / 7 Days / All), category filters, live search, and top app stats
+  - `CategoryFilterBar.tsx` filter control bar with segmented control, category pills, search field, and active focus timer
+  - `ActivityDistributionChart.tsx` stacked proportion bar (`#059669` Deep Work, amber Neutral, red Distraction), metric mini cards, and top application progress bars
+  - `TimelineStream.tsx` chronological activity feed with Framer Motion spring entries, idle indicators, app icons, and task attribution selector
+  - Integrated components into `src/app/timeline/page.tsx`
+  - Verified with `npm run typecheck` and `npm run build` (0 errors)
 
 ## Next Up
 
-1. Implement Timeline feature — daily activity log & analytics (`/timeline`)
-2. Implement Settings — app categories, preferences (`/settings`)
-3. Polish pass (Phase 4) — entry animations, reduced-motion, edge states
-4. Verify pass (Phase 5) — build, lint, typecheck
+1. Implement Settings feature — app categories, preferences (`/settings`)
+2. Polish pass (Phase 4) — entry animations, reduced-motion, edge states
+3. Verify pass (Phase 5) — build, lint, typecheck
 
 ## Open Questions
 
