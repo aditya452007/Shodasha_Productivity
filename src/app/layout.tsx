@@ -28,6 +28,11 @@ const geist = Geist({
 export const metadata: Metadata = {
   title: 'Shodasha — Personal Productivity & Activity Tracker',
   description: 'Local time-management desktop app with passive activity tracking, habit heatmap, and kanban board.',
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

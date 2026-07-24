@@ -186,6 +186,16 @@ Execute Shodasha redesign incrementally in strictly controlled, verifiable phase
 - [x] Updated README.md with comprehensive project documentation (features, tech stack, installation, privacy)
 - [x] Node.js version aligned across all workflows (22 LTS)
 
+### Auto-Start on Windows Sign-On Fix (Jul 2026)
+- [x] **Automatic Boot Self-Healing**: Rust `lib.rs` now queries `autoStartEnabled` on startup and automatically syncs `commands::set_auto_start(true)` to `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\ShodashaTracker` without requiring manual toggle in UI.
+- [x] **Frontend Startup Sync**: Added `setAutoStartInDb(autoStartEnabled)` call during `settingsStore.initializeSettings()` execution.
+- [x] **Silent Background Logon Handling**: Updated auto-start registry command to launch `"shodasha.exe" --autostart`. Updated `tauri.conf.json` main window config (`visible: false`) and `lib.rs` setup hook to check for `--autostart` / `--minimized` argument. On Windows sign-on, the app starts hidden in the tray to track background activity silently without popping up an intrusive window. Manual application launch shows window cleanly.
+
+### Unified Logo Consistency (Jul 2026)
+- [x] **Generated All System Icons**: Executed `npx tauri icon public/logo.png` to regenerate master PNG, ICO, ICNS, Store, and Taskbar icons directly from `public/logo.png`.
+- [x] **Taskbar & Tray Icon Parity**: Explicitly configured `TrayIconBuilder::new().icon(app.default_window_icon().unwrap().clone())` in `lib.rs` so the Windows taskbar tray icon matches the application logo.
+- [x] **Everywhere Branding Integration**: Added logo image rendering across `layout.tsx` metadata icons, `CommandPalette.tsx` search header, `TaskModal.tsx` detail header, `QuickTaskInput.tsx` task bar, `Navbar.tsx`, and `AboutSettings.tsx`.
+
 ## Project Status: CI/CD AUTOMATED — FULL .MSI RELEASES ON EVERY PUSH 🚀
 
 ## Open Questions

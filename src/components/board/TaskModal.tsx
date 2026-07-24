@@ -101,7 +101,7 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
             {/* Header */}
             <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
               <div className="flex items-center gap-2">
-                <CheckSquare className="h-5 w-5 text-[var(--accent)]" />
+                <img src="/logo.png" alt="Shodasha Logo" className="h-5 w-5 object-contain" />
                 <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
                   Task Details
                 </h2>

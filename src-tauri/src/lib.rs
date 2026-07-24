@@ -38,6 +38,11 @@ pub fn run() {
             .unwrap_or(300),
     ));
 
+    let auto_start_enabled = get_setting_default(&conn, "autoStartEnabled", "true") == "true";
+    if auto_start_enabled {
+        commands::set_auto_start(true).ok();
+    }
+
     let tracker_config = services::tracker_service::TrackerConfig {
         polling_interval_secs: Arc::clone(&polling_interval),
         idle_threshold_secs: Arc::clone(&idle_threshold),
@@ -59,6 +64,7 @@ pub fn run() {
                 .build()?;
 
             let _tray = TrayIconBuilder::new()
+                .icon(app.default_window_icon().unwrap().clone())
                 .menu(&tray_menu)
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "show" => {
@@ -86,6 +92,14 @@ pub fn run() {
                     }
                 })
                 .build(app)?;
+
+            let is_autostart = std::env::args().any(|arg| arg == "--autostart" || arg == "--minimized");
+            if !is_autostart {
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                }
+            }
 
             Ok(())
         })

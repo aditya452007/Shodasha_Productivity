@@ -198,7 +198,7 @@ pub fn set_auto_start(enable: bool) -> Result<(), String> {
 
         if enable {
             let exe_path = std::env::current_exe().map_err(|e| e.to_string())?;
-            let exe_str = format!("\"{}\"\0", exe_path.to_string_lossy());
+            let exe_str = format!("\"{}\" --autostart\0", exe_path.to_string_lossy());
             let exe_utf16: Vec<u16> = exe_str.encode_utf16().collect();
 
             let res = RegSetValueExW(
@@ -213,13 +213,13 @@ pub fn set_auto_start(enable: bool) -> Result<(), String> {
             if res != 0 {
                 return Err("Failed to set registry auto-start value".to_string());
             }
-    } else {
-        RegDeleteValueW(hkey, val_name.as_ptr());
-        RegCloseKey(hkey);
+        } else {
+            RegDeleteValueW(hkey, val_name.as_ptr());
+            RegCloseKey(hkey);
+        }
     }
-}
 
-Ok(())
+    Ok(())
 }
 
 #[command]

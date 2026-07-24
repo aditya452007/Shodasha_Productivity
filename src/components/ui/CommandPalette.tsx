@@ -54,11 +54,14 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
     <div className="fixed inset-0 z-[500] flex items-start justify-center pt-[15vh]">
       <div className="fixed inset-0 bg-black/50" onClick={() => onOpenChange(false)} />
       <Command className="relative w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-elevated)] shadow-2xl overflow-hidden">
-        <Command.Input
-          placeholder="Type a command or search..."
-          autoFocus
-          className="w-full px-4 py-3.5 text-sm text-[var(--text-primary)] bg-transparent outline-none border-b border-[var(--border)] placeholder-[var(--text-muted)]"
-        />
+        <div className="flex items-center px-4 border-b border-[var(--border)]">
+          <img src="/logo.png" alt="Shodasha Logo" className="w-5 h-5 mr-3 object-contain shrink-0" />
+          <Command.Input
+            placeholder="Type a command or search..."
+            autoFocus
+            className="w-full py-3.5 text-sm text-[var(--text-primary)] bg-transparent outline-none placeholder-[var(--text-muted)]"
+          />
+        </div>
         <Command.List className="max-h-72 overflow-y-auto p-2">
           <Command.Empty className="py-8 text-center text-sm text-[var(--text-muted)]">
             No results found.

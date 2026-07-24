@@ -82,6 +82,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
         setPollingIntervalInDb(pollingInterval)
         setIdleThresholdInDb(idleThreshold)
+        setAutoStartInDb(autoStartEnabled)
 
         if (typeof document !== 'undefined') {
           const isDark =
