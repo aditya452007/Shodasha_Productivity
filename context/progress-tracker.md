@@ -204,6 +204,18 @@ Execute Shodasha redesign incrementally in strictly controlled, verifiable phase
 - [x] **UI Link Badges**: Rendered standard external link icon button (`ExternalLink` `↗`) and domain badges (`🔗 github.com ↗`) on `KanbanCard.tsx`, `HabitCalendar.tsx`, and `HabitQuickToggle.tsx` iff a URL is set.
 - [x] **Full Verification Passed**: `npm run typecheck` (0 errors), `npm run lint` (0 errors), `cargo check` (0 errors), `npm run build` (0 errors).
 
+### Learnova-Inspired Dashboard Redesign (Jul 2026)
+- [x] **Layout Architecture**: Restructured main page `src/app/page.tsx` into a 3-tier hierarchy mirroring the Learnova reference layout while retaining Shodasha's Top Navigation bar.
+- [x] **Header Greeting Component**: Created `HeaderGreetingCard.tsx` with time-aware greeting ("Good Morning / Afternoon / Evening"), subtitle, and live refresh trigger.
+- [x] **Top 4-KPI Grid**: Created `TopKPIGrid.tsx` with compact metric cards ("Focus Time Today", "Focus Score", "Tasks Pending", "Habit Consistency").
+- [x] **Schedule & Stream Card (60%)**: Created `ScheduleActivityCard.tsx` with scheduled task items, live active foreground process status, and status tags (`Active`, `Done`, `Scheduled`).
+- [x] **Focus Donut Progress Ring (40%)**: Created `LearningProgressCard.tsx` with circular SVG progress ring and legend (Deep Work, Neutral, Distraction).
+- [x] **Daily Goals & Habits Card (35%)**: Created `GoalsHabitsCard.tsx` with habit completion progress bars, target dates, and interactive checkmarks.
+- [x] **Flame Streak Hero Card (30%)**: Created `StreakHeroCard.tsx` with vibrant purple/indigo gradient, animated flame icon, big text streak counter ("12 Days"), and motivational text.
+- [x] **Performance Overview Line Chart (35%)**: Created `PerformanceOverviewChart.tsx` with smooth curved Recharts area chart and tooltips.
+- [x] **Live Data & Inter-Component Reactivity**: Removed all dummy/random fallbacks (`Math.random()`, static 50% habit rate). Connected 100% live SQLite/Zustand state calculations, and wired task/habit toggle actions directly to SQLite persistence and real-time dashboard UI re-rendering.
+- [x] **Full Verification Passed**: `npm run typecheck` (0 errors), `npm run lint` (0 errors), `npm run build` (0 errors).
+
 ## Project Status: CI/CD AUTOMATED — FULL .MSI RELEASES ON EVERY PUSH 🚀
 
 ## Open Questions
