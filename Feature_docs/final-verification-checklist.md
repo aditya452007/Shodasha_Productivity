@@ -152,13 +152,13 @@ Generated: 2026-07-24 | Type: EXHAUSTIVE — every change that must happen
 ## 3. Component States (Loading / Empty / Error)
 
 ### Dashboard Components
-- [ ] TodayProgressCard: loading skeleton | empty CTA | error banner | content with progress ring
-- [ ] TimeDistributionChart: loading skeleton | empty "No data yet" | error banner | Recharts bar
-- [ ] HabitQuickToggle: loading skeleton | empty "Add your first habit" CTA | error | toggle list
-- [ ] QuickTaskInput: disabled during submit | N/A empty | error toast on failure | form
-- [ ] RecentActivityFeed: loading skeleton | empty "No recent activity" | error | relative-timestamp list
-- [ ] InsightCard: loading skeleton | empty N/A | error "Insight unavailable" | insight text
-- [ ] ProgressRing: loading pulse | empty "0%" | N/A error | animated ring
+- [x] TodayProgressCard: loading skeleton | empty CTA | error banner | content with progress ring
+- [x] TimeDistributionChart: loading skeleton | empty "No data yet" | error banner | Recharts bar
+- [x] HabitQuickToggle: loading skeleton | empty "Add your first habit" CTA | error | toggle list
+- [x] QuickTaskInput: disabled during submit | N/A empty | error toast on failure | form
+- [x] RecentActivityFeed: loading skeleton | empty "No recent activity" | error | relative-timestamp list
+- [x] InsightCard: loading skeleton | empty N/A | error "Insight unavailable" | insight text
+- [x] ProgressRing: loading pulse | empty "0%" | N/A error | animated ring
 
 ### Board Components
 - [ ] KanbanBoard: loading skeleton (column placeholders) | N/A empty (each column handles it) | error banner on drag failure | columns

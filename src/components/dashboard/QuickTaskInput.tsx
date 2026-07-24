@@ -2,17 +2,28 @@
 
 import { useState } from 'react'
 import { useTaskStore } from '@/stores/taskStore'
-import { Plus, CornerDownLeft } from 'lucide-react'
+import { Plus, CornerDownLeft, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 export function QuickTaskInput() {
   const [title, setTitle] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const addTask = useTaskStore((state) => state.addTask)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title.trim()) return
-    addTask(title.trim(), 'todo')
-    setTitle('')
+    if (!title.trim() || isSubmitting) return
+
+    try {
+      setIsSubmitting(true)
+      await addTask(title.trim(), 'todo')
+      toast.success(`Task "${title.trim()}" added to To Do`)
+      setTitle('')
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to add task')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -25,18 +36,25 @@ export function QuickTaskInput() {
       </div>
       <input
         type="text"
+        disabled={isSubmitting}
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Quick add a task to 'To Do'..."
-        className="flex-1 bg-transparent text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none"
+        className="flex-1 bg-transparent text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none disabled:opacity-50"
       />
       <button
         type="submit"
-        disabled={!title.trim()}
-        className="flex items-center gap-1.5 rounded-lg bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-white transition-opacity disabled:opacity-40"
+        disabled={!title.trim() || isSubmitting}
+        className="flex items-center gap-1.5 rounded-lg bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-white transition-opacity disabled:opacity-40 cursor-pointer"
       >
-        <span>Add</span>
-        <CornerDownLeft className="h-3 w-3" />
+        {isSubmitting ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <>
+            <span>Add</span>
+            <CornerDownLeft className="h-3 w-3" />
+          </>
+        )}
       </button>
     </form>
   )

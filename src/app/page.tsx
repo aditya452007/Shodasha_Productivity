@@ -5,12 +5,16 @@ import { QuickTaskInput } from '@/components/dashboard/QuickTaskInput'
 import { HabitQuickToggle } from '@/components/dashboard/HabitQuickToggle'
 import { TimeDistributionChart } from '@/components/dashboard/TimeDistributionChart'
 import { RecentActivityFeed } from '@/components/dashboard/RecentActivityFeed'
+import { InsightCard } from '@/components/dashboard/InsightCard'
 
 export default function DashboardPage() {
   return (
-    <div className="flex flex-col gap-8 w-full">
+    <div className="flex flex-col gap-6 w-full">
       {/* Attention Section — Today's Progress Briefing */}
       <TodayProgressCard />
+
+      {/* Insight Reflection Banner */}
+      <InsightCard />
 
       {/* Quick Task Bar */}
       <div className="w-full">

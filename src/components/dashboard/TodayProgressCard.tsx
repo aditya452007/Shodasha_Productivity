@@ -5,14 +5,28 @@ import { useTaskStore } from '@/stores/taskStore'
 import { useHabitStore } from '@/stores/habitStore'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { CheckCircle2, Clock, Flame, Target, RotateCw } from 'lucide-react'
+import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { ErrorBanner } from '@/components/ui/ErrorBanner'
+import { ProgressRing } from '@/components/ui/ProgressRing'
 
 export function TodayProgressCard() {
   const tasks = useTaskStore((state) => state.tasks)
+  const isTaskLoading = useTaskStore((state) => state.isLoading)
+  const taskError = useTaskStore((state) => state.error)
+
   const habits = useHabitStore((state) => state.habits)
   const records = useHabitStore((state) => state.records)
+  const isHabitLoading = useHabitStore((state) => state.isLoading)
+  const habitError = useHabitStore((state) => state.error)
+
   const getTotalFocusSeconds = useTimeEntryStore((state) => state.getTotalFocusSecondsToday)
   const refreshAllData = useTimeEntryStore((state) => state.refreshAllData)
   const isRefreshing = useTimeEntryStore((state) => state.isRefreshing)
+  const isTimeLoading = useTimeEntryStore((state) => state.isLoading)
+  const timeError = useTimeEntryStore((state) => state.error)
+
+  const isLoading = isTaskLoading || isHabitLoading || isTimeLoading
 
   const completedTasks = tasks.filter((t) => t.status === 'done').length
   const totalTasks = tasks.length
@@ -21,6 +35,7 @@ export function TodayProgressCard() {
   const todayStr = new Date().toISOString().split('T')[0]
   const completedHabits = habits.filter((h) => !!records[`${h.id}_${todayStr}`]).length
   const totalHabits = habits.length
+  const habitProgress = totalHabits > 0 ? Math.round((completedHabits / totalHabits) * 100) : 0
 
   const focusSeconds = getTotalFocusSeconds()
   const focusHours = Math.floor(focusSeconds / 3600)
@@ -50,6 +65,31 @@ export function TodayProgressCard() {
     return currentStreak
   }, [habits, records, todayStr])
 
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-xs space-y-4">
+        <LoadingSkeleton height={32} width="40%" />
+        <LoadingSkeleton height={18} width="65%" />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+          <LoadingSkeleton height={80} />
+          <LoadingSkeleton height={80} />
+          <LoadingSkeleton height={80} />
+        </div>
+      </div>
+    )
+  }
+
+  const hasError = taskError || habitError || timeError
+  if (hasError) {
+    return (
+      <ErrorBanner
+        title="Failed to load dashboard data"
+        message={taskError || habitError || timeError || 'An error occurred'}
+        onRetry={() => refreshAllData()}
+      />
+    )
+  }
+
   return (
     <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-xs transition-all hover:border-[var(--border-strong)]">
       {/* Background Subtle Gradient wash */}
@@ -75,7 +115,7 @@ export function TodayProgressCard() {
           <button
             onClick={() => refreshAllData()}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-all shadow-xs active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-all shadow-xs active:scale-95 disabled:opacity-50 cursor-pointer"
             title="Refresh database metrics"
           >
             <RotateCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin text-[var(--accent)]' : ''}`} />
@@ -106,30 +146,23 @@ export function TodayProgressCard() {
           <div className="flex flex-col gap-1">
             <span className="text-xs font-medium text-[var(--text-muted)]">Tasks Completed</span>
             <div className="flex items-baseline gap-2">
-              <span className="font-mono text-2xl font-bold text-[var(--text-primary)]">
+              <span className="font-mono text-xl font-bold text-[var(--text-primary)]">
                 {completedTasks} / {totalTasks}
-              </span>
-              <span className="text-xs font-semibold text-[var(--accent)]">
-                {taskProgress}%
               </span>
             </div>
           </div>
-          <div className="h-10 w-10 rounded-full border-2 border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)] font-mono text-xs font-bold">
-            {taskProgress}%
-          </div>
+          <ProgressRing value={taskProgress} size={44} strokeWidth={4} />
         </div>
 
         {/* Habits Checked Metric */}
         <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-4">
           <div className="flex flex-col gap-1">
             <span className="text-xs font-medium text-[var(--text-muted)]">Habits Checked</span>
-            <span className="font-mono text-2xl font-bold text-[var(--text-primary)]">
+            <span className="font-mono text-xl font-bold text-[var(--text-primary)]">
               {completedHabits} / {totalHabits}
             </span>
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent-muted)] text-[var(--accent)]">
-            <CheckCircle2 className="h-5 w-5" />
-          </div>
+          <ProgressRing value={habitProgress} size={44} strokeWidth={4} />
         </div>
 
         {/* Streak Counter */}

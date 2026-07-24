@@ -2,10 +2,19 @@
 
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { PieChart, Monitor } from 'lucide-react'
+import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { ErrorBanner } from '@/components/ui/ErrorBanner'
+import { formatDuration } from '@/lib/utils/format'
 
 export function TimeDistributionChart() {
   const getBreakdown = useTimeEntryStore((state) => state.getCategoryBreakdownToday)
+  const isLoading = useTimeEntryStore((state) => state.isLoading)
+  const error = useTimeEntryStore((state) => state.error)
+  const refreshAllData = useTimeEntryStore((state) => state.refreshAllData)
+
   const breakdown = getBreakdown()
+  const totalSeconds = breakdown.reduce((acc, item) => acc + item.seconds, 0)
 
   const categoryColors: Record<string, string> = {
     work: 'bg-[var(--accent)]',
@@ -13,11 +22,46 @@ export function TimeDistributionChart() {
     distraction: 'bg-amber-500',
   }
 
-  const formatDuration = (seconds: number) => {
-    const hrs = Math.floor(seconds / 3600)
-    const mins = Math.floor((seconds % 3600) / 60)
-    if (hrs === 0) return `${mins}m`
-    return `${hrs}h ${mins}m`
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-xs">
+        <LoadingSkeleton height={24} width="50%" />
+        <LoadingSkeleton height={14} />
+        <div className="grid grid-cols-3 gap-2">
+          <LoadingSkeleton height={60} />
+          <LoadingSkeleton height={60} />
+          <LoadingSkeleton height={60} />
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <ErrorBanner
+        title="Failed to load time distribution"
+        message={error}
+        onRetry={() => refreshAllData()}
+      />
+    )
+  }
+
+  if (totalSeconds === 0) {
+    return (
+      <div className="flex flex-col gap-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-xs">
+        <div className="flex items-center gap-2">
+          <PieChart className="h-4 w-4 text-[var(--accent)]" />
+          <h3 className="font-display text-base font-bold text-[var(--text-primary)]">
+            Focus Time Distribution
+          </h3>
+        </div>
+        <EmptyState
+          icon={Monitor}
+          title="No focus time tracked today"
+          description="Start working on tasks to see your application focus time breakdown."
+        />
+      </div>
+    )
   }
 
   return (
