@@ -88,7 +88,7 @@ export function HabitStatsCard() {
         transition={{ type: 'spring', bounce: 0, duration: 0.3, delay: 0.05 }}
         className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
       >
-        <div className="p-3 rounded-xl bg-emerald-500/10 text-[var(--accent-emerald)] shrink-0">
+        <div className="p-3 rounded-xl bg-emerald-500/10 text-[var(--accent)] shrink-0">
           <CheckCircle2 className="w-5 h-5" />
         </div>
         <div>

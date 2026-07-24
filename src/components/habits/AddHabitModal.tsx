@@ -80,7 +80,7 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
             {/* Header */}
             <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-[var(--accent-emerald)]/10 text-[var(--accent-emerald)]">
+                <div className="p-2 rounded-xl bg-[var(--accent)]/10 text-[var(--accent)]">
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
@@ -113,7 +113,7 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
                   placeholder="e.g. 30m Daily Deep Reading"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent-emerald)] focus:outline-hidden focus:ring-2 focus:ring-[var(--accent-emerald)]/20 transition-all"
+                  className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent)] focus:outline-hidden focus:ring-2 focus:ring-[var(--accent)]/20 transition-all"
                 />
               </div>
 
@@ -156,7 +156,7 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
                 <select
                   value={linkedTaskId}
                   onChange={(e) => setLinkedTaskId(e.target.value)}
-                  className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] focus:border-[var(--accent-emerald)] focus:outline-hidden focus:ring-2 focus:ring-[var(--accent-emerald)]/20 transition-all"
+                  className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] focus:border-[var(--accent)] focus:outline-hidden focus:ring-2 focus:ring-[var(--accent)]/20 transition-all"
                 >
                   <option value="">-- No Linked Task --</option>
                   {tasks.map((task) => (
@@ -178,7 +178,7 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-[var(--accent-emerald)] text-white text-xs font-semibold hover:opacity-90 transition-opacity shadow-xs"
+                  className="px-4 py-2 rounded-xl bg-[var(--accent)] text-white text-xs font-semibold hover:opacity-90 transition-opacity shadow-xs"
                 >
                   {editingHabit ? 'Save Changes' : 'Create Habit'}
                 </button>

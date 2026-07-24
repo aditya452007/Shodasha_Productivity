@@ -2,6 +2,19 @@
 
 @layer base {
   :root {
+    /* Color Tokens (OKLCH System) */
+    --color-paper: oklch(97% 0.008 80);
+    --color-paper-elevated: oklch(100% 0 0);
+    --color-rule: oklch(88% 0.008 80);
+    --color-neutral: oklch(55% 0.008 80);
+    --color-muted: oklch(45% 0.008 70);
+    --color-ink: oklch(18% 0.01 60);
+    --color-accent: oklch(55% 0.19 250);
+    --color-success: oklch(50% 0.15 150);
+    --color-warning: oklch(55% 0.15 80);
+    --color-error: oklch(50% 0.18 30);
+
+    /* Legacy & Semantic Variable Aliases */
     --bg-base: #fafaf9;
     --bg-surface: #ffffff;
     --bg-surface-hover: #f5f5f4;
@@ -29,12 +42,62 @@
     --habit-work: #d97706;
     --habit-personal: #e11d48;
 
+    /* Typography Tokens */
+    --font-ui: var(--font-geist), var(--font-inter), system-ui, -apple-system, sans-serif;
     --font-display: var(--font-geist), var(--font-inter), 'Cabinet Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-body: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-mono: var(--font-jetbrains), 'JetBrains Mono', monospace;
+
+    /* Spacing Tokens (4pt scale) */
+    --space-3xs: 0.125rem;
+    --space-2xs: 0.25rem;
+    --space-xs: 0.5rem;
+    --space-sm: 0.75rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+
+    /* Radius Tokens */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-pill: 9999px;
+
+    /* Easing & Duration Tokens */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --dur-micro: 120ms;
+    --dur-short: 220ms;
+    --dur-long: 420ms;
+
+    /* Z-Index Tokens */
+    --z-base: 1;
+    --z-raised: 10;
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-modal: 400;
+    --z-toast: 500;
+    --z-tooltip: 600;
+
+    /* Shadow Tokens */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   }
 
   .dark {
+    /* Color Tokens (OKLCH System) */
+    --color-paper: oklch(14% 0.008 40);
+    --color-paper-elevated: oklch(18% 0.01 40);
+    --color-rule: oklch(28% 0.008 40);
+    --color-neutral: oklch(55% 0.008 40);
+    --color-muted: oklch(70% 0.006 40);
+    --color-ink: oklch(94% 0.006 80);
+    --color-accent: oklch(65% 0.19 250);
+
+    /* Legacy & Semantic Variable Aliases */
     --bg-base: #0c0a09;
     --bg-surface: #1c1917;
     --bg-surface-hover: #292524;
@@ -56,6 +119,10 @@
     --border-default: #292524;
     --error: #ef4444;
     --success: #10b981;
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
   }
 
   body {

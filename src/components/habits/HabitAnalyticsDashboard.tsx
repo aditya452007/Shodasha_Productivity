@@ -55,7 +55,7 @@ function SortableWidgetCard({
       ref={setNodeRef}
       style={style}
       className={`rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-xs relative transition-all ${
-        isDragging ? 'shadow-2xl ring-2 ring-[var(--accent-emerald)] opacity-95 scale-[1.01]' : ''
+        isDragging ? 'shadow-2xl ring-2 ring-[var(--accent)] opacity-95 scale-[1.01]' : ''
       } ${className}`}
     >
       {/* Drag Handle Grip in Header */}
@@ -485,7 +485,7 @@ export function HabitAnalyticsDashboard() {
                       </div>
                       {linkedTask ? (
                         <div className="text-[11px] text-[var(--text-tertiary)] truncate flex items-center gap-1 mt-0.5">
-                          <LinkIcon className="w-3 h-3 text-[var(--accent-emerald)]" /> {linkedTask.title}
+                          <LinkIcon className="w-3 h-3 text-[var(--accent)]" /> {linkedTask.title}
                         </div>
                       ) : (
                         <div className="text-[11px] text-[var(--text-tertiary)] mt-0.5">
@@ -544,7 +544,7 @@ export function HabitAnalyticsDashboard() {
                 onMouseLeave={() => setHoveredBarDay(null)}
               >
                 {/* Count Badge on top of bar */}
-                <span className="text-[10px] font-bold font-display text-[var(--text-secondary)] group-hover:text-[var(--accent-emerald)] transition-colors">
+                <span className="text-[10px] font-bold font-display text-[var(--text-secondary)] group-hover:text-[var(--accent)] transition-colors">
                   {item.count}
                 </span>
 
@@ -557,7 +557,7 @@ export function HabitAnalyticsDashboard() {
                   />
                 </div>
 
-                <span className="text-xs font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-emerald)] transition-colors">
+                <span className="text-xs font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
                   {item.day}
                 </span>
               </div>
@@ -588,15 +588,15 @@ export function HabitAnalyticsDashboard() {
       {/* Performance Highlight Insight Banner */}
       <div className="rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-[var(--bg-secondary)] to-violet-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-[var(--accent-emerald)] text-white shadow-xs">
+          <div className="p-2 rounded-xl bg-[var(--accent)] text-white shadow-xs">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-xs font-bold text-[var(--accent-emerald)] uppercase tracking-wider">
+            <div className="text-xs font-bold text-[var(--accent)] uppercase tracking-wider">
               Performance Insight
             </div>
             <div className="text-sm font-semibold text-[var(--text-primary)]">
-              Peak consistency day is <span className="font-bold text-[var(--accent-emerald)]">{highlights.peakDayName}</span> ({highlights.peakDayCount} check-ins). Top habit: <span className="font-bold text-violet-500">{highlights.topHabitName}</span> ({highlights.topHabitRate}% 30-day rate).
+              Peak consistency day is <span className="font-bold text-[var(--accent)]">{highlights.peakDayName}</span> ({highlights.peakDayCount} check-ins). Top habit: <span className="font-bold text-violet-500">{highlights.topHabitName}</span> ({highlights.topHabitRate}% 30-day rate).
             </div>
           </div>
         </div>
@@ -610,7 +610,7 @@ export function HabitAnalyticsDashboard() {
       {/* Instructions Bar */}
       <div className="flex items-center justify-between text-xs text-[var(--text-tertiary)] px-1">
         <span className="flex items-center gap-1.5">
-          <Info className="w-3.5 h-3.5 text-[var(--accent-emerald)] shrink-0" />
+          <Info className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
           Drag widget cards using the grip handles to customize your analytics layout.
         </span>
       </div>

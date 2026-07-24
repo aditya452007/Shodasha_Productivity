@@ -39,7 +39,7 @@ export default function HabitsPage() {
             <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--text-primary)]">
               Habits Dashboard & Performance
             </h1>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-[var(--accent-emerald)] border border-emerald-500/20">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-[var(--accent)] border border-emerald-500/20">
               <Flame className="w-3.5 h-3.5" /> Daily Consistency
             </span>
           </div>
@@ -50,7 +50,7 @@ export default function HabitsPage() {
 
         <button
           onClick={handleOpenAddModal}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--accent-emerald)] text-white text-xs font-semibold hover:opacity-90 transition-all shadow-xs self-start sm:self-auto active:scale-95"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--accent)] text-white text-xs font-semibold hover:opacity-90 transition-all shadow-xs self-start sm:self-auto active:scale-95"
         >
           <Plus className="w-4 h-4" />
           New Habit

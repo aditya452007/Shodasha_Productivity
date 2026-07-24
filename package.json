@@ -18,11 +18,13 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@tauri-apps/api": "^2.11.1",
+    "cmdk": "^1.1.1",
     "lucide-react": "^1.26.0",
     "motion": "^12.42.2",
     "next": "^16.2.11",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "recharts": "^3.10.0",
     "sonner": "^2.0.7",
     "zustand": "^5.0.14"
   },

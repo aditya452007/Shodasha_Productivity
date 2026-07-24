@@ -76,7 +76,7 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
       {/* Calendar Top Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-[var(--border-subtle)]">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-[var(--accent-emerald)]/10 text-[var(--accent-emerald)]">
+          <div className="p-2 rounded-lg bg-[var(--accent)]/10 text-[var(--accent)]">
             <CalendarIcon className="w-5 h-5" />
           </div>
           <div>
@@ -116,7 +116,7 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
 
           <button
             onClick={onOpenAddModal}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent-emerald)] text-white text-xs font-medium hover:opacity-90 transition-opacity shadow-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-medium hover:opacity-90 transition-opacity shadow-xs"
           >
             <Plus className="w-3.5 h-3.5" />
             Add Habit
@@ -137,13 +137,13 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                 <th
                   key={day.dateStr}
                   className={`py-2 px-1 text-center min-w-[32px] ${
-                    day.isToday ? 'bg-[var(--accent-emerald)]/10 font-bold text-[var(--accent-emerald)]' : ''
+                    day.isToday ? 'bg-[var(--accent)]/10 font-bold text-[var(--accent)]' : ''
                   }`}
                 >
                   <div className="text-[10px] uppercase text-[var(--text-tertiary)]">
                     {day.dayOfWeek}
                   </div>
-                  <div className={`text-xs mt-0.5 ${day.isToday ? 'text-[var(--accent-emerald)]' : 'text-[var(--text-primary)]'}`}>
+                  <div className={`text-xs mt-0.5 ${day.isToday ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'}`}>
                     {day.dayNum}
                   </div>
                 </th>
@@ -163,7 +163,7 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                     <p className="text-sm">No habits created yet.</p>
                     <button
                       onClick={onOpenAddModal}
-                      className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent-emerald)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
+                      className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
                     >
                       <Plus className="w-3.5 h-3.5" /> Create your first habit
                     </button>
@@ -239,7 +239,7 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                           <td
                             key={day.dateStr}
                             className={`py-2 px-1 text-center align-middle ${
-                              day.isToday ? 'bg-[var(--accent-emerald)]/5' : ''
+                              day.isToday ? 'bg-[var(--accent)]/5' : ''
                             }`}
                           >
                             <button

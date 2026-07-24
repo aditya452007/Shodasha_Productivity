@@ -36,7 +36,7 @@ function renderAchievementIcon(iconName: Achievement['iconName']) {
     case 'trophy':
       return <Trophy className="w-5 h-5 text-amber-400" />
     default:
-      return <Award className="w-5 h-5 text-[var(--accent-emerald)]" />
+      return <Award className="w-5 h-5 text-[var(--accent)]" />
   }
 }
 
@@ -169,7 +169,7 @@ export function HabitAchievements() {
                 <div className="h-1.5 w-full rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
-                      unlocked ? 'bg-amber-500' : 'bg-[var(--accent-emerald)]'
+                      unlocked ? 'bg-amber-500' : 'bg-[var(--accent)]'
                     }`}
                     style={{ width: `${progressPercentage}%` }}
                   />

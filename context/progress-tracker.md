@@ -4,7 +4,7 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-**Phase 0 — Foundation Fixes (Incremental Execution)**
+**Phase 2 — Design System Foundations Completed**
 
 ## Current Goal
 
@@ -12,6 +12,11 @@ Execute Shodasha redesign incrementally in strictly controlled, verifiable phase
 
 ## Completed
 
+- [x] Complete CSS variable overhaul in `src/app/globals.css`: OKLCH color tokens, spacing scale, border radius, easing/durations, z-indices, shadows (Phase 2.1)
+- [x] Installed `cmdk` and `recharts` packages (Phase 2.2)
+- [x] Created shared UI design system components: `LoadingSkeleton.tsx`, `EmptyState.tsx`, `ErrorBanner.tsx`, `StreamCard.tsx` (double-bezel doppelrand), and `ProgressRing.tsx` (Phase 2.3)
+- [x] Created utility modules: `src/lib/utils/format.ts` (duration/relative time/percent) and `src/lib/utils/streak.ts` (per-habit streak calculation) (Phase 2.4, 2.5)
+- [x] Standardized single-accent color usage: replaced `--accent-emerald` with `--accent` across 6 habit components and pages (Phase 2.8)
 - [x] Defined 8 missing CSS variables in `src/app/globals.css` (`--bg-primary`, `--bg-secondary`, `--bg-tertiary`, `--bg-surface-elevated`, `--text-tertiary`, `--border-subtle`, `--border-default`, `--accent-emerald`)
 - [x] Configured font loading via `next/font/google` (`Geist`, `Inter`, `JetBrains_Mono`) in `src/app/layout.tsx` and updated CSS variable font mappings
 - [x] Installed `sonner` package and added `<Toaster position="bottom-right" richColors />` to `src/app/layout.tsx`

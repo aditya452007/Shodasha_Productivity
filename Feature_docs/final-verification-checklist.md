@@ -83,69 +83,69 @@ Generated: 2026-07-24 | Type: EXHAUSTIVE — every change that must happen
 ## 2. Design System Tokens (Correct Values)
 
 ### Colors — Light Mode (OKLCH)
-- [ ] `--color-paper: oklch(97% 0.008 80)` — off-white background
-- [ ] `--color-paper-elevated: oklch(100% 0 0)` — card surfaces
-- [ ] `--color-rule: oklch(88% 0.008 80)` — hairline borders
-- [ ] `--color-neutral: oklch(55% 0.008 80)` — secondary text
-- [ ] `--color-muted: oklch(45% 0.008 70)` — tertiary text
-- [ ] `--color-ink: oklch(18% 0.01 60)` — primary text
-- [ ] `--color-accent: oklch(55% 0.19 250)` — accent (blue)
-- [ ] `--color-success: oklch(50% 0.15 150)` — green
-- [ ] `--color-warning: oklch(55% 0.15 80)` — amber
-- [ ] `--color-error: oklch(50% 0.18 30)` — red
+- [x] `--color-paper: oklch(97% 0.008 80)` — off-white background
+- [x] `--color-paper-elevated: oklch(100% 0 0)` — card surfaces
+- [x] `--color-rule: oklch(88% 0.008 80)` — hairline borders
+- [x] `--color-neutral: oklch(55% 0.008 80)` — secondary text
+- [x] `--color-muted: oklch(45% 0.008 70)` — tertiary text
+- [x] `--color-ink: oklch(18% 0.01 60)` — primary text
+- [x] `--color-accent: oklch(55% 0.19 250)` — accent (blue)
+- [x] `--color-success: oklch(50% 0.15 150)` — green
+- [x] `--color-warning: oklch(55% 0.15 80)` — amber
+- [x] `--color-error: oklch(50% 0.18 30)` — red
 
 ### Colors — Dark Mode (OKLCH)
-- [ ] `--color-paper: oklch(14% 0.008 40)`
-- [ ] `--color-paper-elevated: oklch(18% 0.01 40)`
-- [ ] `--color-rule: oklch(28% 0.008 40)`
-- [ ] `--color-neutral: oklch(55% 0.008 40)`
-- [ ] `--color-muted: oklch(70% 0.006 40)`
-- [ ] `--color-ink: oklch(94% 0.006 80)`
-- [ ] `--color-accent: oklch(65% 0.19 250)`
+- [x] `--color-paper: oklch(14% 0.008 40)`
+- [x] `--color-paper-elevated: oklch(18% 0.01 40)`
+- [x] `--color-rule: oklch(28% 0.008 40)`
+- [x] `--color-neutral: oklch(55% 0.008 40)`
+- [x] `--color-muted: oklch(70% 0.006 40)`
+- [x] `--color-ink: oklch(94% 0.006 80)`
+- [x] `--color-accent: oklch(65% 0.19 250)`
 
 ### Spacing (4pt scale, rem)
-- [ ] `--space-3xs: 0.125rem`
-- [ ] `--space-2xs: 0.25rem`
-- [ ] `--space-xs: 0.5rem`
-- [ ] `--space-sm: 0.75rem`
-- [ ] `--space-md: 1rem`
-- [ ] `--space-lg: 1.5rem`
-- [ ] `--space-xl: 2rem`
-- [ ] `--space-2xl: 3rem`
+- [x] `--space-3xs: 0.125rem`
+- [x] `--space-2xs: 0.25rem`
+- [x] `--space-xs: 0.5rem`
+- [x] `--space-sm: 0.75rem`
+- [x] `--space-md: 1rem`
+- [x] `--space-lg: 1.5rem`
+- [x] `--space-xl: 2rem`
+- [x] `--space-2xl: 3rem`
 
 ### Border Radius
-- [ ] `--radius-sm: 4px`
-- [ ] `--radius-md: 8px`
-- [ ] `--radius-lg: 12px`
-- [ ] `--radius-pill: 9999px`
+- [x] `--radius-sm: 4px`
+- [x] `--radius-md: 8px`
+- [x] `--radius-lg: 12px`
+- [x] `--radius-pill: 9999px`
 
 ### Typography
-- [ ] `--font-ui: "Geist", system-ui, -apple-system, sans-serif`
-- [ ] `--font-mono: "Geist Mono", "SF Mono", "JetBrains Mono", monospace`
-- [ ] Fonts loaded via `next/font` in `layout.tsx`
-- [ ] Type scale: 0.75rem / 0.875rem / 1rem / 1.25rem / 1.5rem / 2rem
+- [x] `--font-ui: "Geist", system-ui, -apple-system, sans-serif`
+- [x] `--font-mono: "Geist Mono", "SF Mono", "JetBrains Mono", monospace`
+- [x] Fonts loaded via `next/font` in `layout.tsx`
+- [x] Type scale: 0.75rem / 0.875rem / 1rem / 1.25rem / 1.5rem / 2rem
 
 ### Easing & Duration
-- [ ] `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)`
-- [ ] `--ease-in: cubic-bezier(0.7, 0, 0.84, 0)`
-- [ ] `--ease-in-out: cubic-bezier(0.65, 0, 0.35, 1)`
-- [ ] `--dur-micro: 120ms`
-- [ ] `--dur-short: 220ms`
-- [ ] `--dur-long: 420ms`
+- [x] `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)`
+- [x] `--ease-in: cubic-bezier(0.7, 0, 0.84, 0)`
+- [x] `--ease-in-out: cubic-bezier(0.65, 0, 0.35, 1)`
+- [x] `--dur-micro: 120ms`
+- [x] `--dur-short: 220ms`
+- [x] `--dur-long: 420ms`
 
 ### Z-Index
-- [ ] `--z-base: 1`
-- [ ] `--z-raised: 10`
-- [ ] `--z-dropdown: 100`
-- [ ] `--z-sticky: 200`
-- [ ] `--z-modal: 400`
-- [ ] `--z-toast: 500`
-- [ ] `--z-tooltip: 600`
+- [x] `--z-base: 1`
+- [x] `--z-raised: 10`
+- [x] `--z-dropdown: 100`
+- [x] `--z-sticky: 200`
+- [x] `--z-modal: 400`
+- [x] `--z-toast: 500`
+- [x] `--z-tooltip: 600`
 
 ### Shadows
-- [ ] Define `--shadow-sm`, `--shadow-md`, `--shadow-lg` tokens
-- [ ] Replace all hardcoded `rgba(...)` shadows with token references
-- [ ] Verify dark mode shadows work (no white-tinted inset shadows in dark mode)
+- [x] Define `--shadow-sm`, `--shadow-md`, `--shadow-lg` tokens
+- [x] Replace all hardcoded `rgba(...)` shadows with token references
+- [x] Verify dark mode shadows work (no white-tinted inset shadows in dark mode)
 
 ---
 
