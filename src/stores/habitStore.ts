@@ -14,6 +14,7 @@ export interface Habit {
   name: string
   color: string
   linkedTaskId?: string
+  url?: string
   createdAt: string
 }
 
@@ -29,8 +30,8 @@ interface HabitState extends AsyncState {
   records: Record<string, boolean> // key: `${habitId}_${date}` -> boolean
   initializeHabits: () => Promise<void>
   toggleHabit: (habitId: string, date: string) => void
-  addHabit: (name: string, color?: string, linkedTaskId?: string) => void
-  updateHabit: (id: string, name: string, color: string, linkedTaskId?: string) => void
+  addHabit: (name: string, color?: string, linkedTaskId?: string, url?: string) => void
+  updateHabit: (id: string, name: string, color: string, linkedTaskId?: string, url?: string) => void
   deleteHabit: (id: string) => void
 }
 
@@ -58,6 +59,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
           name: h.name,
           color: h.color,
           linkedTaskId: h.linked_task_id || undefined,
+          url: h.url || undefined,
           createdAt: h.created_at,
         }))
         set({ habits: mappedHabits })
@@ -110,12 +112,13 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       }
     }
   },
-  addHabit: (name, color = '#059669', linkedTaskId) => {
+  addHabit: (name, color = '#059669', linkedTaskId, url) => {
     const newHabit: Habit = {
       id: `h-${Date.now()}`,
       name,
       color,
       linkedTaskId: linkedTaskId || undefined,
+      url: url || undefined,
       createdAt: new Date().toISOString(),
     }
     set((state) => ({ habits: [...state.habits, newHabit] }))
@@ -124,13 +127,14 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       name: newHabit.name,
       color: newHabit.color,
       linked_task_id: newHabit.linkedTaskId || null,
+      url: newHabit.url || null,
       created_at: newHabit.createdAt,
     })
   },
-  updateHabit: (id, name, color, linkedTaskId) => {
+  updateHabit: (id, name, color, linkedTaskId, url) => {
     set((state) => ({
       habits: state.habits.map((h) =>
-        h.id === id ? { ...h, name, color, linkedTaskId: linkedTaskId || undefined } : h
+        h.id === id ? { ...h, name, color, linkedTaskId: linkedTaskId || undefined, url: url || undefined } : h
       ),
     }))
     const updated = get().habits.find((h) => h.id === id)
@@ -140,6 +144,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         name: updated.name,
         color: updated.color,
         linked_task_id: updated.linkedTaskId || null,
+        url: updated.url || null,
         created_at: updated.createdAt,
       })
     }

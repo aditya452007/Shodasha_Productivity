@@ -5,7 +5,8 @@ import { Task, useTaskStore } from '@/stores/taskStore'
 import { useHabitStore } from '@/stores/habitStore'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { X, Trash2, Calendar, Tag, Link2, AlignLeft, CheckSquare, Loader2, Clock } from 'lucide-react'
+import { X, Trash2, Calendar, Tag, Link2, AlignLeft, CheckSquare, Loader2, Clock, ExternalLink, Globe } from 'lucide-react'
+import { openExternalUrl } from '@/lib/utils/url'
 import { toast } from 'sonner'
 
 interface TaskModalProps {
@@ -26,6 +27,7 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
   const [dueDate, setDueDate] = useState('')
   const [tagsInput, setTagsInput] = useState('')
   const [linkedHabitId, setLinkedHabitId] = useState('')
+  const [url, setUrl] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const shouldReduceMotion = useReducedMotion()
 
@@ -37,6 +39,7 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
       setDueDate(task.dueDate || '')
       setTagsInput(task.tags ? task.tags.join(', ') : '')
       setLinkedHabitId(task.linkedHabitId || '')
+      setUrl(task.url || '')
     }
   }, [task])
 
@@ -63,6 +66,7 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
         dueDate: dueDate || undefined,
         tags,
         linkedHabitId: linkedHabitId || undefined,
+        url: url.trim() || undefined,
       })
       toast.success('Task details updated')
       onClose()
@@ -157,6 +161,32 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add optional task details..."
               className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none focus:border-[var(--accent)] resize-none"
+            />
+          </div>
+
+          {/* Web Link / URL (Optional) */}
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)]">
+                <Globe className="h-3.5 w-3.5" />
+                <span>Web Link / URL (Optional)</span>
+              </div>
+              {url.trim() && (
+                <button
+                  type="button"
+                  onClick={() => openExternalUrl(url)}
+                  className="text-xs text-[var(--accent)] hover:underline flex items-center gap-1 font-medium"
+                >
+                  Open in browser <ExternalLink className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://example.com/task"
+              className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-base)] px-3.5 py-2 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none focus:border-[var(--accent)]"
             />
           </div>
 

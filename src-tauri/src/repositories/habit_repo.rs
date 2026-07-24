@@ -7,6 +7,7 @@ pub struct HabitDb {
     pub name: String,
     pub color: String,
     pub linked_task_id: Option<String>,
+    pub url: Option<String>,
     pub created_at: String,
 }
 
@@ -20,7 +21,7 @@ pub struct HabitRecordDb {
 
 pub fn get_habits(conn: &Connection) -> Result<Vec<HabitDb>> {
     let mut stmt = conn.prepare(
-        "SELECT id, name, color, linked_task_id, created_at FROM habits ORDER BY created_at ASC"
+        "SELECT id, name, color, linked_task_id, url, created_at FROM habits ORDER BY created_at ASC"
     )?;
 
     let habits = stmt.query_map([], |row| {
@@ -29,7 +30,8 @@ pub fn get_habits(conn: &Connection) -> Result<Vec<HabitDb>> {
             name: row.get(1)?,
             color: row.get(2)?,
             linked_task_id: row.get(3)?,
-            created_at: row.get(4)?,
+            url: row.get(4)?,
+            created_at: row.get(5)?,
         })
     })?.collect::<Result<Vec<_>, _>>()?;
 
@@ -56,16 +58,16 @@ pub fn get_habit_records(conn: &Connection) -> Result<Vec<HabitRecordDb>> {
 
 pub fn create_habit(conn: &Connection, habit: &HabitDb) -> Result<()> {
     conn.execute(
-        "INSERT INTO habits (id, name, color, linked_task_id, created_at) VALUES (?1, ?2, ?3, ?4, ?5)",
-        params![habit.id, habit.name, habit.color, habit.linked_task_id, habit.created_at],
+        "INSERT INTO habits (id, name, color, linked_task_id, url, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+        params![habit.id, habit.name, habit.color, habit.linked_task_id, habit.url, habit.created_at],
     )?;
     Ok(())
 }
 
 pub fn update_habit(conn: &Connection, habit: &HabitDb) -> Result<()> {
     conn.execute(
-        "UPDATE habits SET name = ?2, color = ?3, linked_task_id = ?4 WHERE id = ?1",
-        params![habit.id, habit.name, habit.color, habit.linked_task_id],
+        "UPDATE habits SET name = ?2, color = ?3, linked_task_id = ?4, url = ?5 WHERE id = ?1",
+        params![habit.id, habit.name, habit.color, habit.linked_task_id, habit.url],
     )?;
     Ok(())
 }

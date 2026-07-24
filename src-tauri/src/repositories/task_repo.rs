@@ -11,13 +11,14 @@ pub struct TaskDb {
     pub due_date: Option<String>,
     pub tags: Option<String>, // JSON string array
     pub linked_habit_id: Option<String>,
+    pub url: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }
 
 pub fn get_all_tasks(conn: &Connection) -> Result<Vec<TaskDb>> {
     let mut stmt = conn.prepare(
-        "SELECT id, title, description, status, sort_order, due_date, tags, linked_habit_id, created_at, updated_at 
+        "SELECT id, title, description, status, sort_order, due_date, tags, linked_habit_id, url, created_at, updated_at 
          FROM tasks ORDER BY sort_order ASC, created_at DESC"
     )?;
 
@@ -31,8 +32,9 @@ pub fn get_all_tasks(conn: &Connection) -> Result<Vec<TaskDb>> {
             due_date: row.get(5)?,
             tags: row.get(6)?,
             linked_habit_id: row.get(7)?,
-            created_at: row.get(8)?,
-            updated_at: row.get(9)?,
+            url: row.get(8)?,
+            created_at: row.get(9)?,
+            updated_at: row.get(10)?,
         })
     })?.collect::<Result<Vec<_>, _>>()?;
 
@@ -41,8 +43,8 @@ pub fn get_all_tasks(conn: &Connection) -> Result<Vec<TaskDb>> {
 
 pub fn create_task(conn: &Connection, task: &TaskDb) -> Result<()> {
     conn.execute(
-        "INSERT INTO tasks (id, title, description, status, sort_order, due_date, tags, linked_habit_id, created_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+        "INSERT INTO tasks (id, title, description, status, sort_order, due_date, tags, linked_habit_id, url, created_at, updated_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
         params![
             task.id,
             task.title,
@@ -52,6 +54,7 @@ pub fn create_task(conn: &Connection, task: &TaskDb) -> Result<()> {
             task.due_date,
             task.tags,
             task.linked_habit_id,
+            task.url,
             task.created_at,
             task.updated_at,
         ],
@@ -62,7 +65,7 @@ pub fn create_task(conn: &Connection, task: &TaskDb) -> Result<()> {
 pub fn update_task(conn: &Connection, task: &TaskDb) -> Result<()> {
     conn.execute(
         "UPDATE tasks 
-         SET title = ?2, description = ?3, status = ?4, sort_order = ?5, due_date = ?6, tags = ?7, linked_habit_id = ?8, updated_at = ?9
+         SET title = ?2, description = ?3, status = ?4, sort_order = ?5, due_date = ?6, tags = ?7, linked_habit_id = ?8, url = ?9, updated_at = ?10
          WHERE id = ?1",
         params![
             task.id,
@@ -73,6 +76,7 @@ pub fn update_task(conn: &Connection, task: &TaskDb) -> Result<()> {
             task.due_date,
             task.tags,
             task.linked_habit_id,
+            task.url,
             task.updated_at,
         ],
     )?;

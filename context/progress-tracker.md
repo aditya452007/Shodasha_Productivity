@@ -196,6 +196,14 @@ Execute Shodasha redesign incrementally in strictly controlled, verifiable phase
 - [x] **Taskbar & Tray Icon Parity**: Explicitly configured `TrayIconBuilder::new().icon(app.default_window_icon().unwrap().clone())` in `lib.rs` so the Windows taskbar tray icon matches the application logo.
 - [x] **Everywhere Branding Integration**: Added logo image rendering across `layout.tsx` metadata icons, `CommandPalette.tsx` search header, `TaskModal.tsx` detail header, `QuickTaskInput.tsx` task bar, `Navbar.tsx`, and `AboutSettings.tsx`.
 
+### Optional Link Attachment & Default Browser Launcher (Jul 2026)
+- [x] **Database & Backend**: Updated SQLite `data.db` schema migration in `db.rs` with `url TEXT` column for `tasks` and `habits`; updated `TaskDb` & `HabitDb` Rust structs and SQL queries.
+- [x] **Browser Redirection Utility**: Created `src/lib/utils/url.ts` using `@tauri-apps/plugin-shell` for native desktop mode and `window.open` fallback for web browser mode.
+- [x] **Zustand Stores & IPC**: Updated `taskStore.ts`, `habitStore.ts`, and `db.ts` to persist optional `url` property.
+- [x] **Modals & Inputs**: Added "Web Link / URL (Optional)" input fields with live test link preview buttons in `AddHabitModal.tsx` and `TaskModal.tsx`.
+- [x] **UI Link Badges**: Rendered standard external link icon button (`ExternalLink` `↗`) and domain badges (`🔗 github.com ↗`) on `KanbanCard.tsx`, `HabitCalendar.tsx`, and `HabitQuickToggle.tsx` iff a URL is set.
+- [x] **Full Verification Passed**: `npm run typecheck` (0 errors), `npm run lint` (0 errors), `cargo check` (0 errors), `npm run build` (0 errors).
+
 ## Project Status: CI/CD AUTOMATED — FULL .MSI RELEASES ON EVERY PUSH 🚀
 
 ## Open Questions

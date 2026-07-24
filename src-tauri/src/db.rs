@@ -44,6 +44,7 @@ fn run_migrations(conn: &Connection) -> Result<()> {
             due_date TEXT,
             tags TEXT,
             linked_habit_id TEXT,
+            url TEXT,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL
         );
@@ -53,6 +54,7 @@ fn run_migrations(conn: &Connection) -> Result<()> {
             name TEXT NOT NULL,
             color TEXT NOT NULL DEFAULT '#059669',
             linked_task_id TEXT,
+            url TEXT,
             created_at TEXT NOT NULL
         );
 
@@ -96,6 +98,10 @@ fn run_migrations(conn: &Connection) -> Result<()> {
             value TEXT NOT NULL
         );"
     )?;
+
+    // Safe migration: add url column if existing database does not have it yet
+    conn.execute("ALTER TABLE tasks ADD COLUMN url TEXT", []).ok();
+    conn.execute("ALTER TABLE habits ADD COLUMN url TEXT", []).ok();
 
     // Check schema_version
     let version: i32 = conn.query_row(

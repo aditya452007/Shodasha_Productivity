@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { X, Sparkles, Link as LinkIcon, Check, Loader2 } from 'lucide-react'
+import { X, Sparkles, Link as LinkIcon, Check, Loader2, ExternalLink, Globe } from 'lucide-react'
 import { useHabitStore, Habit } from '@/stores/habitStore'
 import { useTaskStore } from '@/stores/taskStore'
+import { openExternalUrl } from '@/lib/utils/url'
 import { toast } from 'sonner'
 
 interface AddHabitModalProps {
@@ -33,16 +34,19 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
   const [name, setName] = useState('')
   const [color, setColor] = useState('#059669')
   const [linkedTaskId, setLinkedTaskId] = useState('')
+  const [url, setUrl] = useState('')
 
   useEffect(() => {
     if (editingHabit) {
       setName(editingHabit.name)
       setColor(editingHabit.color || '#059669')
       setLinkedTaskId(editingHabit.linkedTaskId || '')
+      setUrl(editingHabit.url || '')
     } else {
       setName('')
       setColor('#059669')
       setLinkedTaskId('')
+      setUrl('')
     }
   }, [editingHabit, isOpen])
 
@@ -58,10 +62,10 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
     try {
       setIsSubmitting(true)
       if (editingHabit) {
-        await updateHabit(editingHabit.id, name.trim(), color, linkedTaskId || undefined)
+        await updateHabit(editingHabit.id, name.trim(), color, linkedTaskId || undefined, url.trim() || undefined)
         toast.success('Habit updated')
       } else {
-        await addHabit(name.trim(), color, linkedTaskId || undefined)
+        await addHabit(name.trim(), color, linkedTaskId || undefined, url.trim() || undefined)
         toast.success(`Habit "${name.trim()}" created`)
       }
       onClose()
@@ -105,7 +109,7 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
                     {editingHabit ? 'Edit Habit' : 'Create New Habit'}
                   </h3>
                   <p className="text-xs text-[var(--text-secondary)]">
-                    Set a daily goal and optionally link it to a task
+                    Set a daily goal and optionally attach a link or task
                   </p>
                 </div>
               </div>
@@ -132,6 +136,34 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
                   onChange={(e) => setName(e.target.value)}
                   className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent)] focus:outline-hidden focus:ring-2 focus:ring-[var(--accent)]/20 transition-all"
                 />
+              </div>
+
+              {/* Web Link / URL Field (Optional) */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider">
+                    Web Link / URL (Optional)
+                  </label>
+                  {url.trim() && (
+                    <button
+                      type="button"
+                      onClick={() => openExternalUrl(url)}
+                      className="text-[11px] text-[var(--accent)] hover:underline flex items-center gap-1 font-medium"
+                    >
+                      Test Link <ExternalLink className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <Globe className="w-4 h-4 text-[var(--text-tertiary)] absolute left-3.5 top-3" />
+                  <input
+                    type="url"
+                    placeholder="https://example.com/habit"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] pl-10 pr-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent)] focus:outline-hidden focus:ring-2 focus:ring-[var(--accent)]/20 transition-all"
+                  />
+                </div>
               </div>
 
               {/* Color Picker Swatches */}

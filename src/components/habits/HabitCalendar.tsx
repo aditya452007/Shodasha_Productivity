@@ -12,9 +12,11 @@ import {
   Trash2,
   Edit2,
   Calendar as CalendarIcon,
+  ExternalLink,
 } from 'lucide-react'
 import { useHabitStore, Habit } from '@/stores/habitStore'
 import { useTaskStore } from '@/stores/taskStore'
+import { openExternalUrl } from '@/lib/utils/url'
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { ErrorBanner } from '@/components/ui/ErrorBanner'
 
@@ -223,8 +225,23 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                               style={{ backgroundColor: habit.color }}
                             />
                             <div className="min-w-0">
-                              <div className="text-sm font-medium text-[var(--text-primary)] truncate">
-                                {habit.name}
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-sm font-medium text-[var(--text-primary)] truncate">
+                                  {habit.name}
+                                </span>
+                                {habit.url && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      openExternalUrl(habit.url)
+                                    }}
+                                    aria-label={`Open link for ${habit.name} in default browser`}
+                                    className="p-1 rounded-md text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-colors shrink-0"
+                                    title={`Open ${habit.url} in browser`}
+                                  >
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
                               </div>
                               {linkedTask && (
                                 <div className="flex items-center gap-1 text-[11px] text-[var(--text-tertiary)] truncate mt-0.5">

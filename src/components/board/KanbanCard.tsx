@@ -4,7 +4,8 @@ import { Task, useTaskStore } from '@/stores/taskStore'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { CheckCircle2, GripVertical, Calendar, Link2, MoreHorizontal, Clock } from 'lucide-react'
+import { CheckCircle2, GripVertical, Calendar, Link2, MoreHorizontal, Clock, ExternalLink } from 'lucide-react'
+import { openExternalUrl, getCleanDomain } from '@/lib/utils/url'
 import { motion } from 'motion/react'
 
 interface KanbanCardProps {
@@ -72,6 +73,22 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
         </div>
 
         <div className="flex items-center gap-1">
+          {/* External Link Redirect Button */}
+          {task.url && (
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={(e) => {
+                e.stopPropagation()
+                openExternalUrl(task.url)
+              }}
+              aria-label={`Open link for ${task.title} in default browser`}
+              className="flex h-6 w-6 items-center justify-center rounded-lg border border-[var(--accent)]/30 bg-[var(--accent-muted)]/30 text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition-all"
+              title={`Open ${task.url} in browser`}
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+            </motion.button>
+          )}
+
           {/* Quick Status Toggle */}
           <motion.button
             whileTap={{ scale: 0.9 }}
@@ -125,8 +142,23 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
       </div>
 
       {/* Tags & Badges Footer */}
-      {((task.tags && task.tags.length > 0) || task.dueDate || task.linkedHabitId || taskSeconds > 0) && (
+      {((task.tags && task.tags.length > 0) || task.dueDate || task.linkedHabitId || taskSeconds > 0 || task.url) && (
         <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[var(--border)]/60">
+          {/* External URL Link Badge */}
+          {task.url && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                openExternalUrl(task.url)
+              }}
+              className="flex items-center gap-1 rounded-md bg-[var(--accent-muted)]/40 px-2 py-0.5 text-[10px] font-semibold text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white border border-[var(--accent)]/30 transition-all cursor-pointer"
+              title={`Open ${task.url} in default browser`}
+            >
+              <ExternalLink className="h-3 w-3" />
+              <span>{getCleanDomain(task.url)}</span>
+            </button>
+          )}
+
           {/* Cumulative Tracked Desktop Time Badge */}
           {taskSeconds > 0 && (
             <span className="flex items-center gap-1 rounded-md bg-[var(--accent-muted)] px-2 py-0.5 text-[10px] font-mono font-semibold text-[var(--accent)] border border-[var(--accent)]/20">

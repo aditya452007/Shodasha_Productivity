@@ -21,6 +21,7 @@ export interface Task {
   dueDate?: string
   tags?: string[]
   linkedHabitId?: string
+  url?: string
   createdAt: string
   updatedAt: string
 }
@@ -41,7 +42,7 @@ interface TaskState extends AsyncState {
   tasks: Task[]
   columns: KanbanColumn[]
   initializeTasks: () => Promise<void>
-  addTask: (title: string, status?: string, description?: string, tags?: string[], dueDate?: string, linkedHabitId?: string) => void
+  addTask: (title: string, status?: string, description?: string, tags?: string[], dueDate?: string, linkedHabitId?: string, url?: string) => void
   updateTask: (id: string, updates: Partial<Task>) => void
   toggleTaskStatus: (id: string) => void
   moveTask: (id: string, targetStatus: string) => void
@@ -92,6 +93,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
           dueDate: t.due_date || undefined,
           tags: t.tags ? JSON.parse(t.tags) : [],
           linkedHabitId: t.linked_habit_id || undefined,
+          url: t.url || undefined,
           createdAt: t.created_at,
           updatedAt: t.updated_at,
         }))
@@ -103,7 +105,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       set({ error: err?.message || 'Failed to initialize tasks', isLoading: false, isInitialized: true })
     }
   },
-  addTask: (title, status = 'todo', description, tags, dueDate, linkedHabitId) => {
+  addTask: (title, status = 'todo', description, tags, dueDate, linkedHabitId, url) => {
     const newTask: Task = {
       id: `t-${Date.now()}`,
       title,
@@ -113,6 +115,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       tags: tags || [],
       dueDate,
       linkedHabitId,
+      url,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }
@@ -126,6 +129,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       due_date: newTask.dueDate || null,
       tags: newTask.tags ? JSON.stringify(newTask.tags) : null,
       linked_habit_id: newTask.linkedHabitId || null,
+      url: newTask.url || null,
       created_at: newTask.createdAt,
       updated_at: newTask.updatedAt,
     })
@@ -147,6 +151,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         due_date: updated.dueDate || null,
         tags: updated.tags ? JSON.stringify(updated.tags) : null,
         linked_habit_id: updated.linkedHabitId || null,
+        url: updated.url || null,
         created_at: updated.createdAt,
         updated_at: updated.updatedAt,
       })
