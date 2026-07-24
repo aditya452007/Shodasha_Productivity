@@ -5,6 +5,7 @@ import './globals.css'
 import { Navbar } from '@/components/layout/Navbar'
 import { AgentationWrapper } from '@/components/common/AgentationWrapper'
 import { AppInitializer } from '@/components/common/AppInitializer'
+import { PageTransition } from '@/components/ui/PageTransition'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -36,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AppInitializer />
         <Navbar />
         <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-8">
-          {children}
+          <PageTransition>{children}</PageTransition>
         </main>
         <Toaster position="bottom-right" richColors />
         <AgentationWrapper />

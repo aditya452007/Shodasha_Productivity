@@ -22,7 +22,7 @@ export function LoadingSkeleton({
   return (
     <div
       style={style}
-      className={`animate-pulse bg-[var(--border)]/60 ${rounded} ${className}`}
+      className={`animate-pulse motion-reduce:animate-none bg-[var(--border)]/60 ${rounded} ${className}`}
       aria-hidden="true"
     />
   )

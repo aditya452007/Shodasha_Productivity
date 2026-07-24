@@ -140,6 +140,82 @@
     font-style: normal;
     text-wrap: balance;
   }
+
+  /* Micro-interactions: Focus ring, button hover/press, transitions */
+  button, [role="button"], input[type="button"], input[type="submit"], .btn-interactive {
+    transition: transform var(--dur-micro) var(--ease-out), background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out);
+  }
+
+  button:active, [role="button"]:active, input[type="button"]:active, input[type="submit"]:active, .btn-interactive:active {
+    transform: scale(0.97);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn-hover-lift:hover {
+      transform: translateY(-1px);
+    }
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent) !important;
+    outline-offset: 3px !important;
+    transition: none !important;
+  }
+}
+
+/* Tooltip appearance utility */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  opacity: 0;
+  pointer-events: none;
+  background-color: var(--bg-surface-elevated);
+  color: var(--text-primary);
+  font-size: 11px;
+  font-family: var(--font-ui);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+  z-index: var(--z-tooltip);
+  transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
+  transition-delay: 800ms;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+/* Accessibility: Prefers Reduced Motion Guard */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  button:active, [role="button"]:active, input[type="button"]:active, input[type="submit"]:active, .btn-interactive:active {
+    transform: none !important;
+  }
+
+  .btn-hover-lift:hover {
+    transform: none !important;
+  }
+
+  [data-tooltip]::after {
+    transition-delay: 0ms !important;
+    transition-duration: 0ms !important;
+  }
 }
 
 /* Custom scrollbars */
@@ -160,3 +236,4 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+

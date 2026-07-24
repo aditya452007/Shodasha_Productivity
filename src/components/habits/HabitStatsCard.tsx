@@ -1,17 +1,19 @@
 'use client'
 
 import { useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Flame, Trophy, CalendarCheck, CheckCircle2 } from 'lucide-react'
 import { useHabitStore } from '@/stores/habitStore'
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { ErrorBanner } from '@/components/ui/ErrorBanner'
+import { NumberTicker } from '@/components/ui/NumberTicker'
 
 export function HabitStatsCard() {
   const habits = useHabitStore((s) => s.habits)
   const records = useHabitStore((s) => s.records)
   const isLoading = useHabitStore((s) => s.isLoading)
   const error = useHabitStore((s) => s.error)
+  const shouldReduceMotion = useReducedMotion()
 
   const stats = useMemo(() => {
     const today = new Date()
@@ -80,10 +82,10 @@ export function HabitStatsCard() {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Current Streak */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
         animate={{ opacity: 1, y: 0 }}
         whileTap={{ scale: 0.98 }}
-        transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
         className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
       >
         <div className="p-3 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
@@ -94,17 +96,17 @@ export function HabitStatsCard() {
             Current Streak
           </div>
           <div className="text-2xl font-extrabold font-display text-[var(--text-primary)] mt-0.5">
-            {stats.currentStreak} {stats.currentStreak === 1 ? 'day' : 'days'}
+            <NumberTicker value={stats.currentStreak} /> {stats.currentStreak === 1 ? 'day' : 'days'}
           </div>
         </div>
       </motion.div>
 
       {/* Today's Progress */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
         animate={{ opacity: 1, y: 0 }}
         whileTap={{ scale: 0.98 }}
-        transition={{ type: 'spring', bounce: 0, duration: 0.3, delay: 0.05 }}
+        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1], delay: shouldReduceMotion ? 0 : 0.05 }}
         className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
       >
         <div className="p-3 rounded-xl bg-emerald-500/10 text-[var(--accent)] shrink-0">
@@ -115,17 +117,17 @@ export function HabitStatsCard() {
             Today&apos;s Progress
           </div>
           <div className="text-2xl font-extrabold font-display text-[var(--text-primary)] mt-0.5">
-            {stats.todayCompletedCount} / {habits.length} ({stats.todayCompletionRate}%)
+            <NumberTicker value={stats.todayCompletedCount} /> / {habits.length} (<NumberTicker value={stats.todayCompletionRate} />%)
           </div>
         </div>
       </motion.div>
 
       {/* Monthly Total */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
         animate={{ opacity: 1, y: 0 }}
         whileTap={{ scale: 0.98 }}
-        transition={{ type: 'spring', bounce: 0, duration: 0.3, delay: 0.1 }}
+        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1], delay: shouldReduceMotion ? 0 : 0.1 }}
         className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
       >
         <div className="p-3 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 shrink-0">
@@ -136,17 +138,17 @@ export function HabitStatsCard() {
             30-Day Check-ins
           </div>
           <div className="text-2xl font-extrabold font-display text-[var(--text-primary)] mt-0.5">
-            {stats.last30DaysCount} check-ins
+            <NumberTicker value={stats.last30DaysCount} /> check-ins
           </div>
         </div>
       </motion.div>
 
       {/* Active Habits Count */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
         animate={{ opacity: 1, y: 0 }}
         whileTap={{ scale: 0.98 }}
-        transition={{ type: 'spring', bounce: 0, duration: 0.3, delay: 0.15 }}
+        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1], delay: shouldReduceMotion ? 0 : 0.15 }}
         className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
       >
         <div className="p-3 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 shrink-0">
@@ -157,7 +159,7 @@ export function HabitStatsCard() {
             Active Habits
           </div>
           <div className="text-2xl font-extrabold font-display text-[var(--text-primary)] mt-0.5">
-            {habits.length} Habits
+            <NumberTicker value={habits.length} /> Habits
           </div>
         </div>
       </motion.div>

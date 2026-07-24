@@ -62,7 +62,8 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
 
         <div className="flex items-center gap-1">
           {/* Quick Status Toggle */}
-          <button
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             onClick={(e) => {
               e.stopPropagation()
               toggleTaskStatus(task.id)
@@ -74,8 +75,14 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
             }`}
             title={isDone ? 'Mark as incomplete' : 'Mark as complete'}
           >
-            <CheckCircle2 className="h-3.5 w-3.5" />
-          </button>
+            <motion.div
+              initial={false}
+              animate={{ scale: isDone ? [1, 1.25, 1] : 1 }}
+              transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+            >
+              <CheckCircle2 className="h-3.5 w-3.5" />
+            </motion.div>
+          </motion.button>
 
           {/* Edit Task Modal Trigger */}
           <button

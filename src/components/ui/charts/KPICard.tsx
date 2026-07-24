@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { LucideIcon } from 'lucide-react'
+import { NumberTicker } from '@/components/ui/NumberTicker'
 
 interface KPICardProps {
   eyebrow: string
@@ -40,7 +41,7 @@ export function KPICard({
 
         <div className="flex items-baseline justify-between gap-2 mt-1">
           <span className="font-mono font-extrabold text-2xl text-[var(--text-primary)] tracking-tight">
-            {value}
+            {typeof value === 'number' ? <NumberTicker value={value} /> : value}
           </span>
 
           {trend && (

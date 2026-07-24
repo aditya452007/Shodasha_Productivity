@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Task, useTaskStore } from '@/stores/taskStore'
 import { useHabitStore } from '@/stores/habitStore'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { X, Trash2, Calendar, Tag, Link2, AlignLeft, CheckSquare } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -25,6 +26,7 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
   const [tagsInput, setTagsInput] = useState('')
   const [linkedHabitId, setLinkedHabitId] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const shouldReduceMotion = useReducedMotion()
 
   useEffect(() => {
     if (task) {
@@ -37,7 +39,7 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
     }
   }, [task])
 
-  if (!isOpen || !task) return null
+  if (!task) return null
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -77,24 +79,40 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-xl transition-all">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
-          <div className="flex items-center gap-2">
-            <CheckSquare className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
-              Task Details
-            </h2>
-          </div>
-          <button
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
             onClick={onClose}
-            aria-label="Close modal"
-            className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--bg-surface-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs"
+          />
+          <motion.div
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
+            transition={{ duration: 0.42, ease: [0.23, 1, 0.32, 1] }}
+            className="relative w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-xl z-10"
           >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
+              <div className="flex items-center gap-2">
+                <CheckSquare className="h-5 w-5 text-[var(--accent)]" />
+                <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
+                  Task Details
+                </h2>
+              </div>
+              <button
+                onClick={onClose}
+                aria-label="Close modal"
+                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--bg-surface-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
 
         {/* Form Body */}
         <form onSubmit={handleSave} className="flex flex-col gap-4 mt-4">
@@ -220,7 +238,9 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
             </div>
           </div>
         </form>
-      </div>
+      </motion.div>
     </div>
+  )}
+</AnimatePresence>
   )
 }

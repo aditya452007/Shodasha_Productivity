@@ -17,6 +17,8 @@ import { useTaskStore } from '@/stores/taskStore'
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { ErrorBanner } from '@/components/ui/ErrorBanner'
 
+import { useReducedMotion } from 'framer-motion'
+
 interface HabitCalendarProps {
   onOpenAddModal: () => void
   onOpenEditModal: (habit: Habit) => void
@@ -30,6 +32,7 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
   const isLoading = useHabitStore((s) => s.isLoading)
   const error = useHabitStore((s) => s.error)
   const tasks = useTaskStore((s) => s.tasks)
+  const shouldReduceMotion = useReducedMotion()
 
   const [currentDate, setCurrentDate] = useState(() => new Date())
 
@@ -187,7 +190,7 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                   </td>
                 </tr>
               ) : (
-                habits.map((habit) => {
+                habits.map((habit, habitIndex) => {
                   const linkedTask = tasks.find((t) => t.id === habit.linkedTaskId)
 
                   // Compute monthly completion rate for this habit
@@ -200,9 +203,14 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                     <motion.tr
                       key={habit.id}
                       layout
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
+                      initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
+                      animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
+                      transition={{
+                        duration: 0.3,
+                        ease: [0.23, 1, 0.32, 1],
+                        delay: shouldReduceMotion ? 0 : Math.min(habitIndex * 0.05, 0.3),
+                      }}
                       className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)]/20 transition-colors group"
                     >
                       {/* Habit Name & Metadata Column */}

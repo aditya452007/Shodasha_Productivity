@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { X, Sparkles, Link as LinkIcon, Check } from 'lucide-react'
 import { useHabitStore, Habit } from '@/stores/habitStore'
 import { useTaskStore } from '@/stores/taskStore'
@@ -28,6 +28,7 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
   const addHabit = useHabitStore((s) => s.addHabit)
   const updateHabit = useHabitStore((s) => s.updateHabit)
   const tasks = useTaskStore((s) => s.tasks)
+  const shouldReduceMotion = useReducedMotion()
 
   const [name, setName] = useState('')
   const [color, setColor] = useState('#059669')
@@ -80,16 +81,17 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
             onClick={onClose}
             className="fixed inset-0 bg-black/50 backdrop-blur-xs"
           />
 
           {/* Modal Card */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 15 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 15 }}
-            transition={{ type: 'spring', duration: 0.3, bounce: 0.2 }}
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
+            transition={{ duration: 0.42, ease: [0.23, 1, 0.32, 1] }}
             className="relative w-full max-w-md rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-2xl z-10"
           >
             {/* Header */}

@@ -192,33 +192,33 @@ Generated: 2026-07-24 | Type: EXHAUSTIVE — every change that must happen
 ## 4. Animations (Trigger, Duration, Easing, Reduced-Motion Fallback)
 
 ### Micro-interactions
-- [ ] Button press: `scale(0.97)` on `:active`, 120ms `--ease-out`, reduced-motion: skip
-- [ ] Button hover: background shift or `translateY(-1px)`, 200ms `--ease-out`, reduced-motion: skip
-- [ ] Focus ring: 2px accent, 3px offset, instant (no animation), reduced-motion: N/A
-- [ ] Tooltip appear: 800ms delay, 150ms fade-in `--ease-out`, reduced-motion: 0ms delay, skip fade
-- [ ] Toggle switch: 220ms `--ease-out` on thumb position, reduced-motion: skip spring, use instant
+- [x] Button press: `scale(0.97)` on `:active`, 120ms `--ease-out`, reduced-motion: skip
+- [x] Button hover: background shift or `translateY(-1px)`, 200ms `--ease-out`, reduced-motion: skip
+- [x] Focus ring: 2px accent, 3px offset, instant (no animation), reduced-motion: N/A
+- [x] Tooltip appear: 800ms delay, 150ms fade-in `--ease-out`, reduced-motion: 0ms delay, skip fade
+- [x] Toggle switch: 220ms `--ease-out` on thumb position, reduced-motion: skip spring, use instant
 
 ### Entry Animations
-- [ ] Modal/drawer: 420ms `--ease-out`, opacity 0→1 + translateY(8px)→0, reduced-motion: opacity only
-- [ ] Page tab switch: 250ms `--ease-in-out` crossfade, reduced-motion: 0ms
-- [ ] Stagger list entries: 300ms per item, `--ease-out`, 50ms stagger delay, reduced-motion: all at once
-- [ ] Number ticker (stat counters): 400ms `--ease-out` count-up, reduced-motion: show final value
+- [x] Modal/drawer: 420ms `--ease-out`, opacity 0→1 + translateY(8px)→0, reduced-motion: opacity only
+- [x] Page tab switch: 250ms `--ease-in-out` crossfade, reduced-motion: 0ms
+- [x] Stagger list entries: 300ms per item, `--ease-out`, 50ms stagger delay, reduced-motion: all at once
+- [x] Number ticker (stat counters): 400ms `--ease-out` count-up, reduced-motion: show final value
 
 ### Feedback Animations
-- [ ] Task/habit completion: 200ms spring check animation, reduced-motion: instant state change
-- [ ] Toast enter: 400ms slide-in `--ease-out`, reduced-motion: instant appear
-- [ ] Toast exit: 300ms slide-out `--ease-in`, reduced-motion: instant disappear
-- [ ] Skeleton pulse: CSS animation, 150ms, reduced-motion: static placeholder
-- [ ] Progress ring fill: 600ms `--ease-out` stroke-dasharray, reduced-motion: instant fill
+- [x] Task/habit completion: 200ms spring check animation, reduced-motion: instant state change
+- [x] Toast enter: 400ms slide-in `--ease-out`, reduced-motion: instant appear
+- [x] Toast exit: 300ms slide-out `--ease-in`, reduced-motion: instant disappear
+- [x] Skeleton pulse: CSS animation, 150ms, reduced-motion: static placeholder
+- [x] Progress ring fill: 600ms `--ease-out` stroke-dasharray, reduced-motion: instant fill
 
 ### What NOT to animate
-- [ ] No keyboard-initiated action animations
-- [ ] No page-load orchestrated sequences
-- [ ] No `scale(0)` on any element (start from `scale(0.95)`)
-- [ ] No `width`/`height`/`top`/`left`/`margin`/`padding` animations
-- [ ] No `transition: all`
-- [ ] No infinite loops (except functional loaders)
-- [ ] No bounce/elastic on UI elements
+- [x] No keyboard-initiated action animations
+- [x] No page-load orchestrated sequences
+- [x] No `scale(0)` on any element (start from `scale(0.95)`)
+- [x] No `width`/`height`/`top`/`left`/`margin`/`padding` animations
+- [x] No `transition: all`
+- [x] No infinite loops (except functional loaders)
+- [x] No bounce/elastic on UI elements
 
 ---
 

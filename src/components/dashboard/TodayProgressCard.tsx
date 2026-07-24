@@ -9,6 +9,7 @@ import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorBanner } from '@/components/ui/ErrorBanner'
 import { ProgressRing } from '@/components/ui/ProgressRing'
+import { NumberTicker } from '@/components/ui/NumberTicker'
 
 export function TodayProgressCard() {
   const tasks = useTaskStore((state) => state.tasks)
@@ -131,8 +132,8 @@ export function TodayProgressCard() {
                 Active Focus Time
               </span>
               <div className="flex items-baseline gap-1 font-mono text-2xl font-bold text-[var(--text-primary)]">
-                <span>{focusHours}h</span>
-                <span className="text-lg text-[var(--text-secondary)]">{focusMins}m</span>
+                <span><NumberTicker value={focusHours} />h</span>
+                <span className="text-lg text-[var(--text-secondary)]"><NumberTicker value={focusMins} />m</span>
               </div>
             </div>
           </div>
@@ -147,7 +148,7 @@ export function TodayProgressCard() {
             <span className="text-xs font-medium text-[var(--text-muted)]">Tasks Completed</span>
             <div className="flex items-baseline gap-2">
               <span className="font-mono text-xl font-bold text-[var(--text-primary)]">
-                {completedTasks} / {totalTasks}
+                <NumberTicker value={completedTasks} /> / {totalTasks}
               </span>
             </div>
           </div>
@@ -159,7 +160,7 @@ export function TodayProgressCard() {
           <div className="flex flex-col gap-1">
             <span className="text-xs font-medium text-[var(--text-muted)]">Habits Checked</span>
             <span className="font-mono text-xl font-bold text-[var(--text-primary)]">
-              {completedHabits} / {totalHabits}
+              <NumberTicker value={completedHabits} /> / {totalHabits}
             </span>
           </div>
           <ProgressRing value={habitProgress} size={44} strokeWidth={4} />
@@ -170,7 +171,7 @@ export function TodayProgressCard() {
           <div className="flex flex-col gap-1">
             <span className="text-xs font-medium text-[var(--text-muted)]">Daily Streak</span>
             <span className="font-mono text-2xl font-bold text-amber-600 dark:text-amber-400">
-              {streak} {streak === 1 ? 'Day' : 'Days'}
+              <NumberTicker value={streak} /> {streak === 1 ? 'Day' : 'Days'}
             </span>
           </div>
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400">
