@@ -4,15 +4,18 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-**Phase 5 — Verify: Desktop Shell & Background Window Tracking Integration Completed & Verified**
-
-All 5 core frontend features + Tauri v2 desktop shell + Win32 background window tracking poller (`tracker.exe`) + local SQLite database (`%APPDATA%/Shodasha/data.db` in WAL mode) implemented, integrated, verified, and shippable.
+**Phase 0 — Foundation Fixes (Incremental Execution)**
 
 ## Current Goal
 
-Fully functional native desktop application with passive activity tracking, offline SQLite persistence, frameless window controls, and system tray integration with 0 compilation or typecheck errors!
+Execute Shodasha redesign incrementally in strictly controlled, verifiable phases.
 
 ## Completed
+
+- [x] Defined 8 missing CSS variables in `src/app/globals.css` (`--bg-primary`, `--bg-secondary`, `--bg-tertiary`, `--bg-surface-elevated`, `--text-tertiary`, `--border-subtle`, `--border-default`, `--accent-emerald`)
+- [x] Configured font loading via `next/font/google` (`Geist`, `Inter`, `JetBrains_Mono`) in `src/app/layout.tsx` and updated CSS variable font mappings
+- [x] Installed `sonner` package and added `<Toaster position="bottom-right" richColors />` to `src/app/layout.tsx`
+- [x] Verified full build (`npm run typecheck` and `npm run build` pass cleanly)
 
 - [x] PRODUCT.md written (product definition, capabilities, principles)
 - [x] Shape brief written and updated (top tabs, habits, premium libs, dark mode)
