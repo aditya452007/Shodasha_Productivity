@@ -4,12 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Release version (e.g. v0.1.0)'
-        required: true
-        default: 'v0.1.0'
 
 permissions:
   contents: write
@@ -22,11 +16,102 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup Node.js 20
+      - name: Generate Release Body
+        id: body
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}"
+          $lastTag = git describe --tags --abbrev=0 HEAD~1 2>$null
+          if (-not $lastTag) {
+            $tags = git tag --sort=-creatordate
+            if ($tags.Count -gt 1) { $lastTag = $tags[1] }
+          }
+          if (-not $lastTag -or $lastTag -eq $version) { $lastTag = $null }
+
+          $commits = @()
+          if ($lastTag) {
+            $raw = git log "$lastTag..HEAD" --oneline --no-decorate
+            foreach ($line in $raw) {
+              if ($line -match '^(\w+)\s(.+)$') {
+                $hash = $matches[1].Substring(0,7)
+                $msg = $matches[2]
+                $commits += "- $msg ($hash)"
+              }
+            }
+            $compareUrl = "https://github.com/${{ github.repository }}/compare/$lastTag...$version"
+          } else {
+            $raw = git log --oneline --no-decorate
+            foreach ($line in $raw) {
+              if ($line -match '^(\w+)\s(.+)$') {
+                $hash = $matches[1].Substring(0,7)
+                $msg = $matches[2]
+                $commits += "- $msg ($hash)"
+              }
+            }
+            $compareUrl = "https://github.com/${{ github.repository }}/commits/$version"
+          }
+
+          $commitStr = if ($commits.Count -gt 0) { $commits -join "`n" } else { "- No significant changes" }
+
+          $body = @"
+# Shodasha Productivity Engine $version
+
+Shodasha is a local-first, privacy-focused desktop productivity tracker built with **Tauri v2**, **Next.js 16**, **React 19**, **Rust**, and **SQLite**. It fuses passive Windows activity tracking, habit tracking, and kanban task management into a single, beautiful desktop app.
+
+---
+
+## ✨ Key Features
+
+- **Kanban Board** — Drag-and-drop task management with customizable columns and desktop time-tracking
+- **Habit Tracking** — Daily check-ins with calendar heatmaps, streak tracking, and milestone badges
+- **Passive Time Tracking** — Automatically tracks foreground windows via background Rust service (no manual timers)
+- **Interactive Dashboard** — Real-time focus score (0-100), time distribution charts, progress rings, recent activity
+- **Timeline Analytics** — Daily timeline view, weekly charts, app usage breakdown, date range comparison
+- **Focus Target Engine** — Set daily focus goals with real-time progress tracking
+- **Background Tray** — Minimizes to system tray on close with near-zero CPU overhead and auto-start support
+- **Notifications** — Dual-channel in-app toasts paired with native OS alerts
+- **Warm Dark Theme** — Eye-strain-reduced linen and espresso palette with multiple contrast options
+- **100% Offline** — Zero data leaves your machine. No accounts, no cloud, no telemetry
+
+---
+
+## 📥 Installation (Windows)
+
+1. Download the attached **.msi** installer below
+2. Run the installer to set up **Shodasha**
+3. Launch the app — it will sit in your system tray and passively track your focus time
+
+> **System Requirements:** Windows 10 or later, 64-bit
+
+---
+
+## 🔒 Privacy Guarantee
+
+100% offline. All activity data, tasks, and habits are stored exclusively in a local SQLite database on your machine. Shodasha never phones home.
+
+---
+
+## 🧾 Changelog
+
+$commitStr
+
+---
+
+$compareUrl
+"@
+
+          $body = $body -replace '%', '%25'
+          $body = $body -replace "`n", '%0A'
+          $body = $body -replace "`r", '%0D'
+          echo "body=$body" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install Rust Toolchain (MSVC)
@@ -51,7 +136,7 @@ jobs:
       - name: Run TypeScript Typecheck
         run: npm run typecheck
 
-      - name: Build Next.js 16 Frontend
+      - name: Build Next.js Frontend
         run: npm run build
 
       - name: Build Background Tracker Binary (tracker.exe)
@@ -68,35 +153,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: 'Shodasha Desktop Productivity App ${{ github.ref_name }}'
-          releaseBody: |
-            # 🚀 Shodasha Productivity Engine — ${{ github.ref_name }}
-            
-            Shodasha is a local-first, privacy-focused desktop productivity tracker built with **Tauri v2**, **Next.js 16**, **React 19**, **Rust**, and **SQLite**.
-
-            ---
-
-            ## ✨ Key Features in this Release
-            - 🎯 **Daily Focus Target Engine**: Set custom daily targets (e.g., 6.0h/day) with progress rings.
-            - 📊 **Productivity Index (0-100 Focus Score)**: Real-time weighted efficiency analysis (Deep Work vs Distraction).
-            - 📈 **Interactive Chart Cross-Filtering**: Click any day in the usage bar chart to filter active periods and app rankings.
-            - 🔄 **Date Range Comparison Tool**: "This Week vs Last Week" overlay comparison delta stats.
-            - 🏆 **Habit Streaks & Focus Hour Milestones**: Earn badges for completed focus milestones.
-            - ⏱️ **Kanban Desktop Time-Tracking**: Task cards display total desktop time logged (`⏱️ 2h 45m logged`).
-            - 🔔 **Dual-Channel Web & Toast Notifications**: In-app toast alerts paired with native OS alerts.
-            - 🌙 **Warm Linen & Espresso Dark Theme**: Zero eye-strain color palettes with contrast dropdowns.
-            - ⚡ **Background Tray & Auto-Start**: Minimizes to system tray on close with zero background CPU overhead.
-
-            ---
-
-            ## 📥 Installation Instructions (Windows)
-            1. Download the attached `.msi` or `.exe` installer below.
-            2. Run the installer to set up **Shodasha**.
-            3. Launch the app — it will sit in your system tray and passively track your focus time offline.
-
-            ---
-
-            ## 🔒 Privacy Guarantee
-            100% Offline & On-Device. Your activity data never leaves your computer.
+          releaseName: Shodasha Desktop Productivity App ${{ github.ref_name }}
+          releaseBody: ${{ steps.body.outputs.body }}
           releaseDraft: false
           prerelease: false

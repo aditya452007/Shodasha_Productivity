@@ -174,7 +174,17 @@ Execute Shodasha redesign incrementally in strictly controlled, verifiable phase
   - `npm run build` (Next.js 16 production export passed with 0 errors)
   - `cargo check` (Rust backend dev profile passed with 0 errors)
 
-## Project Status: COMPLETE & READY FOR RELEASE 🚀
+### CI/CD & Release Pipeline Improvements
+- [x] Updated README.md with comprehensive project documentation (tech stack, features, installation, privacy)
+- [x] Fixed `release.yml` with auto-generated changelog from git commits between tags
+- [x] Added dynamic release body generation with formatted features list, installation instructions, and commit log
+- [x] Fixed Node.js version alignment across CI and release workflows (Node 22 LTS)
+- [x] Created `auto-release.yml` — auto-creates patch version tags on every push to main/master
+- [x] Auto-release workflow also supports manual `workflow_dispatch` with version input or patch/minor/major bump options
+- [x] Tag creation triggers `release.yml` which builds the full Tauri desktop app and publishes MSI installer to GitHub Releases
+- [x] Release pipeline now fetches full git history (`fetch-depth: 0`) for accurate changelog generation
+
+## Project Status: CI/CD AUTOMATED — RELEASES ON EVERY PUSH
 
 ## Open Questions
 
