@@ -4,6 +4,7 @@ import {
   fetchHabitsFromDb,
   fetchHabitRecordsFromDb,
   createHabitInDb,
+  updateHabitInDb,
   deleteHabitFromDb,
   toggleHabitRecordInDb,
 } from '@/lib/db'
@@ -116,12 +117,23 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       created_at: newHabit.createdAt,
     })
   },
-  updateHabit: (id, name, color, linkedTaskId) =>
+  updateHabit: (id, name, color, linkedTaskId) => {
     set((state) => ({
       habits: state.habits.map((h) =>
         h.id === id ? { ...h, name, color, linkedTaskId: linkedTaskId || undefined } : h
       ),
-    })),
+    }))
+    const updated = get().habits.find((h) => h.id === id)
+    if (updated) {
+      updateHabitInDb({
+        id: updated.id,
+        name: updated.name,
+        color: updated.color,
+        linked_task_id: updated.linkedTaskId || null,
+        created_at: updated.createdAt,
+      })
+    }
+  },
   deleteHabit: (id) => {
     set((state) => ({
       habits: state.habits.filter((h) => h.id !== id),

@@ -4,7 +4,9 @@ use crate::repositories::habit_repo::{self, HabitDb, HabitRecordDb};
 use crate::repositories::time_entry_repo::{self, TimeEntryDb};
 use crate::repositories::app_category_repo::{self, AppCategoryDb};
 use crate::repositories::kanban_repo::{self, KanbanColumnDb};
+use crate::repositories::settings_repo;
 use crate::services::export_service;
+use std::collections::HashMap;
 use tauri::command;
 use windows_sys::Win32::System::Registry::{
     RegCloseKey, RegCreateKeyW, RegDeleteValueW, RegSetValueExW, HKEY, HKEY_CURRENT_USER, REG_SZ,
@@ -57,6 +59,12 @@ pub fn get_habit_records() -> Result<Vec<HabitRecordDb>, String> {
 pub fn create_habit(habit: HabitDb) -> Result<(), String> {
     let conn = init_db().map_err(|e| e.to_string())?;
     habit_repo::create_habit(&conn, &habit).map_err(|e| e.to_string())
+}
+
+#[command]
+pub fn update_habit(habit: HabitDb) -> Result<(), String> {
+    let conn = init_db().map_err(|e| e.to_string())?;
+    habit_repo::update_habit(&conn, &habit).map_err(|e| e.to_string())
 }
 
 #[command]
@@ -114,9 +122,48 @@ pub fn create_kanban_column(col: KanbanColumnDb) -> Result<(), String> {
 }
 
 #[command]
+pub fn update_kanban_column(col: KanbanColumnDb) -> Result<(), String> {
+    let conn = init_db().map_err(|e| e.to_string())?;
+    kanban_repo::create_kanban_column(&conn, &col).map_err(|e| e.to_string())
+}
+
+#[command]
+pub fn reorder_kanban_columns(cols: Vec<KanbanColumnDb>) -> Result<(), String> {
+    let conn = init_db().map_err(|e| e.to_string())?;
+    kanban_repo::reorder_kanban_columns(&conn, &cols).map_err(|e| e.to_string())
+}
+
+#[command]
 pub fn delete_kanban_column(id: String) -> Result<(), String> {
     let conn = init_db().map_err(|e| e.to_string())?;
     kanban_repo::delete_kanban_column(&conn, &id).map_err(|e| e.to_string())
+}
+
+#[command]
+pub fn get_settings() -> Result<HashMap<String, String>, String> {
+    let conn = init_db().map_err(|e| e.to_string())?;
+    settings_repo::get_settings(&conn).map_err(|e| e.to_string())
+}
+
+#[command]
+pub fn save_settings(settings: HashMap<String, String>) -> Result<(), String> {
+    let conn = init_db().map_err(|e| e.to_string())?;
+    settings_repo::save_settings(&conn, &settings).map_err(|e| e.to_string())
+}
+
+#[command]
+pub fn clear_database() -> Result<(), String> {
+    let conn = init_db().map_err(|e| e.to_string())?;
+    conn.execute_batch(
+        "DELETE FROM tasks;
+         DELETE FROM habit_records;
+         DELETE FROM habits;
+         DELETE FROM time_entries;
+         DELETE FROM kanban_columns;
+         DELETE FROM app_categories;
+         DELETE FROM settings;"
+    ).map_err(|e| e.to_string())?;
+    Ok(())
 }
 
 #[command]

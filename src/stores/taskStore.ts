@@ -5,6 +5,11 @@ import {
   updateTaskInDb,
   deleteTaskFromDb,
   reorderTaskInDb,
+  fetchKanbanColumnsFromDb,
+  createKanbanColumnInDb,
+  updateKanbanColumnInDb,
+  deleteKanbanColumnFromDb,
+  reorderKanbanColumnsInDb,
 } from '@/lib/db'
 
 export interface Task {
@@ -66,6 +71,17 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     set({ isLoading: true, error: null })
     try {
       const dbTasks = await fetchTasksFromDb()
+      const dbColumns = await fetchKanbanColumnsFromDb()
+
+      if (dbColumns && Array.isArray(dbColumns) && dbColumns.length > 0) {
+        const mappedCols: KanbanColumn[] = dbColumns.map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          order: c.sort_order,
+        }))
+        set({ columns: mappedCols })
+      }
+
       if (dbTasks && Array.isArray(dbTasks)) {
         const mappedTasks: Task[] = dbTasks.map((t: any) => ({
           id: t.id,
@@ -197,37 +213,44 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     }))
     deleteTaskFromDb(id)
   },
-  addColumn: (name) =>
-    set((state) => {
-      const newCol: KanbanColumn = {
-        id: `col-${Date.now()}`,
-        name,
-        order: state.columns.length,
-      }
-      return { columns: [...state.columns, newCol] }
-    }),
-  renameColumn: (id, name) =>
+  addColumn: (name) => {
+    const newCol: KanbanColumn = {
+      id: `col-${Date.now()}`,
+      name,
+      order: get().columns.length,
+    }
+    set((state) => ({ columns: [...state.columns, newCol] }))
+    createKanbanColumnInDb({ id: newCol.id, name: newCol.name, sort_order: newCol.order })
+  },
+  renameColumn: (id, name) => {
     set((state) => ({
       columns: state.columns.map((col) => (col.id === id ? { ...col, name } : col)),
-    })),
-  deleteColumn: (id) =>
+    }))
+    const updated = get().columns.find((c) => c.id === id)
+    if (updated) {
+      updateKanbanColumnInDb({ id: updated.id, name: updated.name, sort_order: updated.order })
+    }
+  },
+  deleteColumn: (id) => {
     set((state) => ({
       columns: state.columns.filter((col) => col.id !== id),
       tasks: state.tasks.map((task) => (task.status === id ? { ...task, status: 'todo' } : task)),
-    })),
-  reorderColumns: (activeId, overId) =>
-    set((state) => {
-      const columns = [...state.columns]
-      const activeIndex = columns.findIndex((c) => c.id === activeId)
-      const overIndex = columns.findIndex((c) => c.id === overId)
+    }))
+    deleteKanbanColumnFromDb(id)
+  },
+  reorderColumns: (activeId, overId) => {
+    const columns = [...get().columns]
+    const activeIndex = columns.findIndex((c) => c.id === activeId)
+    const overIndex = columns.findIndex((c) => c.id === overId)
 
-      if (activeIndex !== -1 && overIndex !== -1) {
-        const [activeCol] = columns.splice(activeIndex, 1)
-        columns.splice(overIndex, 0, activeCol)
-        columns.forEach((col, index) => {
-          col.order = index
-        })
-      }
-      return { columns }
-    }),
+    if (activeIndex !== -1 && overIndex !== -1) {
+      const [activeCol] = columns.splice(activeIndex, 1)
+      columns.splice(overIndex, 0, activeCol)
+      columns.forEach((col, index) => {
+        col.order = index
+      })
+      set({ columns })
+      reorderKanbanColumnsInDb(columns.map((c) => ({ id: c.id, name: c.name, sort_order: c.order })))
+    }
+  },
 }))

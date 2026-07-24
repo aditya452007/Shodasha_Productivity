@@ -62,6 +62,14 @@ pub fn create_habit(conn: &Connection, habit: &HabitDb) -> Result<()> {
     Ok(())
 }
 
+pub fn update_habit(conn: &Connection, habit: &HabitDb) -> Result<()> {
+    conn.execute(
+        "UPDATE habits SET name = ?2, color = ?3, linked_task_id = ?4 WHERE id = ?1",
+        params![habit.id, habit.name, habit.color, habit.linked_task_id],
+    )?;
+    Ok(())
+}
+
 pub fn delete_habit(conn: &Connection, id: &str) -> Result<()> {
     conn.execute("DELETE FROM habits WHERE id = ?1", params![id])?;
     Ok(())

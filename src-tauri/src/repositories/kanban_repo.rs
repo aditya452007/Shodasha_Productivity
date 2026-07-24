@@ -37,3 +37,10 @@ pub fn delete_kanban_column(conn: &Connection, id: &str) -> Result<()> {
     conn.execute("DELETE FROM kanban_columns WHERE id = ?1", params![id])?;
     Ok(())
 }
+
+pub fn reorder_kanban_columns(conn: &Connection, cols: &[KanbanColumnDb]) -> Result<()> {
+    for col in cols {
+        create_kanban_column(conn, col)?;
+    }
+    Ok(())
+}

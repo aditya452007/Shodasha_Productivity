@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { AsyncState } from './taskStore'
-import { setAutoStartInDb } from '@/lib/db'
+import { setAutoStartInDb, fetchSettingsFromDb, saveSettingsToDb } from '@/lib/db'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 export type DataRetentionPeriod = '1_month' | '3_months' | '6_months' | 'indefinite'
@@ -14,6 +14,7 @@ interface SettingsState extends AsyncState {
   themeMode: ThemeMode
   accentColor: AccentColor
 
+  initializeSettings: () => Promise<void>
   setPollingInterval: (interval: number) => void
   setIdleDetectionEnabled: (enabled: boolean) => void
   setAutoStartEnabled: (enabled: boolean) => void
@@ -22,7 +23,18 @@ interface SettingsState extends AsyncState {
   setAccentColor: (color: AccentColor) => void
 }
 
-export const useSettingsStore = create<SettingsState>((set) => ({
+function persistAllSettings(state: Partial<SettingsState>) {
+  saveSettingsToDb({
+    pollingInterval: String(state.pollingInterval ?? 30),
+    idleDetectionEnabled: String(state.idleDetectionEnabled ?? true),
+    autoStartEnabled: String(state.autoStartEnabled ?? true),
+    dataRetentionPeriod: state.dataRetentionPeriod || '6_months',
+    themeMode: state.themeMode || 'dark',
+    accentColor: state.accentColor || '#059669',
+  })
+}
+
+export const useSettingsStore = create<SettingsState>((set, get) => ({
   pollingInterval: 30,
   idleDetectionEnabled: true,
   autoStartEnabled: true,
@@ -31,15 +43,67 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   accentColor: '#059669',
   isLoading: false,
   error: null,
-  isInitialized: true,
+  isInitialized: false,
 
-  setPollingInterval: (interval) => set({ pollingInterval: interval }),
-  setIdleDetectionEnabled: (enabled) => set({ idleDetectionEnabled: enabled }),
+  initializeSettings: async () => {
+    set({ isLoading: true, error: null })
+    try {
+      const dbSettings = await fetchSettingsFromDb()
+      if (dbSettings && Object.keys(dbSettings).length > 0) {
+        const pollingInterval = dbSettings.pollingInterval ? Number(dbSettings.pollingInterval) : get().pollingInterval
+        const idleDetectionEnabled = dbSettings.idleDetectionEnabled !== undefined ? dbSettings.idleDetectionEnabled === 'true' : get().idleDetectionEnabled
+        const autoStartEnabled = dbSettings.autoStartEnabled !== undefined ? dbSettings.autoStartEnabled === 'true' : get().autoStartEnabled
+        const dataRetentionPeriod = (dbSettings.dataRetentionPeriod as DataRetentionPeriod) || get().dataRetentionPeriod
+        const themeMode = (dbSettings.themeMode as ThemeMode) || get().themeMode
+        const accentColor = (dbSettings.accentColor as AccentColor) || get().accentColor
+
+        set({
+          pollingInterval,
+          idleDetectionEnabled,
+          autoStartEnabled,
+          dataRetentionPeriod,
+          themeMode,
+          accentColor,
+          isLoading: false,
+          isInitialized: true,
+        })
+
+        if (typeof document !== 'undefined') {
+          const isDark =
+            themeMode === 'dark' ||
+            (themeMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          if (isDark) {
+            document.documentElement.classList.add('dark')
+          } else {
+            document.documentElement.classList.remove('dark')
+          }
+          document.documentElement.style.setProperty('--accent', accentColor)
+        }
+      } else {
+        set({ isLoading: false, isInitialized: true })
+      }
+    } catch (err: any) {
+      set({ error: err?.message || 'Failed to load settings', isLoading: false, isInitialized: true })
+    }
+  },
+
+  setPollingInterval: (interval) => {
+    set({ pollingInterval: interval })
+    persistAllSettings(get())
+  },
+  setIdleDetectionEnabled: (enabled) => {
+    set({ idleDetectionEnabled: enabled })
+    persistAllSettings(get())
+  },
   setAutoStartEnabled: (enabled) => {
     set({ autoStartEnabled: enabled })
     setAutoStartInDb(enabled)
+    persistAllSettings(get())
   },
-  setDataRetentionPeriod: (period) => set({ dataRetentionPeriod: period }),
+  setDataRetentionPeriod: (period) => {
+    set({ dataRetentionPeriod: period })
+    persistAllSettings(get())
+  },
   setThemeMode: (mode) => {
     set({ themeMode: mode })
     if (typeof document !== 'undefined') {
@@ -52,11 +116,13 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         document.documentElement.classList.remove('dark')
       }
     }
+    persistAllSettings(get())
   },
   setAccentColor: (color) => {
     set({ accentColor: color })
     if (typeof document !== 'undefined') {
       document.documentElement.style.setProperty('--accent', color)
     }
+    persistAllSettings(get())
   },
 }))

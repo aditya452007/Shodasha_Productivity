@@ -26,14 +26,14 @@ Generated: 2026-07-24 | Type: EXHAUSTIVE — every change that must happen
 - [ ] Add confirmation dialog before allowing column deletion
 
 ### B4: "Clear Database" Doesn't Clear SQLite
-- [ ] Add `clear_database` IPC command to `commands.rs`
-- [ ] Add `clearDatabaseInDb()` wrapper in `db.ts`
-- [ ] Update `DataManagement.tsx:handleClearDatabase` to call IPC
-- [ ] Reset all Zustand stores to initial state after clear
-- [ ] Show Sonner success toast on completion
-- [ ] Show Sonner error toast on failure
-- [ ] Add double-confirmation dialog ("Are you sure? This cannot be undone.")
-- [ ] Verify data doesn't return on reload
+- [x] Add `clear_database` IPC command to `commands.rs`
+- [x] Add `clearDatabaseInDb()` wrapper in `db.ts`
+- [x] Update `DataManagement.tsx:handleClearDatabase` to call IPC
+- [x] Reset all Zustand stores to initial state after clear
+- [x] Show Sonner success toast on completion
+- [x] Show Sonner error toast on failure
+- [x] Add double-confirmation dialog ("Are you sure? This cannot be undone.")
+- [x] Verify data doesn't return on reload
 
 ### B5: Two Competing Theme Systems
 - [x] Remove `toggleTheme()` from `uiStore.ts`
@@ -50,33 +50,33 @@ Generated: 2026-07-24 | Type: EXHAUSTIVE — every change that must happen
 - [x] Verify fonts load in production build
 
 ### B7: Settings Lost on Restart (NEW)
-- [ ] Add `settings` table to SQLite schema in `db.rs`
-- [ ] Add `get_settings` IPC command in `commands.rs`
-- [ ] Add `save_settings` IPC command in `commands.rs`
-- [ ] Add wrapper functions in `db.ts`
-- [ ] Update `settingsStore.ts` to load from IPC on init
-- [ ] Update `settingsStore.ts` to persist on every change
-- [ ] Verify settings survive app restart
+- [x] Add `settings` table to SQLite schema in `db.rs`
+- [x] Add `get_settings` IPC command in `commands.rs`
+- [x] Add `save_settings` IPC command in `commands.rs`
+- [x] Add wrapper functions in `db.ts`
+- [x] Update `settingsStore.ts` to load from IPC on init
+- [x] Update `settingsStore.ts` to persist on every change
+- [x] Verify settings survive app restart
 
 ### B8: Habit Update Not Persisted (NEW)
-- [ ] Add `update_habit` command to `commands.rs`
-- [ ] Add `update_habit` to `habit_repo.rs`
-- [ ] Add `updateHabitInDb()` wrapper in `db.ts`
-- [ ] Wire `habitStore.updateHabit()` to call IPC
-- [ ] Verify habit name/color changes persist after reload
+- [x] Add `update_habit` command to `commands.rs`
+- [x] Add `update_habit` to `habit_repo.rs`
+- [x] Add `updateHabitInDb()` wrapper in `db.ts`
+- [x] Wire `habitStore.updateHabit()` to call IPC
+- [x] Verify habit name/color changes persist after reload
 
 ### B9: Kanban Columns Not Persisted (NEW)
-- [ ] Wire `taskStore.addColumn()` to call `create_kanban_column` IPC
-- [ ] Wire `taskStore.renameColumn()` to call new `update_kanban_column` IPC
-- [ ] Wire `taskStore.deleteColumn()` to call `delete_kanban_column` IPC
-- [ ] Wire `taskStore.reorderColumns()` to call new `reorder_kanban_column` IPC
-- [ ] Load columns from IPC on `taskStore.initializeTasks()`
-- [ ] Verify column state survives reload
+- [x] Wire `taskStore.addColumn()` to call `create_kanban_column` IPC
+- [x] Wire `taskStore.renameColumn()` to call new `update_kanban_column` IPC
+- [x] Wire `taskStore.deleteColumn()` to call `delete_kanban_column` IPC
+- [x] Wire `taskStore.reorderColumns()` to call new `reorder_kanban_column` IPC
+- [x] Load columns from IPC on `taskStore.initializeTasks()`
+- [x] Verify column state survives reload
 
 ### B10: No User-Visible IPC Error Handling (NEW)
-- [ ] Update all `db.ts` wrappers to show Sonner toast on error (not just console.error)
-- [ ] Differentiate error types: network vs DB vs permission
-- [ ] Add retry-state indicator on failed operations
+- [x] Update all `db.ts` wrappers to show Sonner toast on error (not just console.error)
+- [x] Differentiate error types: network vs DB vs permission
+- [x] Add retry-state indicator on failed operations
 
 ---
 

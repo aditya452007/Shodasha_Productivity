@@ -89,6 +89,11 @@ fn run_migrations(conn: &Connection) -> Result<()> {
             app_name TEXT NOT NULL UNIQUE,
             category TEXT NOT NULL,
             created_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
         );"
     )?;
 

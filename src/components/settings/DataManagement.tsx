@@ -7,6 +7,8 @@ import { useSettingsStore, DataRetentionPeriod } from '@/stores/settingsStore'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { useHabitStore } from '@/stores/habitStore'
 import { useTaskStore } from '@/stores/taskStore'
+import { clearDatabaseInDb } from '@/lib/db'
+import { toast } from 'sonner'
 
 export function DataManagement() {
   const { dataRetentionPeriod, setDataRetentionPeriod } = useSettingsStore()
@@ -57,15 +59,32 @@ export function DataManagement() {
     setTimeout(() => setExportSuccess(false), 3000)
   }
 
-  const handleClearDatabase = () => {
+  const handleClearDatabase = async () => {
     if (confirmStage === 1) {
       setConfirmStage(2)
       return
     }
-    // Execution stage 2: clear local storage & reload
-    if (typeof window !== 'undefined') {
-      localStorage.clear()
-      window.location.reload()
+    try {
+      await clearDatabaseInDb()
+      if (typeof window !== 'undefined') {
+        localStorage.clear()
+      }
+      useTaskStore.setState({
+        tasks: [],
+        columns: [
+          { id: 'todo', name: 'To Do', order: 0 },
+          { id: 'in_progress', name: 'In Progress', order: 1 },
+          { id: 'done', name: 'Done', order: 2 },
+        ],
+      })
+      useHabitStore.setState({ habits: [], records: {} })
+      useTimeEntryStore.setState({ entries: [] })
+
+      toast.success('Database cleared successfully.')
+      setIsConfirmOpen(false)
+      setConfirmStage(1)
+    } catch (err: any) {
+      toast.error('Failed to clear database: ' + (err?.message || String(err)))
     }
   }
 

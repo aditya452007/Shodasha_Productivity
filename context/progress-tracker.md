@@ -19,7 +19,12 @@ Execute Shodasha redesign incrementally in strictly controlled, verifiable phase
 - [x] Added `'use client'` directive to `TodayProgressCard.tsx` (B1)
 - [x] Fixed `deleteColumn` parameter bug in `taskStore.ts` (B3)
 - [x] Consolidated competing theme systems: migrated `Navbar.tsx` to `settingsStore` and purged duplicate theme state from `uiStore.ts` (B5)
-- [x] Verified full build (`npm run typecheck` and `npm run build` pass cleanly)
+- [x] Implemented `clear_database` IPC command in Rust, `clearDatabaseInDb()` wrapper, and wired `DataManagement.tsx` with Sonner toasts & store reset (B4)
+- [x] Implemented `settings` SQLite table, `get_settings`/`save_settings` Rust commands, `settings_repo`, and wired `settingsStore.ts` with auto-save & auto-load (B7)
+- [x] Implemented `update_habit` IPC command in Rust, `habit_repo.rs`, `db.ts`, and wired `habitStore.updateHabit()` (B8)
+- [x] Implemented Kanban columns SQLite persistence: `get_kanban_columns`, `create_kanban_column`, `update_kanban_column`, `delete_kanban_column`, `reorder_kanban_columns` in Rust & `db.ts`, and wired `taskStore` column actions (B9)
+- [x] Standardized user-visible IPC error notifications with Sonner toasts across `src/lib/db.ts` (B10)
+- [x] Verified full Rust (`cargo check`) and TypeScript (`npm run typecheck` & `npm run build`) compilation (0 errors)
 
 - [x] PRODUCT.md written (product definition, capabilities, principles)
 - [x] Shape brief written and updated (top tabs, habits, premium libs, dark mode)
