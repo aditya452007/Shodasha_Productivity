@@ -26,7 +26,13 @@ export interface KanbanColumn {
   order: number
 }
 
-interface TaskState {
+export interface AsyncState {
+  isLoading: boolean
+  error: string | null
+  isInitialized: boolean
+}
+
+interface TaskState extends AsyncState {
   tasks: Task[]
   columns: KanbanColumn[]
   initializeTasks: () => Promise<void>
@@ -53,22 +59,32 @@ const initialColumns: KanbanColumn[] = [
 export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: initialTasks,
   columns: initialColumns,
+  isLoading: false,
+  error: null,
+  isInitialized: false,
   initializeTasks: async () => {
-    const dbTasks = await fetchTasksFromDb()
-    if (dbTasks && Array.isArray(dbTasks)) {
-      const mappedTasks: Task[] = dbTasks.map((t: any) => ({
-        id: t.id,
-        title: t.title,
-        description: t.description || undefined,
-        status: t.status,
-        order: t.sort_order,
-        dueDate: t.due_date || undefined,
-        tags: t.tags ? JSON.parse(t.tags) : [],
-        linkedHabitId: t.linked_habit_id || undefined,
-        createdAt: t.created_at,
-        updatedAt: t.updated_at,
-      }))
-      set({ tasks: mappedTasks })
+    set({ isLoading: true, error: null })
+    try {
+      const dbTasks = await fetchTasksFromDb()
+      if (dbTasks && Array.isArray(dbTasks)) {
+        const mappedTasks: Task[] = dbTasks.map((t: any) => ({
+          id: t.id,
+          title: t.title,
+          description: t.description || undefined,
+          status: t.status,
+          order: t.sort_order,
+          dueDate: t.due_date || undefined,
+          tags: t.tags ? JSON.parse(t.tags) : [],
+          linkedHabitId: t.linked_habit_id || undefined,
+          createdAt: t.created_at,
+          updatedAt: t.updated_at,
+        }))
+        set({ tasks: mappedTasks, isLoading: false, isInitialized: true })
+      } else {
+        set({ isLoading: false, isInitialized: true })
+      }
+    } catch (err: any) {
+      set({ error: err?.message || 'Failed to initialize tasks', isLoading: false, isInitialized: true })
     }
   },
   addTask: (title, status = 'todo', description, tags, dueDate, linkedHabitId) => {
@@ -197,7 +213,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   deleteColumn: (id) =>
     set((state) => ({
       columns: state.columns.filter((col) => col.id !== id),
-      tasks: state.tasks.map((task) => (task.id === id ? { ...task, status: 'todo' } : task)),
+      tasks: state.tasks.map((task) => (task.status === id ? { ...task, status: 'todo' } : task)),
     })),
   reorderColumns: (activeId, overId) =>
     set((state) => {

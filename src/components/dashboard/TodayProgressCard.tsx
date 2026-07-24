@@ -1,3 +1,5 @@
+'use client'
+
 import { useMemo } from 'react'
 import { useTaskStore } from '@/stores/taskStore'
 import { useHabitStore } from '@/stores/habitStore'

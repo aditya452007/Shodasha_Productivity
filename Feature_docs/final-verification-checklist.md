@@ -7,8 +7,8 @@ Generated: 2026-07-24 | Type: EXHAUSTIVE — every change that must happen
 ## 1. All P0 Bugs (Fix Steps)
 
 ### B1: Missing `'use client'` in TodayProgressCard
-- [ ] Add `"use client"` directive at top of `src/components/dashboard/TodayProgressCard.tsx`
-- [ ] Verify build passes (`next build`)
+- [x] Add `"use client"` directive at top of `src/components/dashboard/TodayProgressCard.tsx`
+- [x] Verify build passes (`next build`)
 
 ### B2: 8 Undefined CSS Variables
 - [x] Add `--border-subtle` to `:root` and `.dark` in `globals.css`
@@ -21,8 +21,8 @@ Generated: 2026-07-24 | Type: EXHAUSTIVE — every change that must happen
 - [x] Add `--bg-surface-elevated` to `:root` and `.dark`
 
 ### B3: deleteColumn Parameter Bug
-- [ ] Fix `taskStore.ts:200`: change `task.id === id` to `task.status === id`
-- [ ] Verify tasks migrate to 'todo' column on column deletion
+- [x] Fix `taskStore.ts:200`: change `task.id === id` to `task.status === id`
+- [x] Verify tasks migrate to 'todo' column on column deletion
 - [ ] Add confirmation dialog before allowing column deletion
 
 ### B4: "Clear Database" Doesn't Clear SQLite
@@ -36,11 +36,11 @@ Generated: 2026-07-24 | Type: EXHAUSTIVE — every change that must happen
 - [ ] Verify data doesn't return on reload
 
 ### B5: Two Competing Theme Systems
-- [ ] Remove `toggleTheme()` from `uiStore.ts`
-- [ ] Remove `setTheme()` from `uiStore.ts`
-- [ ] Update Navbar to use `settingsStore.setThemeMode()` instead of `uiStore.toggleTheme()`
-- [ ] Delete `uiStore.ts` or reduce to non-theme state (activeTab, isTracking)
-- [ ] Verify theme toggle works from both Navbar and Settings
+- [x] Remove `toggleTheme()` from `uiStore.ts`
+- [x] Remove `setTheme()` from `uiStore.ts`
+- [x] Update Navbar to use `settingsStore.setThemeMode()` instead of `uiStore.toggleTheme()`
+- [x] Delete `uiStore.ts` or reduce to non-theme state (activeTab, isTracking)
+- [x] Verify theme toggle works from both Navbar and Settings
 
 ### B6: Font Files Not Loaded via next/font
 - [x] Add `@next/font/google` import for Geist (or Inter + Cabinet Grotesk)

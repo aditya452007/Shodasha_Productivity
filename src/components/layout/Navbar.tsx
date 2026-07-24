@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useUIStore } from '@/stores/uiStore'
+import { useSettingsStore } from '@/stores/settingsStore'
 import { isTauri } from '@/lib/db'
 import GooeyTabs from '@/components/ui/gooey-tabs'
 import {
@@ -30,7 +31,13 @@ const navItems = [
 export function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
-  const { theme, toggleTheme, isTracking } = useUIStore()
+  const isTracking = useUIStore((state) => state.isTracking)
+  const themeMode = useSettingsStore((state) => state.themeMode)
+  const setThemeMode = useSettingsStore((state) => state.setThemeMode)
+
+  const toggleTheme = () => {
+    setThemeMode(themeMode === 'dark' ? 'light' : 'dark')
+  }
 
   const activeIndex = navItems.findIndex((item) => item.href === pathname)
   const currentActiveIndex = activeIndex >= 0 ? activeIndex : 0
@@ -138,7 +145,7 @@ export function Navbar() {
             aria-label="Toggle theme"
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)] shadow-xs"
           >
-            {theme === 'dark' ? <Sun className="h-3.5 w-3.5 text-amber-400" /> : <Moon className="h-3.5 w-3.5" />}
+            {themeMode === 'dark' ? <Sun className="h-3.5 w-3.5 text-amber-400" /> : <Moon className="h-3.5 w-3.5" />}
           </button>
 
           {/* Native Window Controls (Minimize, Maximize, Close to Tray) */}

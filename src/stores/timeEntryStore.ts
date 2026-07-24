@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { AsyncState } from './taskStore'
 import {
   fetchTimeEntriesFromDb,
   fetchTimeEntriesRangeFromDb,
@@ -53,7 +54,7 @@ export interface TimeKPIs {
   topAppDurationSeconds: number
 }
 
-interface TimeEntryState {
+interface TimeEntryState extends AsyncState {
   entries: TimeEntry[]
   categories: Record<string, CategoryType>
   selectedTimeframe: TimeframeFilter
@@ -109,33 +110,42 @@ export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
   searchQuery: '',
   widgetOrder: initialWidgetOrder,
   isRefreshing: false,
+  isLoading: false,
+  error: null,
+  isInitialized: false,
 
   initializeTimeEntries: async (targetDateStr?: string) => {
-    const dateStr = targetDateStr || get().selectedDate || new Date().toISOString().split('T')[0]
-    const dbEntries = await fetchTimeEntriesFromDb(dateStr)
-    const dbCategories = await fetchAppCategoriesFromDb()
+    set({ isLoading: true, error: null })
+    try {
+      const dateStr = targetDateStr || get().selectedDate || new Date().toISOString().split('T')[0]
+      const dbEntries = await fetchTimeEntriesFromDb(dateStr)
+      const dbCategories = await fetchAppCategoriesFromDb()
 
-    if (dbEntries && Array.isArray(dbEntries)) {
-      const mappedEntries: TimeEntry[] = dbEntries.map((e: any) => ({
-        id: e.id,
-        appName: e.app_name,
-        windowTitle: e.window_title,
-        startTime: e.start_time,
-        endTime: e.end_time || undefined,
-        endReason: (e.end_reason as any) || null,
-        durationSeconds: e.duration_seconds || undefined,
-        linkedTaskId: e.linked_task_id || undefined,
-        createdAt: e.created_at,
-      }))
-      set({ entries: mappedEntries, selectedDate: dateStr })
-    }
+      if (dbEntries && Array.isArray(dbEntries)) {
+        const mappedEntries: TimeEntry[] = dbEntries.map((e: any) => ({
+          id: e.id,
+          appName: e.app_name,
+          windowTitle: e.window_title,
+          startTime: e.start_time,
+          endTime: e.end_time || undefined,
+          endReason: (e.end_reason as any) || null,
+          durationSeconds: e.duration_seconds || undefined,
+          linkedTaskId: e.linked_task_id || undefined,
+          createdAt: e.created_at,
+        }))
+        set({ entries: mappedEntries, selectedDate: dateStr })
+      }
 
-    if (dbCategories && Array.isArray(dbCategories) && dbCategories.length > 0) {
-      const catMap: Record<string, CategoryType> = { ...get().categories }
-      dbCategories.forEach((c: any) => {
-        catMap[c.app_name] = c.category as CategoryType
-      })
-      set({ categories: catMap })
+      if (dbCategories && Array.isArray(dbCategories) && dbCategories.length > 0) {
+        const catMap: Record<string, CategoryType> = { ...get().categories }
+        dbCategories.forEach((c: any) => {
+          catMap[c.app_name] = c.category as CategoryType
+        })
+        set({ categories: catMap })
+      }
+      set({ isLoading: false, isInitialized: true })
+    } catch (err: any) {
+      set({ error: err?.message || 'Failed to initialize time entries', isLoading: false, isInitialized: true })
     }
   },
 

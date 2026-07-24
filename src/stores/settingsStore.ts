@@ -1,11 +1,12 @@
 import { create } from 'zustand'
+import { AsyncState } from './taskStore'
 import { setAutoStartInDb } from '@/lib/db'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 export type DataRetentionPeriod = '1_month' | '3_months' | '6_months' | 'indefinite'
 export type AccentColor = '#059669' | '#7c3aed' | '#d97706' | '#e11d48'
 
-interface SettingsState {
+interface SettingsState extends AsyncState {
   pollingInterval: number // in seconds (5 - 60)
   idleDetectionEnabled: boolean
   autoStartEnabled: boolean
@@ -28,6 +29,9 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   dataRetentionPeriod: '6_months',
   themeMode: 'dark',
   accentColor: '#059669',
+  isLoading: false,
+  error: null,
+  isInitialized: true,
 
   setPollingInterval: (interval) => set({ pollingInterval: interval }),
   setIdleDetectionEnabled: (enabled) => set({ idleDetectionEnabled: enabled }),

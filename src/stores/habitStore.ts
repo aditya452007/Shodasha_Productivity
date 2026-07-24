@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { useTaskStore } from './taskStore'
+import { useTaskStore, AsyncState } from './taskStore'
 import {
   fetchHabitsFromDb,
   fetchHabitRecordsFromDb,
@@ -23,7 +23,7 @@ export interface HabitRecord {
   done: boolean
 }
 
-interface HabitState {
+interface HabitState extends AsyncState {
   habits: Habit[]
   records: Record<string, boolean> // key: `${habitId}_${date}` -> boolean
   initializeHabits: () => Promise<void>
@@ -42,29 +42,38 @@ const initialHabits: Habit[] = []
 export const useHabitStore = create<HabitState>((set, get) => ({
   habits: initialHabits,
   records: generateInitialRecords(),
+  isLoading: false,
+  error: null,
+  isInitialized: false,
   initializeHabits: async () => {
-    const dbHabits = await fetchHabitsFromDb()
-    const dbRecords = await fetchHabitRecordsFromDb()
+    set({ isLoading: true, error: null })
+    try {
+      const dbHabits = await fetchHabitsFromDb()
+      const dbRecords = await fetchHabitRecordsFromDb()
 
-    if (dbHabits && Array.isArray(dbHabits)) {
-      const mappedHabits: Habit[] = dbHabits.map((h: any) => ({
-        id: h.id,
-        name: h.name,
-        color: h.color,
-        linkedTaskId: h.linked_task_id || undefined,
-        createdAt: h.created_at,
-      }))
-      set({ habits: mappedHabits })
-    }
+      if (dbHabits && Array.isArray(dbHabits)) {
+        const mappedHabits: Habit[] = dbHabits.map((h: any) => ({
+          id: h.id,
+          name: h.name,
+          color: h.color,
+          linkedTaskId: h.linked_task_id || undefined,
+          createdAt: h.created_at,
+        }))
+        set({ habits: mappedHabits })
+      }
 
-    if (dbRecords && Array.isArray(dbRecords)) {
-      const recMap: Record<string, boolean> = {}
-      dbRecords.forEach((r: any) => {
-        if (r.done) {
-          recMap[`${r.habit_id}_${r.date}`] = true
-        }
-      })
-      set({ records: recMap })
+      if (dbRecords && Array.isArray(dbRecords)) {
+        const recMap: Record<string, boolean> = {}
+        dbRecords.forEach((r: any) => {
+          if (r.done) {
+            recMap[`${r.habit_id}_${r.date}`] = true
+          }
+        })
+        set({ records: recMap })
+      }
+      set({ isLoading: false, isInitialized: true })
+    } catch (err: any) {
+      set({ error: err?.message || 'Failed to initialize habits', isLoading: false, isInitialized: true })
     }
   },
   toggleHabit: (habitId, date) => {
