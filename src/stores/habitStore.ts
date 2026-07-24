@@ -1,5 +1,12 @@
 import { create } from 'zustand'
 import { useTaskStore } from './taskStore'
+import {
+  fetchHabitsFromDb,
+  fetchHabitRecordsFromDb,
+  createHabitInDb,
+  deleteHabitFromDb,
+  toggleHabitRecordInDb,
+} from '@/lib/db'
 
 export interface Habit {
   id: string
@@ -19,56 +26,47 @@ export interface HabitRecord {
 interface HabitState {
   habits: Habit[]
   records: Record<string, boolean> // key: `${habitId}_${date}` -> boolean
+  initializeHabits: () => Promise<void>
   toggleHabit: (habitId: string, date: string) => void
   addHabit: (name: string, color?: string, linkedTaskId?: string) => void
   updateHabit: (id: string, name: string, color: string, linkedTaskId?: string) => void
   deleteHabit: (id: string) => void
 }
 
-// Generate realistic mock records for the past 90 days for initial rich heatmap visualization
 function generateInitialRecords(): Record<string, boolean> {
-  const records: Record<string, boolean> = {}
-  const today = new Date()
-  
-  for (let i = 0; i < 90; i++) {
-    const d = new Date(today)
-    d.setDate(today.getDate() - i)
-    const dateStr = d.toISOString().split('T')[0]
-    
-    // Simulate high consistency for h-1, moderate for h-2 and h-3
-    if ((i * 3 + 1) % 4 !== 0) records[`h-1_${dateStr}`] = true
-    if (i % 2 === 0) records[`h-2_${dateStr}`] = true
-    if (i % 3 !== 0) records[`h-3_${dateStr}`] = true
-  }
-  
-  return records
+  return {}
 }
 
-const initialHabits: Habit[] = [
-  {
-    id: 'h-1',
-    name: 'Morning Deep Work',
-    color: '#059669', // Emerald
-    linkedTaskId: 't-3',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'h-2',
-    name: '2L Water Intake',
-    color: '#7c3aed', // Violet
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'h-3',
-    name: 'Read Tech Article / Book (20m)',
-    color: '#d97706', // Amber
-    createdAt: new Date().toISOString(),
-  },
-]
+const initialHabits: Habit[] = []
 
 export const useHabitStore = create<HabitState>((set, get) => ({
   habits: initialHabits,
   records: generateInitialRecords(),
+  initializeHabits: async () => {
+    const dbHabits = await fetchHabitsFromDb()
+    const dbRecords = await fetchHabitRecordsFromDb()
+
+    if (dbHabits && Array.isArray(dbHabits)) {
+      const mappedHabits: Habit[] = dbHabits.map((h: any) => ({
+        id: h.id,
+        name: h.name,
+        color: h.color,
+        linkedTaskId: h.linked_task_id || undefined,
+        createdAt: h.created_at,
+      }))
+      set({ habits: mappedHabits })
+    }
+
+    if (dbRecords && Array.isArray(dbRecords)) {
+      const recMap: Record<string, boolean> = {}
+      dbRecords.forEach((r: any) => {
+        if (r.done) {
+          recMap[`${r.habit_id}_${r.date}`] = true
+        }
+      })
+      set({ records: recMap })
+    }
+  },
   toggleHabit: (habitId, date) => {
     const key = `${habitId}_${date}`
     const currentlyDone = !!get().records[key]
@@ -81,6 +79,9 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       },
     }))
 
+    const recordId = `rec_${habitId}_${date}`
+    toggleHabitRecordInDb(recordId, habitId, date, nextDone)
+
     // Domain Rule: Completing a Habit for a day auto-completes its linked Task (one-way link)
     if (nextDone) {
       const targetHabit = get().habits.find((h) => h.id === habitId)
@@ -89,30 +90,36 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       }
     }
   },
-  addHabit: (name, color = '#059669', linkedTaskId) =>
-    set((state) => {
-      const newHabit: Habit = {
-        id: `h-${Date.now()}`,
-        name,
-        color,
-        linkedTaskId: linkedTaskId || undefined,
-        createdAt: new Date().toISOString(),
-      }
-      return { habits: [...state.habits, newHabit] }
-    }),
+  addHabit: (name, color = '#059669', linkedTaskId) => {
+    const newHabit: Habit = {
+      id: `h-${Date.now()}`,
+      name,
+      color,
+      linkedTaskId: linkedTaskId || undefined,
+      createdAt: new Date().toISOString(),
+    }
+    set((state) => ({ habits: [...state.habits, newHabit] }))
+    createHabitInDb({
+      id: newHabit.id,
+      name: newHabit.name,
+      color: newHabit.color,
+      linked_task_id: newHabit.linkedTaskId || null,
+      created_at: newHabit.createdAt,
+    })
+  },
   updateHabit: (id, name, color, linkedTaskId) =>
     set((state) => ({
       habits: state.habits.map((h) =>
         h.id === id ? { ...h, name, color, linkedTaskId: linkedTaskId || undefined } : h
       ),
     })),
-  deleteHabit: (id) =>
+  deleteHabit: (id) => {
     set((state) => ({
       habits: state.habits.filter((h) => h.id !== id),
-      // Clean up records for deleted habit
       records: Object.fromEntries(
         Object.entries(state.records).filter(([key]) => !key.startsWith(`${id}_`))
       ),
-    })),
+    }))
+    deleteHabitFromDb(id)
+  },
 }))
-

@@ -1,15 +1,16 @@
-'use client'
-
+import { useMemo } from 'react'
 import { useTaskStore } from '@/stores/taskStore'
 import { useHabitStore } from '@/stores/habitStore'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
-import { CheckCircle2, Clock, Flame, Target } from 'lucide-react'
+import { CheckCircle2, Clock, Flame, Target, RotateCw } from 'lucide-react'
 
 export function TodayProgressCard() {
   const tasks = useTaskStore((state) => state.tasks)
   const habits = useHabitStore((state) => state.habits)
   const records = useHabitStore((state) => state.records)
   const getTotalFocusSeconds = useTimeEntryStore((state) => state.getTotalFocusSecondsToday)
+  const refreshAllData = useTimeEntryStore((state) => state.refreshAllData)
+  const isRefreshing = useTimeEntryStore((state) => state.isRefreshing)
 
   const completedTasks = tasks.filter((t) => t.status === 'done').length
   const totalTasks = tasks.length
@@ -23,6 +24,30 @@ export function TodayProgressCard() {
   const focusHours = Math.floor(focusSeconds / 3600)
   const focusMins = Math.floor((focusSeconds % 3600) / 60)
 
+  // Dynamic habit streak calculation
+  const streak = useMemo(() => {
+    if (habits.length === 0) return 0
+    let currentStreak = 0
+    let checkDate = new Date()
+
+    const anyDoneToday = habits.some((h) => !!records[`${h.id}_${todayStr}`])
+    if (!anyDoneToday) {
+      checkDate.setDate(checkDate.getDate() - 1)
+    }
+
+    while (true) {
+      const dateStr = checkDate.toISOString().split('T')[0]
+      const hasCompletedHabit = habits.some((h) => !!records[`${h.id}_${dateStr}`])
+      if (hasCompletedHabit) {
+        currentStreak++
+        checkDate.setDate(checkDate.getDate() - 1)
+      } else {
+        break
+      }
+    }
+    return currentStreak
+  }, [habits, records, todayStr])
+
   return (
     <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-xs transition-all hover:border-[var(--border-strong)]">
       {/* Background Subtle Gradient wash */}
@@ -33,7 +58,7 @@ export function TodayProgressCard() {
         <div className="flex flex-col gap-1 max-w-xl">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
             <Target className="h-3.5 w-3.5" />
-            <span>Today's Briefing</span>
+            <span>Today&apos;s Briefing</span>
           </div>
           <h2 className="font-display text-2xl font-bold tracking-tight text-[var(--text-primary)] md:text-3xl">
             Stay aligned with your daily rhythm.
@@ -43,18 +68,30 @@ export function TodayProgressCard() {
           </p>
         </div>
 
-        {/* Focus Hours Counter Highlight */}
-        <div className="flex items-center gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] px-5 py-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--accent-muted)] text-[var(--accent)]">
-            <Clock className="h-6 w-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
-              Active Focus Time
-            </span>
-            <div className="flex items-baseline gap-1 font-mono text-2xl font-bold text-[var(--text-primary)]">
-              <span>{focusHours}h</span>
-              <span className="text-lg text-[var(--text-secondary)]">{focusMins}m</span>
+        {/* Focus Hours Counter Highlight + Refresh Button */}
+        <div className="flex items-center gap-3 self-start md:self-auto">
+          <button
+            onClick={() => refreshAllData()}
+            disabled={isRefreshing}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-all shadow-xs active:scale-95 disabled:opacity-50"
+            title="Refresh database metrics"
+          >
+            <RotateCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin text-[var(--accent)]' : ''}`} />
+            <span>{isRefreshing ? 'Refreshing...' : 'Refresh Data'}</span>
+          </button>
+
+          <div className="flex items-center gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] px-5 py-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--accent-muted)] text-[var(--accent)]">
+              <Clock className="h-6 w-6" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
+                Active Focus Time
+              </span>
+              <div className="flex items-baseline gap-1 font-mono text-2xl font-bold text-[var(--text-primary)]">
+                <span>{focusHours}h</span>
+                <span className="text-lg text-[var(--text-secondary)]">{focusMins}m</span>
+              </div>
             </div>
           </div>
         </div>
@@ -98,7 +135,7 @@ export function TodayProgressCard() {
           <div className="flex flex-col gap-1">
             <span className="text-xs font-medium text-[var(--text-muted)]">Daily Streak</span>
             <span className="font-mono text-2xl font-bold text-amber-600 dark:text-amber-400">
-              5 Days
+              {streak} {streak === 1 ? 'Day' : 'Days'}
             </span>
           </div>
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400">

@@ -1,4 +1,11 @@
 import { create } from 'zustand'
+import {
+  fetchTimeEntriesFromDb,
+  fetchTimeEntriesRangeFromDb,
+  fetchAppCategoriesFromDb,
+  setAppCategoryInDb,
+  linkTaskToTimeEntryInDb,
+} from '@/lib/db'
 
 export interface TimeEntry {
   id: string
@@ -30,9 +37,9 @@ export interface AppStatItem {
 }
 
 export interface CumulativePoint {
-  timestamp: string // e.g. "08:00", "10:00", "12:00", "14:00", "16:00", "18:00"
-  cumulativeFocusMins: number // Monotonically increasing
-  cumulativeTotalMins: number // Monotonically increasing (includes idle)
+  timestamp: string
+  cumulativeFocusMins: number
+  cumulativeTotalMins: number
 }
 
 export interface TimeKPIs {
@@ -51,9 +58,14 @@ interface TimeEntryState {
   categories: Record<string, CategoryType>
   selectedTimeframe: TimeframeFilter
   selectedCategory: CategoryFilter
+  selectedDate: string
   searchQuery: string
   widgetOrder: string[]
+  isRefreshing: boolean
 
+  initializeTimeEntries: (dateStr?: string) => Promise<void>
+  setSelectedDate: (dateStr: string) => Promise<void>
+  refreshAllData: () => Promise<void>
   setCategory: (appName: string, category: CategoryType) => void
   setTimeframe: (tf: TimeframeFilter) => void
   setSelectedCategory: (cat: CategoryFilter) => void
@@ -84,64 +96,7 @@ const initialCategories: Record<string, CategoryType> = {
   'reddit.com': 'distraction',
 }
 
-const now = Date.now()
-const initialEntries: TimeEntry[] = [
-  {
-    id: 'te-1',
-    appName: 'Code.exe',
-    windowTitle: 'Shodasha_Productivity — timeEntryStore.ts',
-    startTime: new Date(now - 3600 * 1000 * 5).toISOString(),
-    endTime: new Date(now - 3600 * 1000 * 3).toISOString(),
-    durationSeconds: 7200, // 2h (09:00 - 11:00)
-    createdAt: new Date(now - 3600 * 1000 * 5).toISOString(),
-  },
-  {
-    id: 'te-2',
-    appName: 'WindowsTerminal.exe',
-    windowTitle: 'PowerShell — npm run dev',
-    startTime: new Date(now - 3600 * 1000 * 3).toISOString(),
-    endTime: new Date(now - 3600 * 1000 * 2.5).toISOString(),
-    durationSeconds: 1800, // 30 mins (11:00 - 11:30)
-    createdAt: new Date(now - 3600 * 1000 * 3).toISOString(),
-  },
-  {
-    id: 'te-3',
-    appName: 'chrome.exe',
-    windowTitle: 'Tailwind CSS v4 Documentation',
-    startTime: new Date(now - 3600 * 1000 * 2.5).toISOString(),
-    endTime: new Date(now - 3600 * 1000 * 1.8).toISOString(),
-    durationSeconds: 2520, // 42 mins (11:30 - 12:12)
-    createdAt: new Date(now - 3600 * 1000 * 2.5).toISOString(),
-  },
-  {
-    id: 'te-4',
-    appName: 'Figma.exe',
-    windowTitle: 'Shodasha Design System Specs',
-    startTime: new Date(now - 3600 * 1000 * 1.8).toISOString(),
-    endTime: new Date(now - 3600 * 1000 * 0.8).toISOString(),
-    durationSeconds: 3600, // 1h (12:12 - 13:12)
-    createdAt: new Date(now - 3600 * 1000 * 1.8).toISOString(),
-  },
-  {
-    id: 'te-5',
-    appName: 'youtube.com',
-    windowTitle: 'Lo-Fi Chill Beats for Coding',
-    startTime: new Date(now - 3600 * 1000 * 0.8).toISOString(),
-    endTime: new Date(now - 3600 * 1000 * 0.3).toISOString(),
-    durationSeconds: 1800, // 30 mins (13:12 - 13:42)
-    createdAt: new Date(now - 3600 * 1000 * 0.8).toISOString(),
-  },
-  {
-    id: 'te-6',
-    appName: 'Code.exe',
-    windowTitle: 'Lock Screen / Idle Period',
-    startTime: new Date(now - 3600 * 1000 * 0.3).toISOString(),
-    endTime: new Date().toISOString(),
-    endReason: 'idle',
-    durationSeconds: 1080, // 18 mins idle
-    createdAt: new Date(now - 3600 * 1000 * 0.3).toISOString(),
-  },
-]
+const initialEntries: TimeEntry[] = []
 
 const initialWidgetOrder = ['kpi-grid', 'cumulative-screentime-chart', 'category-ring-chart', 'top-apps-bar-chart', 'activity-stream']
 
@@ -150,25 +105,74 @@ export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
   categories: initialCategories,
   selectedTimeframe: 'today',
   selectedCategory: 'all',
+  selectedDate: new Date().toISOString().split('T')[0],
   searchQuery: '',
   widgetOrder: initialWidgetOrder,
+  isRefreshing: false,
 
-  setCategory: (appName, category) =>
+  initializeTimeEntries: async (targetDateStr?: string) => {
+    const dateStr = targetDateStr || get().selectedDate || new Date().toISOString().split('T')[0]
+    const dbEntries = await fetchTimeEntriesFromDb(dateStr)
+    const dbCategories = await fetchAppCategoriesFromDb()
+
+    if (dbEntries && Array.isArray(dbEntries)) {
+      const mappedEntries: TimeEntry[] = dbEntries.map((e: any) => ({
+        id: e.id,
+        appName: e.app_name,
+        windowTitle: e.window_title,
+        startTime: e.start_time,
+        endTime: e.end_time || undefined,
+        endReason: (e.end_reason as any) || null,
+        durationSeconds: e.duration_seconds || undefined,
+        linkedTaskId: e.linked_task_id || undefined,
+        createdAt: e.created_at,
+      }))
+      set({ entries: mappedEntries, selectedDate: dateStr })
+    }
+
+    if (dbCategories && Array.isArray(dbCategories) && dbCategories.length > 0) {
+      const catMap: Record<string, CategoryType> = { ...get().categories }
+      dbCategories.forEach((c: any) => {
+        catMap[c.app_name] = c.category as CategoryType
+      })
+      set({ categories: catMap })
+    }
+  },
+
+  setSelectedDate: async (dateStr: string) => {
+    set({ selectedDate: dateStr })
+    await get().initializeTimeEntries(dateStr)
+  },
+
+  refreshAllData: async () => {
+    set({ isRefreshing: true })
+    try {
+      await get().initializeTimeEntries(get().selectedDate)
+    } finally {
+      set({ isRefreshing: false })
+    }
+  },
+
+  setCategory: (appName, category) => {
     set((state) => ({
       categories: { ...state.categories, [appName]: category },
-    })),
+    }))
+    setAppCategoryInDb(appName, category)
+  },
 
   setTimeframe: (tf) => set({ selectedTimeframe: tf }),
   setSelectedCategory: (cat) => set({ selectedCategory: cat }),
   setSearchQuery: (query) => set({ searchQuery: query }),
   setWidgetOrder: (order) => set({ widgetOrder: order }),
 
-  linkTaskToTimeEntry: (entryId, taskId) =>
+  linkTaskToTimeEntry: (entryId, taskId) => {
     set((state) => ({
       entries: state.entries.map((entry) =>
         entry.id === entryId ? { ...entry, linkedTaskId: taskId } : entry
       ),
-    })),
+    }))
+    linkTaskToTimeEntryInDb(entryId, taskId || null)
+  },
 
   getTotalFocusSecondsToday: () => {
     const todayStr = new Date().toISOString().split('T')[0]
@@ -203,52 +207,37 @@ export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
     const total = workSec + neutralSec + distractionSec || 1
 
     return [
-      { category: 'work', label: 'Deep Work', seconds: workSec, percentage: Math.round((workSec / total) * 100) },
-      { category: 'neutral', label: 'General / Tools', seconds: neutralSec, percentage: Math.round((neutralSec / total) * 100) },
-      { category: 'distraction', label: 'Distraction', seconds: distractionSec, percentage: Math.round((distractionSec / total) * 100) },
+      { category: 'work', label: 'Work / Code', seconds: workSec, percentage: Math.round((workSec / total) * 100) },
+      { category: 'neutral', label: 'Utilities / Browser', seconds: neutralSec, percentage: Math.round((neutralSec / total) * 100) },
+      { category: 'distraction', label: 'Media / Social', seconds: distractionSec, percentage: Math.round((distractionSec / total) * 100) },
     ]
   },
 
   getFilteredEntries: () => {
-    const { entries, categories, selectedTimeframe, selectedCategory, searchQuery } = get()
+    let list = get().entries
+    const catFilter = get().selectedCategory
+    const search = get().searchQuery.toLowerCase().trim()
+    const categories = get().categories
 
-    const nowTime = Date.now()
-    const todayStr = new Date().toISOString().split('T')[0]
-    const sevenDaysAgo = nowTime - 7 * 86400 * 1000
+    if (catFilter !== 'all') {
+      list = list.filter((e) => (categories[e.appName] || 'neutral') === catFilter)
+    }
 
-    return entries.filter((entry) => {
-      // 1. Timeframe filter
-      if (selectedTimeframe === 'today' && !entry.startTime.startsWith(todayStr)) {
-        return false
-      }
-      if (selectedTimeframe === '7days' && new Date(entry.startTime).getTime() < sevenDaysAgo) {
-        return false
-      }
+    if (search) {
+      list = list.filter(
+        (e) =>
+          e.appName.toLowerCase().includes(search) ||
+          e.windowTitle.toLowerCase().includes(search)
+      )
+    }
 
-      // 2. Category filter
-      const cat = categories[entry.appName] || 'neutral'
-      if (selectedCategory !== 'all' && cat !== selectedCategory) {
-        return false
-      }
-
-      // 3. Search query
-      if (searchQuery.trim() !== '') {
-        const q = searchQuery.toLowerCase()
-        const matchApp = entry.appName.toLowerCase().includes(q)
-        const matchTitle = entry.windowTitle.toLowerCase().includes(q)
-        if (!matchApp && !matchTitle) return false
-      }
-
-      return true
-    })
+    return list
   },
 
   getFilteredFocusSeconds: () => {
-    const filtered = get().getFilteredEntries()
-    return filtered.reduce((sum, entry) => {
-      if (entry.endReason === 'idle') return sum
-      return sum + (entry.durationSeconds || 0)
-    }, 0)
+    return get()
+      .getFilteredEntries()
+      .reduce((acc, curr) => (curr.endReason === 'idle' ? acc : acc + (curr.durationSeconds || 0)), 0)
   },
 
   getCategoryBreakdownFiltered: () => {
@@ -271,8 +260,8 @@ export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
     const total = workSec + neutralSec + distractionSec || 1
 
     return [
-      { category: 'work', label: 'Deep Work', seconds: workSec, percentage: Math.round((workSec / total) * 100) },
-      { category: 'neutral', label: 'General / Tools', seconds: neutralSec, percentage: Math.round((neutralSec / total) * 100) },
+      { category: 'work', label: 'Work', seconds: workSec, percentage: Math.round((workSec / total) * 100) },
+      { category: 'neutral', label: 'Neutral', seconds: neutralSec, percentage: Math.round((neutralSec / total) * 100) },
       { category: 'distraction', label: 'Distraction', seconds: distractionSec, percentage: Math.round((distractionSec / total) * 100) },
     ]
   },
@@ -311,16 +300,50 @@ export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
   },
 
   getCumulativeScreenTimeFiltered: () => {
-    // Cumulative screen time accumulates monotonically throughout the day
-    // 08:00 → 10:00 → 12:00 → 14:00 → 16:00 → 18:00
-    const points: CumulativePoint[] = [
-      { timestamp: '08:00', cumulativeFocusMins: 0, cumulativeTotalMins: 0 },
-      { timestamp: '10:00', cumulativeFocusMins: 90, cumulativeTotalMins: 95 },
-      { timestamp: '12:00', cumulativeFocusMins: 184, cumulativeTotalMins: 195 },
-      { timestamp: '14:00', cumulativeFocusMins: 244, cumulativeTotalMins: 260 },
-      { timestamp: '16:00', cumulativeFocusMins: 310, cumulativeTotalMins: 330 },
-      { timestamp: '18:00', cumulativeFocusMins: 380, cumulativeTotalMins: 410 },
-    ]
+    const filtered = get().getFilteredEntries()
+    const categories = get().categories
+
+    if (filtered.length === 0) {
+      return [
+        { timestamp: '12:00 AM', cumulativeFocusMins: 0, cumulativeTotalMins: 0 },
+        { timestamp: '12:00 PM', cumulativeFocusMins: 0, cumulativeTotalMins: 0 },
+      ]
+    }
+
+    const sorted = [...filtered].sort(
+      (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+    )
+
+    let totalFocusSec = 0
+    let totalScreenSec = 0
+    const points: CumulativePoint[] = []
+
+    const firstDate = new Date(sorted[0].startTime)
+    const firstLabel = firstDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
+    points.push({
+      timestamp: firstLabel,
+      cumulativeFocusMins: 0,
+      cumulativeTotalMins: 0,
+    })
+
+    sorted.forEach((entry) => {
+      const dur = entry.durationSeconds || 0
+      totalScreenSec += dur
+      const cat = categories[entry.appName] || 'neutral'
+      if (cat === 'work' && entry.endReason !== 'idle') {
+        totalFocusSec += dur
+      }
+
+      const endDate = entry.endTime ? new Date(entry.endTime) : new Date(entry.startTime)
+      const timeLabel = endDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
+
+      points.push({
+        timestamp: timeLabel,
+        cumulativeFocusMins: Math.round(totalFocusSec / 60),
+        cumulativeTotalMins: Math.round(totalScreenSec / 60),
+      })
+    })
+
     return points
   },
 
@@ -357,7 +380,7 @@ export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
       focusEfficiency,
       contextSwitches: filtered.length,
       deepWorkRatio,
-      topAppName: topApp ? topApp.appName : 'Code.exe',
+      topAppName: topApp ? topApp.appName : 'None',
       topAppDurationSeconds: topApp ? topApp.totalSeconds : focusSec,
     }
   },

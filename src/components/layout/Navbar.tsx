@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useUIStore } from '@/stores/uiStore'
+import { isTauri } from '@/lib/db'
 import GooeyTabs from '@/components/ui/gooey-tabs'
 import {
   Sun,
@@ -13,6 +14,9 @@ import {
   CalendarCheck,
   LineChart,
   Settings,
+  Minus,
+  Square,
+  X,
 } from 'lucide-react'
 
 const navItems = [
@@ -38,12 +42,39 @@ export function Navbar() {
     }
   }
 
+  const handleMinimize = async () => {
+    if (isTauri()) {
+      const { getCurrentWindow } = await import('@tauri-apps/api/window')
+      const appWindow = getCurrentWindow()
+      await appWindow.minimize()
+    }
+  }
+
+  const handleMaximize = async () => {
+    if (isTauri()) {
+      const { getCurrentWindow } = await import('@tauri-apps/api/window')
+      const appWindow = getCurrentWindow()
+      await appWindow.toggleMaximize()
+    }
+  }
+
+  const handleClose = async () => {
+    if (isTauri()) {
+      const { getCurrentWindow } = await import('@tauri-apps/api/window')
+      const appWindow = getCurrentWindow()
+      await appWindow.hide() // Minimizes/Hides to System Tray
+    }
+  }
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--bg-surface)]/80 backdrop-blur-md transition-colors">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+    <header
+      data-tauri-drag-region
+      className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--bg-surface)]/80 backdrop-blur-md transition-colors select-none"
+    >
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6" data-tauri-drag-region>
         {/* Brand Logo & Name */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--accent)] text-white shadow-sm transition-transform group-hover:scale-105">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--accent)] text-white shadow-xs transition-transform group-hover:scale-105">
             <span className="font-mono text-lg font-bold tracking-tighter">十六</span>
           </div>
           <div className="flex flex-col">
@@ -56,7 +87,7 @@ export function Navbar() {
           </div>
         </Link>
 
-        {/* Central Floating Gooey Tabs Navigation — No Outer Background Container */}
+        {/* Central Floating Gooey Tabs Navigation */}
         <div className="flex items-center justify-center py-1">
           <GooeyTabs
             activeIndex={currentActiveIndex}
@@ -81,8 +112,8 @@ export function Navbar() {
           </GooeyTabs>
         </div>
 
-        {/* Right Status Indicator & Actions */}
-        <div className="flex items-center gap-4">
+        {/* Right Status Indicator & Actions & Frameless Window Controls */}
+        <div className="flex items-center gap-3">
           {/* Tracking Pulse Badge */}
           <div className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-base)] px-3 py-1.5 text-xs text-[var(--text-secondary)] shadow-xs">
             <span className="relative flex h-2 w-2">
@@ -105,10 +136,40 @@ export function Navbar() {
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)] shadow-xs"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)] shadow-xs"
           >
-            {theme === 'dark' ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
+            {theme === 'dark' ? <Sun className="h-3.5 w-3.5 text-amber-400" /> : <Moon className="h-3.5 w-3.5" />}
           </button>
+
+          {/* Native Window Controls (Minimize, Maximize, Close to Tray) */}
+          <div className="flex items-center gap-1 pl-2 border-l border-[var(--border)]">
+            <button
+              onClick={handleMinimize}
+              aria-label="Minimize Window"
+              title="Minimize"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-muted)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              <Minus className="h-3.5 w-3.5" />
+            </button>
+
+            <button
+              onClick={handleMaximize}
+              aria-label="Maximize Window"
+              title="Maximize / Restore"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-muted)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              <Square className="h-3 w-3" />
+            </button>
+
+            <button
+              onClick={handleClose}
+              aria-label="Close to System Tray"
+              title="Close to System Tray"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-500 transition-colors"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
       </div>
     </header>

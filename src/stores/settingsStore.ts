@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { setAutoStartInDb } from '@/lib/db'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 export type DataRetentionPeriod = '1_month' | '3_months' | '6_months' | 'indefinite'
@@ -30,7 +31,10 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 
   setPollingInterval: (interval) => set({ pollingInterval: interval }),
   setIdleDetectionEnabled: (enabled) => set({ idleDetectionEnabled: enabled }),
-  setAutoStartEnabled: (enabled) => set({ autoStartEnabled: enabled }),
+  setAutoStartEnabled: (enabled) => {
+    set({ autoStartEnabled: enabled })
+    setAutoStartInDb(enabled)
+  },
   setDataRetentionPeriod: (period) => set({ dataRetentionPeriod: period }),
   setThemeMode: (mode) => {
     set({ themeMode: mode })

@@ -232,6 +232,8 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                       {/* Days Checkbox Cells */}
                       {daysInMonth.map((day) => {
                         const isDone = !!records[`${habit.id}_${day.dateStr}`]
+                        const todayStr = new Date().toISOString().split('T')[0]
+                        const isFuture = day.dateStr > todayStr
 
                         return (
                           <td
@@ -241,19 +243,26 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                             }`}
                           >
                             <button
-                              onClick={() => toggleHabit(habit.id, day.dateStr)}
+                              disabled={isFuture}
+                              onClick={() => !isFuture && toggleHabit(habit.id, day.dateStr)}
                               className={`w-6 h-6 mx-auto rounded-md flex items-center justify-center transition-all focus:outline-hidden ${
-                                isDone
+                                isFuture
+                                  ? 'opacity-30 cursor-not-allowed border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/40'
+                                  : isDone
                                   ? 'shadow-xs scale-100'
                                   : 'border border-[var(--border-subtle)] bg-[var(--bg-primary)] hover:border-[var(--border-default)]'
                               }`}
                               style={{
-                                backgroundColor: isDone ? habit.color : undefined,
-                                borderColor: isDone ? habit.color : undefined,
+                                backgroundColor: isDone && !isFuture ? habit.color : undefined,
+                                borderColor: isDone && !isFuture ? habit.color : undefined,
                               }}
-                              title={`${habit.name} - ${day.dateStr}: ${isDone ? 'Done' : 'Not done'}`}
+                              title={
+                                isFuture
+                                  ? `${habit.name} - ${day.dateStr}: Future date disabled`
+                                  : `${habit.name} - ${day.dateStr}: ${isDone ? 'Done' : 'Not done'}`
+                              }
                             >
-                              {isDone && (
+                              {isDone && !isFuture && (
                                 <motion.div
                                   initial={{ scale: 0 }}
                                   animate={{ scale: 1 }}

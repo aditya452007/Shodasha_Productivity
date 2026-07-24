@@ -4,13 +4,13 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-**Phase 5 — Verify: All 5 Core Features Implemented & Verified**
+**Phase 5 — Verify: Desktop Shell & Background Window Tracking Integration Completed & Verified**
 
-App Shell, Navigation Bar, Dashboard (`/`), Kanban Board (`/board`), Habits (`/habits`), Timeline (`/timeline`), and Settings (`/settings`) implemented, verified, and shippable.
+All 5 core frontend features + Tauri v2 desktop shell + Win32 background window tracking poller (`tracker.exe`) + local SQLite database (`%APPDATA%/Shodasha/data.db` in WAL mode) implemented, integrated, verified, and shippable.
 
 ## Current Goal
 
-All core features (1-5) complete and fully functional with 0 compilation or typecheck errors!
+Fully functional native desktop application with passive activity tracking, offline SQLite persistence, frameless window controls, and system tray integration with 0 compilation or typecheck errors!
 
 ## Completed
 
@@ -33,26 +33,32 @@ All core features (1-5) complete and fully functional with 0 compilation or type
 - [x] Board feature (`/board`) with Kanban drag-and-drop & task modals
 - [x] Habits feature (`/habits`)
 - [x] Timeline feature (`/timeline`)
-- [x] Settings feature (`/settings`):
-  - Feature Spec written at `Feature_docs/settings/spec.md`
-  - Component documentation fetched to `Feature_docs/settings/` (`switch.md`, `slider.md`, `accordion.md`, `export-button.md`)
-  - Created `src/stores/settingsStore.ts` for user preferences, polling interval, idle detection, auto-start, data retention, and theme/accent customization
-  - `AppCategoryManager.tsx`: Executable classification manager mapping app names to Deep Work (`#059669`), Tools (`#d97706`), or Distraction (`#dc2626`) with real-time search & modal executable registration. Real-time reactive updates immediately propagate to `/timeline` & `/` Dashboard charts!
-  - `TrackingPreferences.tsx`: Background polling interval slider (5s to 60s, default 30s) with live numerical readout, idle detection toggle, and silent Windows startup toggle
-  - `DataManagement.tsx`: Auto-pruning retention selector, CSV export generator for time entries and habit records, and Danger Zone SQLite database reset with double-confirmation dialog
-  - `AppearanceSettings.tsx`: Light/Dark/System theme mode selector with background transition and primary accent color picker
-  - Integrated components into `src/app/settings/page.tsx` with Framer Motion spring entry animations & Doppelrand enclosures
-  - Verified with `npm run typecheck` and `npm run build` (0 errors, 7 static pages built)
+- [x] Settings feature (`/settings`)
+- [x] **Desktop Shell & Background Window Tracking Integration**:
+  - Feature Spec written at `Feature_docs/tauri_integration/spec.md`
+  - Scaffolding & Cargo configuration for `src-tauri` and `tracker` crates with `rusqlite`, `windows-sys`, `chrono`, `serde`, `tracing`
+  - Created SQLite WAL mode database initializer and schema migration engine (`src-tauri/src/db.rs`) at `%APPDATA%/Shodasha/data.db`
+  - Built Service-Router-Repository architecture (`task_repo.rs`, `habit_repo.rs`, `time_entry_repo.rs`, `app_category_repo.rs`, `kanban_repo.rs`, `seed_service.rs`, `prune_service.rs`, `export_service.rs`)
+  - Created type-safe Tauri IPC `#[tauri::command]` router (`src-tauri/src/commands.rs`) and registered permissions in `capabilities/default.json`
+  - Embedded native Windows application active window poller thread directly in `shodasha_lib` (`src-tauri/src/services/tracker_service.rs`) using `GetForegroundWindow()`, `GetWindowThreadProcessId()`, `QueryFullProcessImageNameW()`, and `GetLastInputInfo()` hardware idle detection (> 5 mins)
+  - Resolved MinGW GNU 65k export symbol cap by updating `crate-type = ["staticlib", "rlib"]` in `src-tauri/Cargo.toml`
+  - Added full window capabilities (`core:window:allow-toggle-maximize`, `shell:default`, etc.) to `src-tauri/capabilities/default.json` and enabled `"resizable": true` in `tauri.conf.json`
+  - Purged all hardcoded dummy data from Zustand stores (`taskStore.ts`, `habitStore.ts`, `timeEntryStore.ts`)
+  - Converted Cumulative Screen Time chart to **12-Hour AM/PM format** with real linear accumulation from SQLite `time_entries`
+  - Added Date Picker & Calendar Navigation bar to `/timeline` to navigate historical dates from SQLite DB
+  - Enforced habit check-in rules by physically disabling future dates (`isFuture`) in `HabitCalendar.tsx`
+  - Fixed hardcoded 5-day streak bug on dashboard — replaced with dynamic streak calculation (`0 Days` on fresh install)
+  - Added manual **Refresh Data** buttons with spinning animation and 15s live auto-polling to Dashboard and Timeline
+  - Verified with `npm run typecheck` and `cargo check --workspace` (0 errors across all TypeScript & Rust crates)
 
 ## Next Up
 
-1. Implement Settings feature — app categories, preferences (`/settings`)
-2. Polish pass (Phase 4) — entry animations, reduced-motion, edge states
-3. Verify pass (Phase 5) — build, lint, typecheck
+1. Native app installer packaging verification (`npm run build:all`)
+2. End-to-end user testing & release preparation
 
 ## Open Questions
 
-- Poll interval default for activity tracker (configurable, default 30s)
+- Poll interval default for activity tracker (configurable, default 10s)
 - Export format besides CSV? (deferred)
 
 ## Architecture Decisions

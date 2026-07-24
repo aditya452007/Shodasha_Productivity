@@ -1,10 +1,17 @@
 import { create } from 'zustand'
+import {
+  fetchTasksFromDb,
+  createTaskInDb,
+  updateTaskInDb,
+  deleteTaskFromDb,
+  reorderTaskInDb,
+} from '@/lib/db'
 
 export interface Task {
   id: string
   title: string
   description?: string
-  status: string // Column ID (e.g. 'todo', 'in_progress', 'done', or custom column id)
+  status: string
   order: number
   dueDate?: string
   tags?: string[]
@@ -22,6 +29,7 @@ export interface KanbanColumn {
 interface TaskState {
   tasks: Task[]
   columns: KanbanColumn[]
+  initializeTasks: () => Promise<void>
   addTask: (title: string, status?: string, description?: string, tags?: string[], dueDate?: string, linkedHabitId?: string) => void
   updateTask: (id: string, updates: Partial<Task>) => void
   toggleTaskStatus: (id: string) => void
@@ -34,39 +42,7 @@ interface TaskState {
   deleteColumn: (id: string) => void
 }
 
-const initialTasks: Task[] = [
-  {
-    id: 't-1',
-    title: 'Review weekly focus analytics',
-    description: 'Check foreground window time allocation across work vs distraction apps',
-    status: 'in_progress',
-    order: 0,
-    tags: ['Analytics', 'Weekly'],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 't-2',
-    title: 'Refactor SQLite database migrations',
-    description: 'Ensure WAL mode and busy timeout handles concurrent tracker process writes',
-    status: 'todo',
-    order: 1,
-    tags: ['Engineering'],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 't-3',
-    title: 'Complete morning deep work session',
-    description: 'Focus block for core architecture',
-    status: 'done',
-    order: 2,
-    tags: ['Habit Linked'],
-    linkedHabitId: 'h-1',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-]
+const initialTasks: Task[] = []
 
 const initialColumns: KanbanColumn[] = [
   { id: 'todo', name: 'To Do', order: 0 },
@@ -74,48 +50,101 @@ const initialColumns: KanbanColumn[] = [
   { id: 'done', name: 'Done', order: 2 },
 ]
 
-export const useTaskStore = create<TaskState>((set) => ({
+export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: initialTasks,
   columns: initialColumns,
-  addTask: (title, status = 'todo', description, tags, dueDate, linkedHabitId) =>
-    set((state) => {
-      const newTask: Task = {
-        id: `t-${Date.now()}`,
-        title,
-        description,
-        status,
-        order: state.tasks.filter((t) => t.status === status).length,
-        tags: tags || [],
-        dueDate,
-        linkedHabitId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }
-      return { tasks: [newTask, ...state.tasks] }
-    }),
-  updateTask: (id, updates) =>
+  initializeTasks: async () => {
+    const dbTasks = await fetchTasksFromDb()
+    if (dbTasks && Array.isArray(dbTasks)) {
+      const mappedTasks: Task[] = dbTasks.map((t: any) => ({
+        id: t.id,
+        title: t.title,
+        description: t.description || undefined,
+        status: t.status,
+        order: t.sort_order,
+        dueDate: t.due_date || undefined,
+        tags: t.tags ? JSON.parse(t.tags) : [],
+        linkedHabitId: t.linked_habit_id || undefined,
+        createdAt: t.created_at,
+        updatedAt: t.updated_at,
+      }))
+      set({ tasks: mappedTasks })
+    }
+  },
+  addTask: (title, status = 'todo', description, tags, dueDate, linkedHabitId) => {
+    const newTask: Task = {
+      id: `t-${Date.now()}`,
+      title,
+      description,
+      status,
+      order: get().tasks.filter((t) => t.status === status).length,
+      tags: tags || [],
+      dueDate,
+      linkedHabitId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    set((state) => ({ tasks: [newTask, ...state.tasks] }))
+    createTaskInDb({
+      id: newTask.id,
+      title: newTask.title,
+      description: newTask.description || null,
+      status: newTask.status,
+      sort_order: newTask.order,
+      due_date: newTask.dueDate || null,
+      tags: newTask.tags ? JSON.stringify(newTask.tags) : null,
+      linked_habit_id: newTask.linkedHabitId || null,
+      created_at: newTask.createdAt,
+      updated_at: newTask.updatedAt,
+    })
+  },
+  updateTask: (id, updates) => {
     set((state) => ({
       tasks: state.tasks.map((task) =>
-        task.id === id
-          ? { ...task, ...updates, updatedAt: new Date().toISOString() }
-          : task
+        task.id === id ? { ...task, ...updates, updatedAt: new Date().toISOString() } : task
       ),
-    })),
-  toggleTaskStatus: (id) =>
+    }))
+    const updated = get().tasks.find((t) => t.id === id)
+    if (updated) {
+      updateTaskInDb({
+        id: updated.id,
+        title: updated.title,
+        description: updated.description || null,
+        status: updated.status,
+        sort_order: updated.order,
+        due_date: updated.dueDate || null,
+        tags: updated.tags ? JSON.stringify(updated.tags) : null,
+        linked_habit_id: updated.linkedHabitId || null,
+        created_at: updated.createdAt,
+        updated_at: updated.updatedAt,
+      })
+    }
+  },
+  toggleTaskStatus: (id) => {
     set((state) => ({
       tasks: state.tasks.map((task) => {
         if (task.id !== id) return task
         const nextStatus = task.status === 'done' ? 'todo' : 'done'
         return { ...task, status: nextStatus, updatedAt: new Date().toISOString() }
       }),
-    })),
-  moveTask: (id, targetStatus) =>
+    }))
+    const updated = get().tasks.find((t) => t.id === id)
+    if (updated) {
+      reorderTaskInDb(updated.id, updated.status, updated.order)
+    }
+  },
+  moveTask: (id, targetStatus) => {
     set((state) => ({
       tasks: state.tasks.map((task) =>
         task.id === id ? { ...task, status: targetStatus, updatedAt: new Date().toISOString() } : task
       ),
-    })),
-  reorderTasks: (activeId, overId, newStatus) =>
+    }))
+    const updated = get().tasks.find((t) => t.id === id)
+    if (updated) {
+      reorderTaskInDb(updated.id, updated.status, updated.order)
+    }
+  },
+  reorderTasks: (activeId, overId, newStatus) => {
     set((state) => {
       const tasks = [...state.tasks]
       const activeIndex = tasks.findIndex((t) => t.id === activeId)
@@ -135,12 +164,23 @@ export const useTaskStore = create<TaskState>((set) => ({
         tasks.push(activeTask)
       }
 
+      tasks.forEach((t, index) => {
+        t.order = index
+      })
+
       return { tasks }
-    }),
-  deleteTask: (id) =>
+    })
+    const moved = get().tasks.find((t) => t.id === activeId)
+    if (moved) {
+      reorderTaskInDb(moved.id, moved.status, moved.order)
+    }
+  },
+  deleteTask: (id) => {
     set((state) => ({
       tasks: state.tasks.filter((task) => task.id !== id),
-    })),
+    }))
+    deleteTaskFromDb(id)
+  },
   addColumn: (name) =>
     set((state) => {
       const newCol: KanbanColumn = {
@@ -164,12 +204,13 @@ export const useTaskStore = create<TaskState>((set) => ({
       const columns = [...state.columns]
       const activeIndex = columns.findIndex((c) => c.id === activeId)
       const overIndex = columns.findIndex((c) => c.id === overId)
-      
+
       if (activeIndex !== -1 && overIndex !== -1) {
         const [activeCol] = columns.splice(activeIndex, 1)
         columns.splice(overIndex, 0, activeCol)
-        // Update order property
-        columns.forEach((col, index) => { col.order = index })
+        columns.forEach((col, index) => {
+          col.order = index
+        })
       }
       return { columns }
     }),

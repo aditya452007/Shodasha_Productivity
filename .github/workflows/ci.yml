@@ -1,0 +1,61 @@
+name: Shodasha CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-verify:
+    name: Build & Verify (Windows)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            .
+            src-tauri
+            tracker
+
+      - name: Install Frontend Dependencies
+        run: npm ci
+
+      - name: Run TypeScript Typecheck
+        run: npm run typecheck
+
+      - name: Build Next.js Static Export
+        run: npm run build
+
+      - name: Build Background Tracker Binary (tracker.exe)
+        run: cargo build --manifest-path tracker/Cargo.toml --release
+
+      - name: Verify Tauri Rust Workspace (src-tauri)
+        run: cargo check --manifest-path src-tauri/Cargo.toml
+
+      - name: Build Tauri Desktop Application
+        uses: tauri-apps/tauri-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: 'Shodasha v__VERSION__'
+          releaseBody: 'Automated release build for Shodasha desktop app.'
+          releaseDraft: true
+          prerelease: false
