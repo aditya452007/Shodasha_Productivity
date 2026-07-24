@@ -54,6 +54,7 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
         <div
           {...attributes}
           {...listeners}
+          aria-label={`Drag ${task.title}`}
           className="flex items-center gap-1.5 cursor-grab active:cursor-grabbing text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
           title="Drag task"
         >
@@ -68,6 +69,7 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
               e.stopPropagation()
               toggleTaskStatus(task.id)
             }}
+            aria-label={`Toggle ${task.title} status`}
             className={`flex h-6 w-6 items-center justify-center rounded-lg border transition-all ${
               isDone
                 ? 'border-[var(--accent)] bg-[var(--accent)] text-white'
@@ -87,6 +89,7 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
           {/* Edit Task Modal Trigger */}
           <button
             onClick={() => onEdit(task)}
+            aria-label={`Edit ${task.title}`}
             className="flex h-6 w-6 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)]"
             title="Edit Task Details"
           >

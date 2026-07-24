@@ -40,11 +40,13 @@ export function QuickTaskInput() {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Quick add a task to 'To Do'..."
+        aria-label="New task title"
         className="flex-1 bg-transparent text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none disabled:opacity-50"
       />
       <button
         type="submit"
         disabled={!title.trim() || isSubmitting}
+        aria-label="Add task"
         className="flex items-center gap-1.5 rounded-lg bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-white transition-opacity disabled:opacity-40 cursor-pointer"
       >
         {isSubmitting ? (

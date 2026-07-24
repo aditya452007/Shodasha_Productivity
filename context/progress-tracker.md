@@ -4,7 +4,7 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-**Section 4 — Animations & Motion Polish 100% Completed**
+**Phase 5 — Verify 100% Completed**
 
 ## Current Goal
 
@@ -70,7 +70,43 @@ Execute Shodasha redesign incrementally in strictly controlled, verifiable phase
   - Enforced habit check-in rules by physically disabling future dates (`isFuture`) in `HabitCalendar.tsx`
   - Fixed hardcoded 5-day streak bug on dashboard — replaced with dynamic streak calculation (`0 Days` on fresh install)
   - Added manual **Refresh Data** buttons with spinning animation and 15s live auto-polling to Dashboard and Timeline
-  - Verified with `npm run typecheck` and `cargo check --workspace` (0 errors across all TypeScript & Rust crates)
+   - Verified with `npm run typecheck` and `cargo check --workspace` (0 errors across all TypeScript & Rust crates)
+
+### Phase 5 — Verify
+- [x] `npm run lint` passes (0 errors, 0 warnings) — ESLint configured for Next.js 16 w/ `@next/eslint-plugin-next` + TypeScript parser
+- [x] `npm run typecheck` passes (0 errors)
+- [x] `npm run build` passes (0 errors — Next.js 16.2.11, Turbopack, 6 routes static)
+- [x] `package.json` lint script updated: `next lint` → `eslint src/` (Next.js 16 removed built-in lint command)
+- [x] `eslint.config.mjs` created with flat config format (files: *.ts/*.tsx/*.js/*.jsx, Next.js recommended + core-web-vitals rules)
+- [x] `npm install --save-dev eslint @eslint/eslintrc @next/eslint-plugin-next @typescript-eslint/parser @typescript-eslint/eslint-plugin`
+- [x] Removed 4 empty barrel index.ts files (`dashboard/`, `board/`, `habits/`, `timeline/`)
+- [x] Added missing `.dark` OKLCH overrides for `--color-success`, `--color-warning`, `--color-error` in `globals.css`
+- [x] Removed dead `--accent-emerald` variable definitions from `globals.css` (no component usage)
+- [x] Deep-audited ALL 13 checklist sections via 5 parallel verification agents
+- [x] Fixed B10: Added `handleIpcError` Sonner error toasts to remaining 14/27 db.ts wrapper functions (now 27/27)
+- [x] Fixed TaskModal: added Loader2 spinner + disabled state on submit button
+- [x] Fixed AddHabitModal: added Loader2 spinner + disabled state on submit button
+- [x] Fixed habits/page.tsx: added loading state with skeleton layout
+- [x] Fixed BarChart.tsx: replaced `animate={{ width }}` with `scaleX` (banned pattern fix)
+- [x] Fixed HabitAnalyticsDashboard.tsx: replaced `animate={{ height }}` with `scaleY` (banned pattern fix)
+- [x] Fixed Navbar.tsx tracking indicator: added `motion-reduce:animate-none` to `animate-ping`
+- [x] Created `src/components/ui/CommandPalette.tsx` (cmdk-based, Cmd+K + Search button trigger)
+- [x] Wired CommandPalette into Navbar with keyboard shortcut + aria-labels
+- [x] Created `src/lib/insights.ts` (time + habit insight generators)
+- [x] Final re-verification: lint=0, typecheck=0, build=0 — ALL PASS
+- [x] Updated `final-verification-checklist.md` with verified state for all 13 sections
+- [x] Progress tracker updated
+
+## Post-Phase-5 Polish
+
+- [x] Added missing secondary OKLCH CSS variables: `--color-rule-strong`, `--color-ink-secondary`, `--color-accent-hover`, `--color-accent-muted` to `:root` and `.dark` in globals.css
+- [x] Replaced ~57+ hardcoded hex color values with CSS variable references across all component files
+- [x] Removed `backdrop-blur` from CategoryFilterBar.tsx (surface blur — anti-slop violation); kept on modal overlays
+- [x] Added ~25+ aria-label attributes across all pages (Navbar, Board, Dashboard, Habits, Timeline, Settings)
+- [x] Added `aria-pressed` to theme mode buttons and category filter pills
+- [x] B3: Added column delete confirmation dialog in KanbanColumn.tsx with task migration notice
+- [x] Added global keyboard shortcuts: Cmd+1–5 for page navigation, ? for command palette
+- [x] Final re-verification: lint=0, typecheck=0, build=0 — ALL PASS
 
 ## Next Up
 

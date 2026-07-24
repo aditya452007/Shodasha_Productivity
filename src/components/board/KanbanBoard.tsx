@@ -148,6 +148,7 @@ export function KanbanBoard() {
 
         <button
           onClick={() => setIsAddColModalOpen(true)}
+          aria-label="Add new column"
           className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] shadow-xs transition-colors cursor-pointer"
         >
           <Plus className="h-4 w-4" />

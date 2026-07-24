@@ -11,7 +11,7 @@
     "build:all": "npm run build && npm run build:tauri && npm run build:tracker",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "lint": "next lint",
+    "lint": "eslint src/",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -29,11 +29,16 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.6",
+    "@next/eslint-plugin-next": "^16.2.11",
     "@tailwindcss/postcss": "^4.3.3",
     "@tauri-apps/cli": "^2.1.0",
     "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
+    "@typescript-eslint/parser": "^8.65.0",
     "agentation": "^3.0.2",
+    "eslint": "^10.7.0",
     "postcss": "^8.5.22",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3"

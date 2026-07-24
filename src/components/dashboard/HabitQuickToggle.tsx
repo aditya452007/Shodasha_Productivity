@@ -71,6 +71,7 @@ export function HabitQuickToggle() {
                 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => toggleHabit(habit.id, todayStr)}
+                aria-label={`Toggle ${habit.name} for ${todayStr}`}
                 className={`flex items-center justify-between rounded-xl border p-3.5 text-left transition-all cursor-pointer ${
                   isDone
                     ? 'border-[var(--accent)]/40 bg-[var(--accent-muted)]/30'

@@ -65,9 +65,9 @@ export function TrackingPreferences() {
                 step={5}
                 value={pollingInterval}
                 onChange={(e) => setPollingInterval(Number(e.target.value))}
-                className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-stone-200 dark:bg-stone-800 accent-[var(--accent)] focus:outline-none"
+                className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-[var(--border)] dark:bg-[var(--border-strong)] accent-[var(--accent)] focus:outline-none"
                 style={{
-                  background: `linear-gradient(to right, var(--accent) 0%, var(--accent) ${sliderPercentage}%, var(--bg-surface-elevated, #27272a) ${sliderPercentage}%, var(--bg-surface-elevated, #27272a) 100%)`,
+                  background: `linear-gradient(to right, var(--accent) 0%, var(--accent) ${sliderPercentage}%, var(--bg-surface-elevated) ${sliderPercentage}%, var(--bg-surface-elevated) 100%)`,
                 }}
               />
             </div>

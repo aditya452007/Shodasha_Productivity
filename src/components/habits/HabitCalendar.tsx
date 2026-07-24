@@ -238,6 +238,7 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                           <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity shrink-0">
                             <button
                               onClick={() => onOpenEditModal(habit)}
+                              aria-label={`Edit ${habit.name}`}
                               className="p-1 rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"
                               title="Edit Habit"
                             >
@@ -245,7 +246,8 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                             </button>
                             <button
                               onClick={() => deleteHabit(habit.id)}
-                              className="p-1 rounded-md text-[var(--text-tertiary)] hover:text-red-500 hover:bg-red-500/10"
+                              aria-label={`Delete ${habit.name}`}
+                              className="p-1 rounded-md text-[var(--text-tertiary)] hover:text-[var(--error)] hover:bg-[var(--error)]/10"
                               title="Delete Habit"
                             >
                               <Trash2 className="w-3.5 h-3.5" />

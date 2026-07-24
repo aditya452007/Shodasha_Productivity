@@ -94,7 +94,7 @@ export function DataManagement() {
         {/* Section Header */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2">
-            <span className="rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-bold text-violet-600 dark:text-violet-400 bg-violet-500/10 border border-violet-500/20">
+            <span className="rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/20">
               Storage & Export
             </span>
           </div>
@@ -110,7 +110,7 @@ export function DataManagement() {
           {/* Data Retention Select */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-stone-900/5 dark:bg-white/5 text-violet-500">
+              <div className="p-2 rounded-xl bg-stone-900/5 dark:bg-white/5 text-[var(--accent)]">
                 <Database className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
@@ -138,7 +138,7 @@ export function DataManagement() {
           {/* Export Activity CSV */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-5">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-stone-900/5 dark:bg-white/5 text-emerald-500">
+              <div className="p-2 rounded-xl bg-stone-900/5 dark:bg-white/5 text-[var(--accent)]">
                 <FileSpreadsheet className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
@@ -154,7 +154,8 @@ export function DataManagement() {
             <button
               type="button"
               onClick={handleExportCSV}
-              className="group inline-flex items-center justify-between gap-3 pl-4 pr-1.5 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-full shadow-md shadow-emerald-600/20 transition-all duration-300 active:scale-[0.98]"
+              aria-label="Export data as CSV"
+              className="group inline-flex items-center justify-between gap-3 pl-4 pr-1.5 py-1.5 text-xs font-semibold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] rounded-full shadow-md shadow-[var(--accent)]/20 transition-all duration-300 active:scale-[0.98]"
             >
               <span>{exportSuccess ? 'Exported!' : 'Export Activity CSV'}</span>
               <span className="w-7 h-7 rounded-full bg-black/10 dark:bg-white/15 flex items-center justify-center transition-transform duration-300 group-hover:scale-105 group-hover:translate-x-0.5">
@@ -166,11 +167,11 @@ export function DataManagement() {
           {/* Danger Zone: Clear SQLite Database */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-5">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400">
+              <div className="p-2 rounded-xl bg-[var(--error)]/10 text-[var(--error)]">
                 <AlertTriangle className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-semibold text-rose-600 dark:text-rose-400">
+                <span className="text-sm font-semibold text-[var(--error)]">
                   Danger Zone: Reset Database
                 </span>
                 <span className="text-xs text-[var(--text-tertiary)]">
@@ -185,7 +186,8 @@ export function DataManagement() {
                 setConfirmStage(1)
                 setIsConfirmOpen(true)
               }}
-              className="group inline-flex items-center justify-between gap-3 pl-4 pr-1.5 py-1.5 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-full shadow-md shadow-rose-600/20 transition-all duration-300 active:scale-[0.98]"
+              aria-label="Clear all database data"
+              className="group inline-flex items-center justify-between gap-3 pl-4 pr-1.5 py-1.5 text-xs font-semibold text-white bg-[var(--error)] hover:brightness-90 rounded-full shadow-md shadow-[var(--error)]/20 transition-all duration-300 active:scale-[0.98]"
             >
               <span>Clear Database</span>
               <span className="w-7 h-7 rounded-full bg-black/10 dark:bg-white/15 flex items-center justify-center transition-transform duration-300 group-hover:scale-105 group-hover:translate-x-0.5">
@@ -209,7 +211,7 @@ export function DataManagement() {
             >
               <div className="rounded-[calc(2rem-0.5rem)] bg-[var(--bg-surface)] p-6 flex flex-col gap-5">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
+                  <div className="flex items-center gap-2 text-[var(--error)]">
                     <ShieldAlert className="w-5 h-5" />
                     <h3 className="text-base font-bold">
                       {confirmStage === 1 ? 'Confirm Database Reset' : 'FINAL WARNING'}
@@ -236,7 +238,7 @@ export function DataManagement() {
                     </ul>
                   </div>
                 ) : (
-                  <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-600 dark:text-rose-300 font-medium">
+                  <div className="p-3.5 rounded-xl bg-[var(--error)]/10 border border-[var(--error)]/20 text-xs text-[var(--error)] font-medium">
                     This action is <strong>IRREVERSIBLE</strong>. All local data will be wiped immediately and the application will reload.
                   </div>
                 )}
@@ -252,7 +254,7 @@ export function DataManagement() {
                   <button
                     type="button"
                     onClick={handleClearDatabase}
-                    className="px-5 py-2 rounded-full text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 active:scale-[0.98] shadow-md shadow-rose-600/20"
+                    className="px-5 py-2 rounded-full text-xs font-semibold text-white bg-[var(--error)] hover:brightness-90 active:scale-[0.98] shadow-md shadow-[var(--error)]/20"
                   >
                     {confirmStage === 1 ? 'Yes, Proceed' : 'Wipe All Data Now'}
                   </button>

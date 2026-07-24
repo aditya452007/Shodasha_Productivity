@@ -125,8 +125,8 @@ export function CumulativeScreenTimeWidget() {
           height={210}
           series1Label="Cumulative Active Focus Time"
           series2Label="Total System On-Time (inc. Idle)"
-          series1Color="#059669"
-          series2Color="#a8a29e"
+          series1Color="var(--accent)"
+          series2Color="var(--text-muted)"
         />
       </div>
     </div>
@@ -144,10 +144,10 @@ export function DistributionChartsWidget() {
     percentage: c.percentage,
     color:
       c.category === 'work'
-        ? '#059669'
+        ? 'var(--color-success)'
         : c.category === 'distraction'
-        ? '#dc2626'
-        : '#d97706',
+        ? 'var(--color-error)'
+        : 'var(--color-warning)',
     seconds: c.seconds,
   }))
 
@@ -160,10 +160,10 @@ export function DistributionChartsWidget() {
     percentage: a.percentage,
     color:
       a.category === 'work'
-        ? '#059669'
+        ? 'var(--color-success)'
         : a.category === 'distraction'
-        ? '#dc2626'
-        : '#d97706',
+        ? 'var(--color-error)'
+        : 'var(--color-warning)',
     formattedDuration: formatDuration(a.totalSeconds),
     sessionsCount: a.sessionsCount,
   }))

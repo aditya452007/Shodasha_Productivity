@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { KanbanColumn as ColumnType, Task, useTaskStore } from '@/stores/taskStore'
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable'
 import { KanbanCard } from './KanbanCard'
-import { Plus, Trash2, Check, GripVertical } from 'lucide-react'
+import { Plus, Trash2, Check, GripVertical, AlertTriangle, X } from 'lucide-react'
 import { CSS } from '@dnd-kit/utilities'
 import { motion } from 'motion/react'
 
@@ -24,6 +24,7 @@ export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanCol
   const [colName, setColName] = useState(column.name)
   const [quickTitle, setQuickTitle] = useState('')
   const [showAddForm, setShowAddForm] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const {
     attributes,
@@ -40,7 +41,6 @@ export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanCol
 
   const defaultTransition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)'
 
-  // During drag we don't apply the transition here to avoid lag; it applies on drop.
   const style = {
     transform: CSS.Translate.toString(transform),
     transition: transition || defaultTransition,
@@ -64,6 +64,11 @@ export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanCol
     setShowAddForm(false)
   }
 
+  const handleDeleteConfirm = () => {
+    deleteColumn(column.id)
+    setConfirmDelete(false)
+  }
+
   return (
     <motion.div
       layout
@@ -83,6 +88,7 @@ export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanCol
           <div
             {...attributes}
             {...listeners}
+            aria-label={`Drag ${column.name} column`}
             className="flex items-center gap-1.5 cursor-grab active:cursor-grabbing text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
             title="Drag column"
           >
@@ -121,6 +127,7 @@ export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanCol
         <div className="flex items-center gap-1">
           <button
             onClick={() => setShowAddForm(!showAddForm)}
+            aria-label={`Add task to ${column.name}`}
             className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
             title="Add task to column"
           >
@@ -129,7 +136,8 @@ export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanCol
 
           {column.id !== 'todo' && column.id !== 'in_progress' && column.id !== 'done' && (
             <button
-              onClick={() => deleteColumn(column.id)}
+              onClick={() => setConfirmDelete(true)}
+              aria-label={`Delete ${column.name} column`}
               className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--error)]/10 hover:text-[var(--error)]"
               title="Delete Column"
             >
@@ -177,6 +185,61 @@ export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanCol
           )}
         </div>
       </SortableContext>
+
+      {/* Delete Confirmation Dialog */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/50" onClick={() => setConfirmDelete(false)} />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+            className="relative w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-xl z-10"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+              <div className="flex items-center gap-2 text-[var(--error)]">
+                <AlertTriangle className="h-5 w-5" />
+                <h2 className="font-display text-base font-bold text-[var(--text-primary)]">
+                  Delete Column
+                </h2>
+              </div>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-surface-hover)]"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-4 text-sm text-[var(--text-secondary)] space-y-2">
+              <p>
+                Are you sure you want to delete <strong className="text-[var(--text-primary)]">"{column.name}"</strong>?
+              </p>
+              <p>
+                {tasks.length > 0
+                  ? `${tasks.length} task${tasks.length > 1 ? 's' : ''} will move back to "To Do".`
+                  : 'This column is empty.'}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 mt-6 pt-3 border-t border-[var(--border)]">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="rounded-xl border border-[var(--border)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-surface-hover)]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="rounded-xl bg-[var(--error)] px-4 py-2 text-xs font-semibold text-white hover:brightness-90"
+              >
+                Delete Column
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </motion.div>
   )
 }

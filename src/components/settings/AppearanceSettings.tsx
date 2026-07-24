@@ -64,6 +64,7 @@ export function AppearanceSettings() {
                     key={mode}
                     type="button"
                     onClick={() => setThemeMode(mode)}
+                    aria-pressed={isSelected}
                     className={`relative inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
                       isSelected ? 'text-[var(--text-primary)] font-bold' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
                     }`}
@@ -107,6 +108,7 @@ export function AppearanceSettings() {
                     key={color}
                     type="button"
                     onClick={() => setAccentColor(color)}
+                    aria-label={`Select ${name} accent color`}
                     title={name}
                     className={`relative w-8 h-8 rounded-full ${bg} flex items-center justify-center transition-all duration-300 active:scale-90 ${
                       isSelected ? 'ring-2 ring-offset-2 ring-[var(--text-primary)] scale-110 shadow-md' : 'hover:scale-105 opacity-80 hover:opacity-100'

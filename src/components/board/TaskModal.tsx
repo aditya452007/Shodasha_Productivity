@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Task, useTaskStore } from '@/stores/taskStore'
 import { useHabitStore } from '@/stores/habitStore'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { X, Trash2, Calendar, Tag, Link2, AlignLeft, CheckSquare } from 'lucide-react'
+import { X, Trash2, Calendar, Tag, Link2, AlignLeft, CheckSquare, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface TaskModalProps {
@@ -231,9 +231,17 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
               </button>
               <button
                 type="submit"
-                className="rounded-xl bg-[var(--accent)] px-5 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90 shadow-xs"
+                disabled={isSubmitting}
+                className="rounded-xl bg-[var(--accent)] px-5 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Save Changes
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin inline-block mr-1.5" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Changes'
+                )}
               </button>
             </div>
           </div>

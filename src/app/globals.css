@@ -13,6 +13,10 @@
     --color-success: oklch(50% 0.15 150);
     --color-warning: oklch(55% 0.15 80);
     --color-error: oklch(50% 0.18 30);
+    --color-rule-strong: oklch(75% 0.015 80);
+    --color-ink-secondary: oklch(38% 0.008 70);
+    --color-accent-hover: oklch(45% 0.19 250);
+    --color-accent-muted: oklch(85% 0.05 250);
 
     /* Legacy & Semantic Variable Aliases */
     --bg-base: #fafaf9;
@@ -29,7 +33,6 @@
     --accent: #059669;
     --accent-hover: #047857;
     --accent-muted: #d1fae5;
-    --accent-emerald: #059669;
     --border: #e7e5e4;
     --border-strong: #d6d3d1;
     --border-subtle: #f5f5f4;
@@ -96,6 +99,13 @@
     --color-muted: oklch(70% 0.006 40);
     --color-ink: oklch(94% 0.006 80);
     --color-accent: oklch(65% 0.19 250);
+    --color-success: oklch(50% 0.15 150);
+    --color-warning: oklch(55% 0.15 80);
+    --color-error: oklch(50% 0.18 30);
+    --color-rule-strong: oklch(38% 0.01 40);
+    --color-ink-secondary: oklch(75% 0.006 60);
+    --color-accent-hover: oklch(75% 0.19 250);
+    --color-accent-muted: oklch(25% 0.05 250);
 
     /* Legacy & Semantic Variable Aliases */
     --bg-base: #0c0a09;
@@ -112,7 +122,6 @@
     --accent: #10b981;
     --accent-hover: #34d399;
     --accent-muted: #022c22;
-    --accent-emerald: #10b981;
     --border: #292524;
     --border-strong: #44403c;
     --border-subtle: #1c1917;

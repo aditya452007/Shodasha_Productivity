@@ -260,7 +260,7 @@ export function HabitAnalyticsDashboard() {
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2.5">
-              <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <div className="p-2.5 rounded-xl bg-[var(--accent)]/10 text-[var(--accent)]">
                 <TrendingUp className="w-5 h-5" />
               </div>
               <div>
@@ -274,7 +274,7 @@ export function HabitAnalyticsDashboard() {
             </div>
 
             <div className="flex items-center gap-2 self-start sm:self-auto mr-8">
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-semibold border border-emerald-500/30">
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[var(--accent)]/15 text-[var(--accent)] text-xs font-semibold border border-[var(--accent)]/30">
                 <Flame className="w-3.5 h-3.5" /> High Precision Curve
               </span>
             </div>
@@ -288,8 +288,8 @@ export function HabitAnalyticsDashboard() {
             >
               <defs>
                 <linearGradient id="vibrantEmeraldGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+                  <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.0" />
                 </linearGradient>
 
                 <filter id="emeraldGlow" x="-20%" y="-20%" width="140%" height="140%">
@@ -357,7 +357,7 @@ export function HabitAnalyticsDashboard() {
                 transition={{ duration: 0.9, ease: 'easeOut' }}
                 d={linePathD}
                 fill="none"
-                stroke="#10b981"
+                stroke="var(--accent)"
                 strokeWidth="4"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -371,7 +371,7 @@ export function HabitAnalyticsDashboard() {
                     cx={pt.x}
                     cy={pt.y}
                     r="6"
-                    className="fill-[#10b981] stroke-[var(--bg-secondary)] stroke-[2.5] hover:r-8 transition-all"
+                    className="fill-[var(--accent)] stroke-[var(--bg-secondary)] stroke-[2.5] hover:r-8 transition-all"
                     onMouseEnter={() => setHoveredLinePoint(pt)}
                     onMouseLeave={() => setHoveredLinePoint(null)}
                   />
@@ -390,11 +390,11 @@ export function HabitAnalyticsDashboard() {
                   top: `${(hoveredLinePoint.y / chartHeight) * 100 - 6}%`,
                 }}
               >
-                <div className="bg-gray-950 text-white text-xs py-2 px-3.5 rounded-xl shadow-2xl border border-gray-800 whitespace-nowrap">
-                  <div className="font-bold text-emerald-400 mb-0.5">
+                <div className="bg-[var(--bg-primary)] text-[var(--text-primary)] text-xs py-2 px-3.5 rounded-xl shadow-2xl border border-[var(--border-strong)] whitespace-nowrap">
+                  <div className="font-bold text-[var(--accent)] mb-0.5">
                     {hoveredLinePoint.label}
                   </div>
-                  <div className="text-gray-300 font-medium">
+                  <div className="text-[var(--text-secondary)] font-medium">
                     {hoveredLinePoint.count} / {habits.length} habits done ({hoveredLinePoint.percentage}%)
                   </div>
                 </div>
@@ -409,7 +409,7 @@ export function HabitAnalyticsDashboard() {
       return (
         <SortableWidgetCard key={id} id={id}>
           <div className="flex items-center gap-2.5 mb-4 border-b border-[var(--border-subtle)] pb-3">
-            <div className="p-2.5 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400">
+            <div className="p-2.5 rounded-xl bg-[var(--accent)]/10 text-[var(--accent)]">
               <Target className="w-5 h-5" />
             </div>
             <div>
@@ -505,12 +505,12 @@ export function HabitAnalyticsDashboard() {
 
           {/* Hover Tooltip for Ring Card */}
           {hoveredRingHabit && (
-            <div className="mt-3 p-3 rounded-xl bg-gray-950 text-white text-xs border border-gray-800 shadow-xl">
-              <div className="font-bold text-emerald-400">{hoveredRingHabit.name}</div>
-              <div className="text-gray-300 mt-1">
+            <div className="mt-3 p-3 rounded-xl bg-[var(--bg-primary)] text-[var(--text-primary)] text-xs border border-[var(--border-strong)] shadow-xl">
+              <div className="font-bold text-[var(--accent)]">{hoveredRingHabit.name}</div>
+              <div className="text-[var(--text-secondary)] mt-1">
                 Completed {hoveredRingHabit.doneCount} out of 30 days ({hoveredRingHabit.rate}% consistency).
                 {hoveredRingHabit.linkedTaskTitle && (
-                  <span className="text-gray-400 block mt-0.5">
+                  <span className="text-[var(--text-muted)] block mt-0.5">
                     Auto-completes task: &quot;{hoveredRingHabit.linkedTaskTitle}&quot;
                   </span>
                 )}
@@ -525,7 +525,7 @@ export function HabitAnalyticsDashboard() {
       return (
         <SortableWidgetCard key={id} id={id}>
           <div className="flex items-center gap-2.5 mb-4 border-b border-[var(--border-subtle)] pb-3">
-            <div className="p-2.5 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400">
+            <div className="p-2.5 rounded-xl bg-[var(--accent)]/10 text-[var(--accent)]">
               <BarChart3 className="w-5 h-5" />
             </div>
             <div>
@@ -553,12 +553,14 @@ export function HabitAnalyticsDashboard() {
                 </span>
 
                 <div className="w-full bg-[var(--bg-tertiary)] rounded-t-xl relative h-full flex items-end overflow-hidden border border-[var(--border-subtle)]">
-                  <motion.div
-                    initial={{ height: 0 }}
-                    animate={{ height: `${item.heightPercentage}%` }}
-                    transition={{ duration: 0.6, ease: 'easeOut' }}
-                    className="w-full bg-gradient-to-t from-emerald-600 to-teal-400 dark:from-emerald-500 dark:to-emerald-300 rounded-t-lg group-hover:brightness-110 transition-all border-t border-emerald-300"
-                  />
+                  <div className="w-full" style={{ height: `${item.heightPercentage}%` }}>
+                    <motion.div
+                      initial={{ scaleY: 0 }}
+                      animate={{ scaleY: 1 }}
+                      transition={{ duration: 0.6, ease: 'easeOut' }}
+                      className="w-full h-full origin-bottom bg-gradient-to-t from-[var(--accent)] to-[var(--accent-hover)] dark:from-[var(--accent)] dark:to-[var(--accent-hover)] rounded-t-lg group-hover:brightness-110 transition-all border-t border-[var(--accent)]/50"
+                    />
+                  </div>
                 </div>
 
                 <span className="text-xs font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
@@ -570,11 +572,11 @@ export function HabitAnalyticsDashboard() {
 
           {/* Hover Tooltip for Bar Chart */}
           {hoveredBarDay && (
-            <div className="mt-3 p-3 rounded-xl bg-gray-950 text-white text-xs border border-gray-800 shadow-xl">
-              <div className="font-bold text-sky-400">{hoveredBarDay.day} Frequency</div>
-              <div className="text-gray-300 mt-1">
+            <div className="mt-3 p-3 rounded-xl bg-[var(--bg-primary)] text-[var(--text-primary)] text-xs border border-[var(--border-strong)] shadow-xl">
+              <div className="font-bold text-[var(--accent)]">{hoveredBarDay.day} Frequency</div>
+              <div className="text-[var(--text-secondary)] mt-1">
                 {hoveredBarDay.count} total check-ins ({hoveredBarDay.percentage}% of overall activity).
-                <span className="block text-gray-400 mt-0.5">
+                <span className="block text-[var(--text-muted)] mt-0.5">
                   Average ~{hoveredBarDay.avgPerWeek} check-ins per {hoveredBarDay.day}.
                 </span>
               </div>
@@ -604,7 +606,7 @@ export function HabitAnalyticsDashboard() {
   return (
     <div className="space-y-4">
       {/* Performance Highlight Insight Banner */}
-      <div className="rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-[var(--bg-secondary)] to-violet-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+      <div className="rounded-2xl border border-[var(--accent)]/20 bg-gradient-to-r from-[var(--accent)]/10 via-[var(--bg-secondary)] to-[var(--accent)]/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-[var(--accent)] text-white shadow-xs">
             <Sparkles className="w-4 h-4" />
@@ -614,13 +616,13 @@ export function HabitAnalyticsDashboard() {
               Performance Insight
             </div>
             <div className="text-sm font-semibold text-[var(--text-primary)]">
-              Peak consistency day is <span className="font-bold text-[var(--accent)]">{highlights.peakDayName}</span> ({highlights.peakDayCount} check-ins). Top habit: <span className="font-bold text-violet-500">{highlights.topHabitName}</span> ({highlights.topHabitRate}% 30-day rate).
+              Peak consistency day is <span className="font-bold text-[var(--accent)]">{highlights.peakDayName}</span> ({highlights.peakDayCount} check-ins). Top habit: <span className="font-bold text-[var(--accent)]">{highlights.topHabitName}</span> ({highlights.topHabitRate}% 30-day rate).
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] shrink-0">
-          <Zap className="w-3.5 h-3.5 text-amber-500" />
+          <Zap className="w-3.5 h-3.5 text-[var(--color-warning)]" />
           <span>Drag widgets to reorder</span>
         </div>
       </div>

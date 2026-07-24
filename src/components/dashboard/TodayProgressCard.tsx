@@ -116,6 +116,7 @@ export function TodayProgressCard() {
           <button
             onClick={() => refreshAllData()}
             disabled={isRefreshing}
+            aria-label="Refresh data"
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-all shadow-xs active:scale-95 disabled:opacity-50 cursor-pointer"
             title="Refresh database metrics"
           >
@@ -123,7 +124,7 @@ export function TodayProgressCard() {
             <span>{isRefreshing ? 'Refreshing...' : 'Refresh Data'}</span>
           </button>
 
-          <div className="flex items-center gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] px-5 py-4">
+          <div className="flex items-center gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] px-5 py-4" aria-label={`Active focus time: ${focusHours}h ${focusMins}m`}>
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--accent-muted)] text-[var(--accent)]">
               <Clock className="h-6 w-6" />
             </div>
@@ -143,7 +144,7 @@ export function TodayProgressCard() {
       {/* Metric Cards Row */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         {/* Task Completion Metric */}
-        <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-4">
+        <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-4" aria-label={`Tasks completed: ${completedTasks} of ${totalTasks}`}>
           <div className="flex flex-col gap-1">
             <span className="text-xs font-medium text-[var(--text-muted)]">Tasks Completed</span>
             <div className="flex items-baseline gap-2">
@@ -156,7 +157,7 @@ export function TodayProgressCard() {
         </div>
 
         {/* Habits Checked Metric */}
-        <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-4">
+        <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-4" aria-label={`Habits checked: ${completedHabits} of ${totalHabits}`}>
           <div className="flex flex-col gap-1">
             <span className="text-xs font-medium text-[var(--text-muted)]">Habits Checked</span>
             <span className="font-mono text-xl font-bold text-[var(--text-primary)]">
@@ -167,7 +168,7 @@ export function TodayProgressCard() {
         </div>
 
         {/* Streak Counter */}
-        <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-4">
+        <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-4" aria-label={`Daily streak: ${streak} ${streak === 1 ? 'Day' : 'Days'}`}>
           <div className="flex flex-col gap-1">
             <span className="text-xs font-medium text-[var(--text-muted)]">Daily Streak</span>
             <span className="font-mono text-2xl font-bold text-amber-600 dark:text-amber-400">

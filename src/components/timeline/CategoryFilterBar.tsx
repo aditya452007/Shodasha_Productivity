@@ -16,10 +16,10 @@ const timeframeOptions: { value: TimeframeFilter; label: string }[] = [
 ]
 
 const categoryOptions: { value: CategoryFilter; label: string; dotColor: string }[] = [
-  { value: 'all', label: 'All', dotColor: 'bg-stone-400 dark:bg-stone-500' },
-  { value: 'work', label: 'Deep Work', dotColor: 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' },
-  { value: 'neutral', label: 'Tools', dotColor: 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' },
-  { value: 'distraction', label: 'Distraction', dotColor: 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' },
+  { value: 'all', label: 'All', dotColor: 'bg-[var(--text-muted)]' },
+  { value: 'work', label: 'Deep Work', dotColor: 'bg-[var(--color-success)] shadow-[0_0_8px_var(--color-success)]' },
+  { value: 'neutral', label: 'Tools', dotColor: 'bg-[var(--color-warning)] shadow-[0_0_8px_var(--color-warning)]' },
+  { value: 'distraction', label: 'Distraction', dotColor: 'bg-[var(--color-error)] shadow-[0_0_8px_var(--color-error)]' },
 ]
 
 const formatDuration = (seconds: number) => {
@@ -44,7 +44,7 @@ export function CategoryFilterBar() {
 
   return (
     <div className="p-2 rounded-[2.25rem] bg-stone-900/5 dark:bg-white/5 ring-1 ring-stone-900/5 dark:ring-white/10 shadow-xs">
-      <div className="backdrop-blur-xl bg-[var(--bg-surface)]/85 border border-[var(--border)] rounded-[calc(2.25rem-0.5rem)] p-3 sm:p-4 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
+      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[calc(2.25rem-0.5rem)] p-3 sm:p-4 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
         {/* Left: Timeframe & Category Filters */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Timeframe Segmented Control with Motion Pill */}
@@ -84,6 +84,7 @@ export function CategoryFilterBar() {
                 <button
                   key={cat.value}
                   onClick={() => setSelectedCategory(cat.value)}
+                  aria-pressed={active}
                   className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl text-xs font-medium transition-all active:scale-[0.97] border ${
                     active
                       ? 'bg-[var(--accent-muted)] border-[var(--accent)] text-[var(--accent)] font-semibold shadow-xs'
@@ -108,6 +109,7 @@ export function CategoryFilterBar() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter by app or window..."
+              aria-label="Filter by app name or window title"
               className="w-full pl-9 pr-8 py-2 text-xs rounded-2xl bg-[var(--bg-surface-hover)] border border-[var(--border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]"
             />
             {searchQuery && (

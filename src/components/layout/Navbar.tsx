@@ -1,15 +1,18 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useUIStore } from '@/stores/uiStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { isTauri } from '@/lib/db'
+import { CommandPalette } from '@/components/ui/CommandPalette'
 import GooeyTabs from '@/components/ui/gooey-tabs'
 import {
   Sun,
   Moon,
   Activity,
+  Search,
   LayoutDashboard,
   Kanban,
   CalendarCheck,
@@ -34,6 +37,7 @@ export function Navbar() {
   const isTracking = useUIStore((state) => state.isTracking)
   const themeMode = useSettingsStore((state) => state.themeMode)
   const setThemeMode = useSettingsStore((state) => state.setThemeMode)
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
 
   const toggleTheme = () => {
     setThemeMode(themeMode === 'dark' ? 'light' : 'dark')
@@ -74,6 +78,7 @@ export function Navbar() {
   }
 
   return (
+    <>
     <header
       data-tauri-drag-region
       className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--bg-surface)]/80 backdrop-blur-md transition-colors select-none"
@@ -125,7 +130,7 @@ export function Navbar() {
           <div className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-base)] px-3 py-1.5 text-xs text-[var(--text-secondary)] shadow-xs">
             <span className="relative flex h-2 w-2">
               {isTracking && (
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--accent)] opacity-75"></span>
+                <span className="absolute inline-flex h-full w-full animate-ping motion-reduce:animate-none rounded-full bg-[var(--accent)] opacity-75"></span>
               )}
               <span
                 className={`relative inline-flex h-2 w-2 rounded-full ${
@@ -139,10 +144,19 @@ export function Navbar() {
             </span>
           </div>
 
+          {/* Command Palette Trigger */}
+          <button
+            onClick={() => setCommandPaletteOpen(true)}
+            aria-label="Open command palette"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)] shadow-xs"
+          >
+            <Search className="h-3.5 w-3.5" />
+          </button>
+
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
-            aria-label="Toggle theme"
+            aria-label="Switch to light/dark mode"
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)] shadow-xs"
           >
             {themeMode === 'dark' ? <Sun className="h-3.5 w-3.5 text-amber-400" /> : <Moon className="h-3.5 w-3.5" />}
@@ -180,5 +194,7 @@ export function Navbar() {
         </div>
       </div>
     </header>
+    <CommandPalette open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
+    </>
   )
 }

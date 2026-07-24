@@ -12,21 +12,21 @@ const categoryColors: Record<CategoryType, { bg: string; text: string; dot: stri
   work: {
     bg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
     text: 'text-emerald-700 dark:text-emerald-400',
-    dot: 'bg-[#059669]',
+    dot: 'bg-[var(--color-success)]',
     border: 'border-emerald-500/20',
     label: 'Deep Work',
   },
   neutral: {
     bg: 'bg-amber-500/10 dark:bg-amber-500/20',
     text: 'text-amber-700 dark:text-amber-400',
-    dot: 'bg-[#d97706]',
+    dot: 'bg-[var(--color-warning)]',
     border: 'border-amber-500/20',
     label: 'General / Tools',
   },
   distraction: {
     bg: 'bg-rose-500/10 dark:bg-rose-500/20',
     text: 'text-rose-700 dark:text-rose-400',
-    dot: 'bg-[#dc2626]',
+    dot: 'bg-[var(--color-error)]',
     border: 'border-rose-500/20',
     label: 'Distraction',
   },
@@ -154,7 +154,7 @@ export function AppCategoryManager() {
                         key={cat}
                         type="button"
                         onClick={() => setCategory(appName, cat)}
-                        title={`Set to ${categoryColors[cat].label}`}
+                        aria-label={`Categorize as ${categoryColors[cat].label}`}
                         className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
                           category === cat
                             ? `${categoryColors[cat].dot} text-white shadow-sm`

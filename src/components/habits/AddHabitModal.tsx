@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { X, Sparkles, Link as LinkIcon, Check } from 'lucide-react'
+import { X, Sparkles, Link as LinkIcon, Check, Loader2 } from 'lucide-react'
 import { useHabitStore, Habit } from '@/stores/habitStore'
 import { useTaskStore } from '@/stores/taskStore'
 import { toast } from 'sonner'
@@ -147,6 +147,7 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
                         key={c.value}
                         type="button"
                         onClick={() => setColor(c.value)}
+                        aria-label={`Select ${c.name} color`}
                         className={`w-7 h-7 rounded-full flex items-center justify-center transition-transform ${
                           isSelected ? 'scale-110 ring-2 ring-offset-2 ring-offset-[var(--bg-secondary)] ring-[var(--text-primary)]' : 'hover:scale-105'
                         }`}
@@ -195,9 +196,17 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-[var(--accent)] text-white text-xs font-semibold hover:opacity-90 transition-opacity shadow-xs"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 rounded-xl bg-[var(--accent)] text-white text-xs font-semibold hover:opacity-90 transition-opacity shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {editingHabit ? 'Save Changes' : 'Create Habit'}
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </span>
+                  ) : (
+                    editingHabit ? 'Save Changes' : 'Create Habit'
+                  )}
                 </button>
               </div>
             </form>

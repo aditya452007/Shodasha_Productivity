@@ -30,8 +30,8 @@ export function LineChart({
   height = 220,
   series1Label = 'Cumulative Focus Time',
   series2Label = 'Total System On-Time',
-  series1Color = '#059669', // Emerald
-  series2Color = '#a8a29e', // Stone
+  series1Color = 'var(--accent)',
+  series2Color = 'var(--text-muted)'
 }: CumulativeLineChartProps) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
 
@@ -82,7 +82,7 @@ export function LineChart({
       <div className="flex flex-wrap items-center justify-between text-xs mb-3 gap-2">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="size-2.5 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]" style={{ backgroundColor: series1Color }} />
+            <span className="size-2.5 rounded-full shadow-[0_0_8px_var(--accent)]" style={{ backgroundColor: series1Color }} />
             <span className="font-semibold text-[var(--text-primary)]">{series1Label}</span>
           </div>
           {series2Label && (
