@@ -161,18 +161,18 @@ Generated: 2026-07-24 | Type: EXHAUSTIVE — every change that must happen
 - [x] ProgressRing: loading pulse | empty "0%" | N/A error | animated ring
 
 ### Board Components
-- [ ] KanbanBoard: loading skeleton (column placeholders) | N/A empty (each column handles it) | error banner on drag failure | columns
-- [ ] KanbanColumn: loading skeleton | empty "Add a task" placeholder | N/A error | task list
-- [ ] KanbanCard: N/A (single item) | N/A | N/A | card with states
-- [ ] TaskModal: loading during save | N/A | error on validation/save failure | form
+- [x] KanbanBoard: loading skeleton (column placeholders) | N/A empty (each column handles it) | error banner on drag failure | columns
+- [x] KanbanColumn: loading skeleton | empty "Add a task" placeholder | N/A error | task list
+- [x] KanbanCard: N/A (single item) | N/A | N/A | card with states
+- [x] TaskModal: loading during save | N/A | error on validation/save failure | form
 
 ### Habits Components
-- [ ] HabitAnalyticsDashboard: loading skeleton | empty "Start tracking habits" CTA | error banner | Recharts
-- [ ] HabitCalendar: loading skeleton | empty "No habits yet" CTA | error | month matrix
-- [ ] HabitHeatmap: loading skeleton | empty "No data yet" | error | heatmap grid
-- [ ] HabitStatsCard: loading skeleton | empty "0 habits" | error | 4 stat cards
-- [ ] HabitAchievements: loading skeleton | empty "Complete habits to unlock" | error | achievement grid
-- [ ] AddHabitModal: submitting state | N/A | validation error | form
+- [x] HabitAnalyticsDashboard: loading skeleton | empty "Start tracking habits" CTA | error banner | Recharts
+- [x] HabitCalendar: loading skeleton | empty "No habits yet" CTA | error | month matrix
+- [x] HabitHeatmap: loading skeleton | empty "No data yet" | error | heatmap grid
+- [x] HabitStatsCard: loading skeleton | empty "0 habits" | error | 4 stat cards
+- [x] HabitAchievements: loading skeleton | empty "Complete habits to unlock" | error | achievement grid
+- [x] AddHabitModal: submitting state | N/A | validation error | form
 
 ### Timeline Components
 - [ ] FilterBar: N/A | N/A | N/A | filter controls

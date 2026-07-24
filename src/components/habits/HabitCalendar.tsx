@@ -14,6 +14,8 @@ import {
 } from 'lucide-react'
 import { useHabitStore, Habit } from '@/stores/habitStore'
 import { useTaskStore } from '@/stores/taskStore'
+import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
+import { ErrorBanner } from '@/components/ui/ErrorBanner'
 
 interface HabitCalendarProps {
   onOpenAddModal: () => void
@@ -25,6 +27,8 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
   const records = useHabitStore((s) => s.records)
   const toggleHabit = useHabitStore((s) => s.toggleHabit)
   const deleteHabit = useHabitStore((s) => s.deleteHabit)
+  const isLoading = useHabitStore((s) => s.isLoading)
+  const error = useHabitStore((s) => s.error)
   const tasks = useTaskStore((s) => s.tasks)
 
   const [currentDate, setCurrentDate] = useState(() => new Date())
@@ -69,6 +73,19 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
 
   const handleToday = () => {
     setCurrentDate(new Date())
+  }
+
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-xs space-y-4">
+        <LoadingSkeleton height={32} width="35%" />
+        <LoadingSkeleton height={180} />
+      </div>
+    )
+  }
+
+  if (error) {
+    return <ErrorBanner title="Failed to load habit calendar" message={error} />
   }
 
   return (

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Task, useTaskStore } from '@/stores/taskStore'
 import { useHabitStore } from '@/stores/habitStore'
 import { X, Trash2, Calendar, Tag, Link2, AlignLeft, CheckSquare } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface TaskModalProps {
   task: Task | null
@@ -23,6 +24,7 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
   const [dueDate, setDueDate] = useState('')
   const [tagsInput, setTagsInput] = useState('')
   const [linkedHabitId, setLinkedHabitId] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     if (task) {
@@ -37,28 +39,40 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
 
   if (!isOpen || !task) return null
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title.trim()) return
+    if (!title.trim()) {
+      toast.error('Task title is required')
+      return
+    }
 
-    const tags = tagsInput
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean)
+    try {
+      setIsSubmitting(true)
+      const tags = tagsInput
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
 
-    updateTask(task.id, {
-      title: title.trim(),
-      description: description.trim() || undefined,
-      status,
-      dueDate: dueDate || undefined,
-      tags,
-      linkedHabitId: linkedHabitId || undefined,
-    })
-    onClose()
+      await updateTask(task.id, {
+        title: title.trim(),
+        description: description.trim() || undefined,
+        status,
+        dueDate: dueDate || undefined,
+        tags,
+        linkedHabitId: linkedHabitId || undefined,
+      })
+      toast.success('Task details updated')
+      onClose()
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to save task')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleDelete = () => {
     deleteTask(task.id)
+    toast.success('Task deleted')
     onClose()
   }
 

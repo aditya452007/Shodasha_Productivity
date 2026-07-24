@@ -4,10 +4,14 @@ import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Flame, Trophy, CalendarCheck, CheckCircle2 } from 'lucide-react'
 import { useHabitStore } from '@/stores/habitStore'
+import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
+import { ErrorBanner } from '@/components/ui/ErrorBanner'
 
 export function HabitStatsCard() {
   const habits = useHabitStore((s) => s.habits)
   const records = useHabitStore((s) => s.records)
+  const isLoading = useHabitStore((s) => s.isLoading)
+  const error = useHabitStore((s) => s.error)
 
   const stats = useMemo(() => {
     const today = new Date()
@@ -56,6 +60,21 @@ export function HabitStatsCard() {
       last30DaysCount,
     }
   }, [habits, records])
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <LoadingSkeleton height={80} />
+        <LoadingSkeleton height={80} />
+        <LoadingSkeleton height={80} />
+        <LoadingSkeleton height={80} />
+      </div>
+    )
+  }
+
+  if (error) {
+    return <ErrorBanner title="Failed to load habit statistics" message={error} />
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

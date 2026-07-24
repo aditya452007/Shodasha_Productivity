@@ -30,6 +30,8 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { useHabitStore } from '@/stores/habitStore'
 import { useTaskStore } from '@/stores/taskStore'
+import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
+import { ErrorBanner } from '@/components/ui/ErrorBanner'
 
 // Sortable Wrapper Component for Analytics Widgets
 function SortableWidgetCard({
@@ -75,6 +77,8 @@ function SortableWidgetCard({
 export function HabitAnalyticsDashboard() {
   const habits = useHabitStore((s) => s.habits)
   const records = useHabitStore((s) => s.records)
+  const isLoading = useHabitStore((s) => s.isLoading)
+  const error = useHabitStore((s) => s.error)
   const tasks = useTaskStore((s) => s.tasks)
 
   const [widgetOrder, setWidgetOrder] = useState(['widget-line', 'widget-rings', 'widget-bar'])
@@ -581,6 +585,20 @@ export function HabitAnalyticsDashboard() {
     }
 
     return null
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <LoadingSkeleton height={60} />
+        <LoadingSkeleton height={200} />
+        <LoadingSkeleton height={200} />
+      </div>
+    )
+  }
+
+  if (error) {
+    return <ErrorBanner title="Failed to load analytics dashboard" message={error} />
   }
 
   return (

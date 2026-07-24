@@ -40,9 +40,14 @@ function renderAchievementIcon(iconName: Achievement['iconName']) {
   }
 }
 
+import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
+import { ErrorBanner } from '@/components/ui/ErrorBanner'
+
 export function HabitAchievements() {
   const habits = useHabitStore((s) => s.habits)
   const records = useHabitStore((s) => s.records)
+  const isLoading = useHabitStore((s) => s.isLoading)
+  const error = useHabitStore((s) => s.error)
 
   // Compute total unique check-in days and active streak
   const { currentStreak, totalCheckInDays } = useMemo(() => {
@@ -88,6 +93,24 @@ export function HabitAchievements() {
   }, [currentStreak, totalCheckInDays])
 
   const unlockedCount = achievementProgresses.filter((a) => a.unlocked).length
+
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-xs space-y-4">
+        <LoadingSkeleton height={32} width="40%" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <LoadingSkeleton height={100} />
+          <LoadingSkeleton height={100} />
+          <LoadingSkeleton height={100} />
+          <LoadingSkeleton height={100} />
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return <ErrorBanner title="Failed to load achievements" message={error} />
+  }
 
   return (
     <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-xs">

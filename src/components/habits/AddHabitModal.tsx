@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Sparkles, Link as LinkIcon, Check } from 'lucide-react'
 import { useHabitStore, Habit } from '@/stores/habitStore'
 import { useTaskStore } from '@/stores/taskStore'
+import { toast } from 'sonner'
 
 interface AddHabitModalProps {
   isOpen: boolean
@@ -44,16 +45,30 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
     }
   }, [editingHabit, isOpen])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!name.trim()) return
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-    if (editingHabit) {
-      updateHabit(editingHabit.id, name.trim(), color, linkedTaskId || undefined)
-    } else {
-      addHabit(name.trim(), color, linkedTaskId || undefined)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name.trim()) {
+      toast.error('Habit title is required')
+      return
     }
-    onClose()
+
+    try {
+      setIsSubmitting(true)
+      if (editingHabit) {
+        await updateHabit(editingHabit.id, name.trim(), color, linkedTaskId || undefined)
+        toast.success('Habit updated')
+      } else {
+        await addHabit(name.trim(), color, linkedTaskId || undefined)
+        toast.success(`Habit "${name.trim()}" created`)
+      }
+      onClose()
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to save habit')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (

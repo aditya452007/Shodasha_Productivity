@@ -20,14 +20,20 @@ import { KanbanCard } from './KanbanCard'
 import { TaskModal } from './TaskModal'
 import { AddColumnModal } from './AddColumnModal'
 import { Plus, Kanban as KanbanIcon } from 'lucide-react'
+import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
+import { ErrorBanner } from '@/components/ui/ErrorBanner'
+import { toast } from 'sonner'
 
 export function KanbanBoard() {
   const [isMounted, setIsMounted] = useState(false)
   const columns = useTaskStore((state) => state.columns)
   const tasks = useTaskStore((state) => state.tasks)
+  const isLoading = useTaskStore((state) => state.isLoading)
+  const error = useTaskStore((state) => state.error)
   const moveTask = useTaskStore((state) => state.moveTask)
   const reorderTasks = useTaskStore((state) => state.reorderTasks)
   const reorderColumns = useTaskStore((state) => state.reorderColumns)
+  const initializeTasks = useTaskStore((state) => state.initializeTasks)
 
   const [activeTask, setActiveTask] = useState<Task | null>(null)
   const [activeColumn, setActiveColumn] = useState<any>(null)
@@ -61,63 +67,71 @@ export function KanbanBoard() {
   }
 
   const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event
-    if (!over) return
+    try {
+      const { active, over } = event
+      if (!over) return
 
-    const activeId = active.id as string
-    const overId = over.id as string
+      const activeId = active.id as string
+      const overId = over.id as string
 
-    if (activeId === overId) return
+      if (activeId === overId) return
 
-    const isTask = active.data.current?.type === 'Task'
-    const isColumn = active.data.current?.type === 'Column'
+      const isTask = active.data.current?.type === 'Task'
+      const isColumn = active.data.current?.type === 'Column'
 
-    if (isColumn) return // Handled in DragEnd
+      if (isColumn) return // Handled in DragEnd
 
-    if (isTask) {
-      const activeTaskItem = tasks.find((t) => t.id === activeId)
-      if (!activeTaskItem) return
+      if (isTask) {
+        const activeTaskItem = tasks.find((t) => t.id === activeId)
+        if (!activeTaskItem) return
 
-      const isOverColumn = columns.some((col) => col.id === overId)
-      if (isOverColumn) {
-        if (activeTaskItem.status !== overId) {
-          moveTask(activeId, overId)
+        const isOverColumn = columns.some((col) => col.id === overId)
+        if (isOverColumn) {
+          if (activeTaskItem.status !== overId) {
+            moveTask(activeId, overId)
+          }
+          return
         }
-        return
-      }
 
-      const overTaskItem = tasks.find((t) => t.id === overId)
-      if (overTaskItem && activeTaskItem.status !== overTaskItem.status) {
-        moveTask(activeId, overTaskItem.status)
+        const overTaskItem = tasks.find((t) => t.id === overId)
+        if (overTaskItem && activeTaskItem.status !== overTaskItem.status) {
+          moveTask(activeId, overTaskItem.status)
+        }
       }
+    } catch (err: any) {
+      toast.error('Drag operation failed: ' + (err?.message || 'Unknown error'))
     }
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-    setActiveTask(null)
-    setActiveColumn(null)
-    if (!over) return
+    try {
+      const { active, over } = event
+      setActiveTask(null)
+      setActiveColumn(null)
+      if (!over) return
 
-    const activeId = active.id as string
-    const overId = over.id as string
+      const activeId = active.id as string
+      const overId = over.id as string
 
-    if (activeId === overId) return
+      if (activeId === overId) return
 
-    if (active.data.current?.type === 'Column') {
-      reorderColumns(activeId, overId)
-      return
-    }
+      if (active.data.current?.type === 'Column') {
+        reorderColumns(activeId, overId)
+        return
+      }
 
-    if (active.data.current?.type === 'Task') {
-      const overTask = tasks.find((t) => t.id === overId)
-      const targetStatus = overTask
-        ? overTask.status
-        : columns.some((c) => c.id === overId)
-        ? overId
-        : undefined
+      if (active.data.current?.type === 'Task') {
+        const overTask = tasks.find((t) => t.id === overId)
+        const targetStatus = overTask
+          ? overTask.status
+          : columns.some((c) => c.id === overId)
+          ? overId
+          : undefined
 
-      reorderTasks(activeId, overId, targetStatus)
+        reorderTasks(activeId, overId, targetStatus)
+      }
+    } catch (err: any) {
+      toast.error('Failed to reorder items: ' + (err?.message || 'Unknown error'))
     }
   }
 
@@ -134,55 +148,83 @@ export function KanbanBoard() {
 
         <button
           onClick={() => setIsAddColModalOpen(true)}
-          className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] shadow-xs transition-colors"
+          className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] shadow-xs transition-colors cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           <span>Add Column</span>
         </button>
       </div>
 
-      {/* Kanban Drag & Drop Area */}
-      {isMounted && (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext items={columns.map((c) => c.id)} strategy={rectSortingStrategy}>
-            <div className="flex flex-wrap items-start gap-6 pb-6 pt-2">
-              {columns.map((column) => {
-                const columnTasks = tasks.filter((t) => t.status === column.id)
-                return (
-                  <KanbanColumn
-                    key={column.id}
-                    column={column}
-                    tasks={columnTasks}
-                    onEditTask={handleEditTask}
-                  />
-                )
-              })}
-            </div>
-          </SortableContext>
+      {error && (
+        <ErrorBanner
+          title="Failed to load Kanban board"
+          message={error}
+          onRetry={() => initializeTasks()}
+        />
+      )}
 
-          <DragOverlay>
-            {activeColumn ? (
-              <div className="w-full shadow-2xl rotate-1 opacity-90">
-                <KanbanColumn
-                  column={activeColumn}
-                  tasks={tasks.filter((t) => t.status === activeColumn.id)}
-                  onEditTask={() => {}}
-                  isOverlay={true}
-                />
+      {/* Loading Skeleton Mode */}
+      {isLoading ? (
+        <div className="flex flex-wrap items-start gap-6 pb-6 pt-2">
+          <div className="w-80 space-y-3 p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-base)]">
+            <LoadingSkeleton height={24} width="50%" />
+            <LoadingSkeleton height={80} />
+            <LoadingSkeleton height={80} />
+          </div>
+          <div className="w-80 space-y-3 p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-base)]">
+            <LoadingSkeleton height={24} width="50%" />
+            <LoadingSkeleton height={80} />
+          </div>
+          <div className="w-80 space-y-3 p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-base)]">
+            <LoadingSkeleton height={24} width="50%" />
+            <LoadingSkeleton height={80} />
+            <LoadingSkeleton height={80} />
+          </div>
+        </div>
+      ) : (
+        /* Kanban Drag & Drop Area */
+        isMounted && (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={columns.map((c) => c.id)} strategy={rectSortingStrategy}>
+              <div className="flex flex-wrap items-start gap-6 pb-6 pt-2">
+                {columns.map((column) => {
+                  const columnTasks = tasks.filter((t) => t.status === column.id)
+                  return (
+                    <KanbanColumn
+                      key={column.id}
+                      column={column}
+                      tasks={columnTasks}
+                      onEditTask={handleEditTask}
+                    />
+                  )
+                })}
               </div>
-            ) : activeTask ? (
-              <div className="w-full shadow-2xl rotate-2">
-                <KanbanCard task={activeTask} onEdit={() => {}} />
-              </div>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
+            </SortableContext>
+
+            <DragOverlay>
+              {activeColumn ? (
+                <div className="w-full shadow-2xl rotate-1 opacity-90">
+                  <KanbanColumn
+                    column={activeColumn}
+                    tasks={tasks.filter((t) => t.status === activeColumn.id)}
+                    onEditTask={() => {}}
+                    isOverlay={true}
+                  />
+                </div>
+              ) : activeTask ? (
+                <div className="w-full shadow-2xl rotate-2">
+                  <KanbanCard task={activeTask} onEdit={() => {}} />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        )
       )}
 
       {/* Task Edit Modal */}
