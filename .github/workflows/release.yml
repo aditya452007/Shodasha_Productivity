@@ -80,7 +80,7 @@ jobs:
         if: steps.version.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: 'npm'
 
       - name: Install Rust toolchain
@@ -186,7 +186,7 @@ jobs:
 
       - name: Build Tauri app & create release
         if: steps.version.outputs.skip != 'true'
-        uses: tauri-apps/tauri-action@v2
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
