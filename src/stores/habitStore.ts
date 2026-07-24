@@ -77,7 +77,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       set({ error: err?.message || 'Failed to initialize habits', isLoading: false, isInitialized: true })
     }
   },
-  toggleHabit: (habitId, date) => {
+  toggleHabit: async (habitId, date) => {
     const key = `${habitId}_${date}`
     const currentlyDone = !!get().records[key]
     const nextDone = !currentlyDone
@@ -90,7 +90,17 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     }))
 
     const recordId = `rec_${habitId}_${date}`
-    toggleHabitRecordInDb(recordId, habitId, date, nextDone)
+    try {
+      await toggleHabitRecordInDb(recordId, habitId, date, nextDone)
+    } catch {
+      set((state) => ({
+        records: {
+          ...state.records,
+          [key]: currentlyDone,
+        },
+      }))
+      return
+    }
 
     // Domain Rule: Completing a Habit for a day auto-completes its linked Task (one-way link)
     if (nextDone) {

@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Activity, Clock, Moon, Power, ShieldCheck } from 'lucide-react'
+import { Activity, Clock, Moon, Power, ShieldCheck, Timer } from 'lucide-react'
 import { useSettingsStore } from '@/stores/settingsStore'
 
 export function TrackingPreferences() {
@@ -11,11 +11,14 @@ export function TrackingPreferences() {
     setPollingInterval,
     idleDetectionEnabled,
     setIdleDetectionEnabled,
+    idleThreshold,
+    setIdleThreshold,
     autoStartEnabled,
     setAutoStartEnabled,
   } = useSettingsStore()
 
   const sliderPercentage = ((pollingInterval - 5) / (60 - 5)) * 100
+  const thresholdPercentage = ((idleThreshold - 60) / (900 - 60)) * 100
 
   return (
     <div className="p-2 rounded-[2.25rem] bg-stone-900/5 dark:bg-white/5 ring-1 ring-stone-900/5 dark:ring-white/10">
@@ -75,6 +78,47 @@ export function TrackingPreferences() {
               <span>5s (High Precision)</span>
               <span>30s (Default)</span>
               <span>60s (Battery Saver)</span>
+            </div>
+          </div>
+
+          {/* Idle Threshold Slider */}
+          <div className="flex flex-col gap-3 pt-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-stone-900/5 dark:bg-white/5 text-amber-500">
+                  <Timer className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold text-[var(--text-primary)]">
+                    Idle Detection Threshold
+                  </span>
+                  <span className="text-xs text-[var(--text-tertiary)]">
+                    Seconds of inactivity before tracking pauses (synced to Rust engine)
+                  </span>
+                </div>
+              </div>
+              <span className="font-mono text-sm font-bold text-amber-500 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+                {idleThreshold}s
+              </span>
+            </div>
+            <div className="relative flex items-center h-6 w-full touch-none select-none">
+              <input
+                type="range"
+                min={60}
+                max={900}
+                step={30}
+                value={idleThreshold}
+                onChange={(e) => setIdleThreshold(Number(e.target.value))}
+                className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-[var(--border)] dark:bg-[var(--border-strong)] accent-[var(--accent)] focus:outline-none"
+                style={{
+                  background: `linear-gradient(to right, var(--accent) 0%, var(--accent) ${thresholdPercentage}%, var(--bg-surface-elevated) ${thresholdPercentage}%, var(--bg-surface-elevated) 100%)`,
+                }}
+              />
+            </div>
+            <div className="flex justify-between text-[10px] font-mono text-[var(--text-tertiary)] px-1">
+              <span>1 min (Sensitive)</span>
+              <span>5 min (Default)</span>
+              <span>15 min (Lenient)</span>
             </div>
           </div>
 

@@ -506,8 +506,12 @@ Last verified: 2026-07-24 (Phase 5 audit)
 | 6. Keyboard Shortcuts | ✅ Global shortcuts done (Cmd+K, Cmd+1-5, ?); board-level shortcuts deferred (complex + focus management required) | ~40% |
 | 7. CSS Variables | ✅ All missing secondary tokens added (--color-rule-strong, --color-ink-secondary, --color-accent-hover, --color-accent-muted) | 100% |
 | 8. IPC Commands | ✅ All Rust commands registered and compiling | 100% |
-| 9. Files Created | ✅ 14/15 done (CommandPalette + insights.ts created; ProgressRing exists in ui/) | ~93% |
+| 9. Files Created | ✅ All done (CommandPalette, insights.ts, DailyUsageBarChart, ActivePeriodsTimeline, AppRankingChart, SettingsSidebar, NotificationsSettings, AboutSettings, notifications.ts, notificationStore.ts) | 100% |
 | 10. Files Modified | ✅ All critical + feature files modified; hex→CSS-var replacement applied across 57+ occurrences | 100% |
 | 11. Files Removed | ✅ 4 barrel files deleted; uiStore.ts retained (active use) | ~80% |
-| 12. npm Packages | ✅ sonner, cmdk, recharts installed (shadcn not needed) | ~60% |
-| 13. Build Verification | ✅ lint/typecheck/build pass; hex audit + blur audit complete | ~60% |
+| 12. npm Packages | ✅ sonner, cmdk, recharts installed | 100% |
+| 13. Build Verification | ✅ lint/typecheck/build pass (0 errors); cargo check pass (0 errors) | 100% |
+| 14. Timeline Rewrite | ✅ Daily total usage bar chart, active periods w/ gap compaction, app ranking by total hours | 100% |
+| 15. Settings Redesign | ✅ 2-column sidebar navigation pattern adapted with Tailwind + Lucide, mobile master-detail pattern | 100% |
+| 16. Web Notifications | ✅ Web Notification API wrapper, habit reminders, idle alerts, daily summary reports | 100% |
+

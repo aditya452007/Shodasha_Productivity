@@ -15,13 +15,17 @@ pub struct TimeEntryDb {
 }
 
 pub fn get_time_entries_by_date(conn: &Connection, date: &str) -> Result<Vec<TimeEntryDb>> {
-    let search_pattern = format!("{}%", date);
+    let day_start = format!("{}T00:00:00", date);
+    let day_end = format!("{}T23:59:59", date);
     let mut stmt = conn.prepare(
         "SELECT id, app_name, window_title, start_time, end_time, end_reason, duration_seconds, linked_task_id, created_at
-         FROM time_entries WHERE start_time LIKE ?1 ORDER BY start_time ASC"
+         FROM time_entries
+         WHERE start_time <= ?2
+           AND (end_time IS NULL OR end_time >= ?1)
+         ORDER BY start_time ASC"
     )?;
 
-    let entries = stmt.query_map(params![search_pattern], |row| {
+    let entries = stmt.query_map(params![day_start, day_end], |row| {
         Ok(TimeEntryDb {
             id: row.get(0)?,
             app_name: row.get(1)?,
@@ -39,14 +43,17 @@ pub fn get_time_entries_by_date(conn: &Connection, date: &str) -> Result<Vec<Tim
 }
 
 pub fn get_time_entries_range(conn: &Connection, start_date: &str, end_date: &str) -> Result<Vec<TimeEntryDb>> {
-    let start_pattern = format!("{}T00:00:00", start_date);
-    let end_pattern = format!("{}T23:59:59", end_date);
+    let range_start = format!("{}T00:00:00", start_date);
+    let range_end = format!("{}T23:59:59", end_date);
     let mut stmt = conn.prepare(
         "SELECT id, app_name, window_title, start_time, end_time, end_reason, duration_seconds, linked_task_id, created_at
-         FROM time_entries WHERE start_time >= ?1 AND start_time <= ?2 ORDER BY start_time ASC"
+         FROM time_entries
+         WHERE start_time <= ?2
+           AND (end_time IS NULL OR end_time >= ?1)
+         ORDER BY start_time ASC"
     )?;
 
-    let entries = stmt.query_map(params![start_pattern, end_pattern], |row| {
+    let entries = stmt.query_map(params![range_start, range_end], |row| {
         Ok(TimeEntryDb {
             id: row.get(0)?,
             app_name: row.get(1)?,

@@ -6,6 +6,7 @@ use crate::repositories::app_category_repo::{self, AppCategoryDb};
 use crate::repositories::kanban_repo::{self, KanbanColumnDb};
 use crate::repositories::settings_repo;
 use crate::services::export_service;
+use crate::TrackerState;
 use std::collections::HashMap;
 use tauri::command;
 use windows_sys::Win32::System::Registry::{
@@ -214,11 +215,29 @@ pub fn set_auto_start(enable: bool) -> Result<(), String> {
             if res != 0 {
                 return Err("Failed to set registry auto-start value".to_string());
             }
-        } else {
-            RegDeleteValueW(hkey, val_name.as_ptr());
-            RegCloseKey(hkey);
-        }
+    } else {
+        RegDeleteValueW(hkey, val_name.as_ptr());
+        RegCloseKey(hkey);
     }
+}
 
+Ok(())
+}
+
+#[command]
+pub fn set_polling_interval(state: tauri::State<'_, TrackerState>, interval_secs: u64) -> Result<(), String> {
+    let clamped = interval_secs.clamp(5, 60);
+    state.polling_interval_secs.store(clamped, std::sync::atomic::Ordering::Relaxed);
+    let conn = init_db().map_err(|e| e.to_string())?;
+    settings_repo::save_setting(&conn, "pollingInterval", &clamped.to_string()).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[command]
+pub fn set_idle_threshold(state: tauri::State<'_, TrackerState>, threshold_secs: u64) -> Result<(), String> {
+    let clamped = threshold_secs.clamp(60, 900);
+    state.idle_threshold_secs.store(clamped, std::sync::atomic::Ordering::Relaxed);
+    let conn = init_db().map_err(|e| e.to_string())?;
+    settings_repo::save_setting(&conn, "idleThreshold", &clamped.to_string()).map_err(|e| e.to_string())?;
     Ok(())
 }

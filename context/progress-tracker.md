@@ -108,6 +108,45 @@ Execute Shodasha redesign incrementally in strictly controlled, verifiable phase
 - [x] Added global keyboard shortcuts: Cmd+1–5 for page navigation, ? for command palette
 - [x] Final re-verification: lint=0, typecheck=0, build=0 — ALL PASS
 
+## Business Logic & UX Polish (Jul 2026)
+
+### Fixed
+- [x] **Light mode borders invisible**: Changed `--border-subtle` (#f5f5f4→#e7e5e4), `--border` (#e7e5e4→#d6d3d1), `--bg-base` (#fafaf9→#f5f5f4) for clear component separation
+- [x] **Dead .com sites in settings**: Removed `youtube.com`, `twitter.com`, `reddit.com` from `initialCategories` (desktop app tracks executables, not URLs)
+- [x] **Habit past/future logic**: Added dashed border for past-date cells, toast confirmation for retroactive entries ("Logging past habit"), future dates remain disabled
+- [x] **Time aggregation by hour**: `getCumulativeScreenTimeFiltered` now buckets entries by hour (max 24 points/day) instead of per-entry (hundreds of points), preventing axis overwriting
+- [x] **Kanban card elevation**: Changed `shadow-xs`→`shadow-sm` default, bumped `--shadow-sm` to be more perceptible, `hover:shadow-md`
+- [x] **Habit toggle rollback**: Made `toggleHabit` async with try/catch — reverts store on DB failure
+- [x] **contextSwitches KPI**: Counts distinct app name transitions, not total entry count
+- [x] **Browser title normalization**: Added `getCategoryForEntry` helper that extracts website names from Chrome/Firefox/Edge/Brave/Opera window titles and checks against categories before falling back to executable name
+
+### Rust Backend (All Deferred Items Implemented)
+- [x] **Laptop sleep/wake gap**: `insert_gap_entry()` in tracker_service.rs records idle periods as "Laptop sleep / idle gap" entries with `end_reason='idle'` — no more data loss during sleep
+- [x] **Orphaned entries on exit**: `close_orphaned_entries()` runs on startup AND on tray "Quit" menu — closes all entries with `end_reason='closed'`, computes duration via julianday
+- [x] **System process filtering**: Blocklist (`SYSTEM_PROCESSES` const) filters `explorer.exe`, `TextInputHost.exe`, `ShellExperienceHost.exe`, `LockApp.exe`, `SearchApp.exe`, `RuntimeBroker.exe`, `ApplicationFrameHost.exe`, etc.; `is_transient_window()` filters "Untitled Window", "Program Manager", "Start"
+- [x] **Minimum entry duration**: `MINIMUM_DURATION_SECONDS = 3` — entries shorter than 3s are silently discarded (no DB row)
+- [x] **Polling interval pipe**: `TrackerConfig` with `Arc<AtomicU64>` shared between lib.rs + tracker thread; `set_polling_interval` Tauri command (clamped 5-60s) updates atomic + persists to settings DB; frontend calls via `setPollingIntervalInDb()`
+- [x] **Idle threshold configurable**: Same pattern — `set_idle_threshold` Tauri command (clamped 60-900s); UI slider in TrackingPreferences.tsx with 1min/5min/15min labels; synced to Rust engine in real-time
+- [x] **Midnight crossover**: `get_time_entries_by_date` and `get_time_entries_range` now use `start_time <= ?2 AND (end_time IS NULL OR end_time >= ?1)` — catches entries that start before midnight but span into the queried day
+- [x] **Pre-Coding Research**: Analyzed ActivityWatch, RescueTime, ManicTime, Toggl, and Rize for time visualization UX, gap compaction, and app rankings; documented in `Feature_docs/research/time-visualization-ux.md`
+- [x] **Priority 1 — Timeline Rewrite**:
+  - Rewrote timeline to eliminate session-level micro logs and session counts
+  - Created `DailyUsageBarChart.tsx` (hours used per day bar chart)
+  - Created `ActivePeriodsTimeline.tsx` (continuous active blocks 7-12, 18-22 with compacted idle gaps >30m)
+  - Created `AppRankingChart.tsx` (app ranking sorted purely by total hours, with category selectors)
+  - Added computed getters to `timeEntryStore.ts` (`getDailyUsageHours`, `getActivePeriods`, `getAppRankingByHours`)
+  - Updated `src/app/timeline/page.tsx` layout
+- [x] **Priority 2 — Redesign Settings**:
+  - Implemented 2-column sidebar navigation pattern adapted from `Component_Docs/settings.md`
+  - Category menu (Tracking, Appearance, Notifications, Data, About) on left, content panel on right
+  - Mobile responsive master-detail drill-down view with back button header
+  - Adapted using Shodasha native Tailwind CSS + Lucide icons
+- [x] **Priority 3 — Web Notifications Service**:
+  - Created `src/lib/notifications.ts` Web Notification API service wrapper
+  - Created `src/stores/notificationStore.ts` Zustand store with local persistence
+  - Built `NotificationsSettings.tsx` configuration panel
+  - Integrated Habit reminders, Idle alerts, and Daily productivity summary notifications with background tick evaluation
+
 ## Next Up
 
 1. Native app installer packaging verification (`npm run build:all`)

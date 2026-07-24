@@ -252,6 +252,24 @@ export async function setAutoStartInDb(enable: boolean) {
   }
 }
 
+export async function setPollingIntervalInDb(intervalSecs: number) {
+  if (!isTauri()) return;
+  try {
+    await invoke('set_polling_interval', { intervalSecs });
+  } catch (err) {
+    handleIpcError('set_polling_interval', err);
+  }
+}
+
+export async function setIdleThresholdInDb(thresholdSecs: number) {
+  if (!isTauri()) return;
+  try {
+    await invoke('set_idle_threshold', { thresholdSecs });
+  } catch (err) {
+    handleIpcError('set_idle_threshold', err);
+  }
+}
+
 // Exports
 export async function exportTimeEntriesCsvFromDb(startDate: string, endDate: string) {
   if (!isTauri()) return null;

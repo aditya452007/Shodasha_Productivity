@@ -4,36 +4,53 @@ pub mod logging;
 pub mod repositories;
 pub mod services;
 
+use std::sync::atomic::AtomicU64;
+use std::sync::Arc;
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder},
     tray::TrayIconBuilder,
     WindowEvent, Manager,
 };
-use tracing::{info, error};
+use tracing::info;
+
+pub struct TrackerState {
+    pub polling_interval_secs: Arc<AtomicU64>,
+    pub idle_threshold_secs: Arc<AtomicU64>,
+}
 
 pub fn run() {
     logging::init_logging();
     info!("Starting Shodasha Tauri v2 desktop application...");
 
-    // Initialize database & run migrations + seeding
-    if let Ok(conn) = db::init_db() {
-        if let Err(e) = services::seed_service::seed_defaults_if_needed(&conn) {
-            error!("Failed to seed defaults: {}", e);
-        }
-        if let Err(e) = services::prune_service::prune_old_time_entries(&conn, 6) {
-            error!("Failed to prune old entries: {}", e);
-        }
-    } else {
-        error!("Failed to initialize database on startup");
-    }
+    let conn = db::init_db().expect("Failed to initialize database");
+    services::seed_service::seed_defaults_if_needed(&conn).ok();
+    services::prune_service::prune_old_time_entries(&conn, 6).ok();
+    services::tracker_service::close_orphaned_entries(&conn).ok();
 
-    // Start native Windows background active window & application time tracker
-    services::tracker_service::start_background_tracker();
+    let polling_interval = Arc::new(AtomicU64::new(
+        get_setting_default(&conn, "pollingInterval", "10")
+            .parse()
+            .unwrap_or(10),
+    ));
+    let idle_threshold = Arc::new(AtomicU64::new(
+        get_setting_default(&conn, "idleThreshold", "300")
+            .parse()
+            .unwrap_or(300),
+    ));
+
+    let tracker_config = services::tracker_service::TrackerConfig {
+        polling_interval_secs: Arc::clone(&polling_interval),
+        idle_threshold_secs: Arc::clone(&idle_threshold),
+    };
+    services::tracker_service::start_background_tracker(tracker_config);
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .manage(TrackerState {
+            polling_interval_secs: polling_interval,
+            idle_threshold_secs: idle_threshold,
+        })
         .setup(|app| {
-            // Build system tray menu
             let show_item = MenuItemBuilder::with_id("show", "Show Shodasha").build(app)?;
             let quit_item = MenuItemBuilder::with_id("quit", "Quit Shodasha").build(app)?;
 
@@ -51,6 +68,10 @@ pub fn run() {
                         }
                     }
                     "quit" => {
+                        let conn = db::init_db();
+                        if let Ok(c) = conn {
+                            services::tracker_service::close_orphaned_entries(&c).ok();
+                        }
                         std::process::exit(0);
                     }
                     _ => {}
@@ -61,7 +82,6 @@ pub fn run() {
         })
         .on_window_event(|window, event| {
             if let WindowEvent::CloseRequested { api, .. } = event {
-                // Intercept close button: hide to tray instead of quitting
                 api.prevent_close();
                 let _ = window.hide();
             }
@@ -93,8 +113,19 @@ pub fn run() {
             commands::clear_database,
             commands::export_time_entries_csv,
             commands::export_habits_csv,
-            commands::set_auto_start
+            commands::set_auto_start,
+            commands::set_polling_interval,
+            commands::set_idle_threshold,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+fn get_setting_default(conn: &rusqlite::Connection, key: &str, default: &str) -> String {
+    conn.query_row(
+        "SELECT value FROM settings WHERE key = ?1",
+        rusqlite::params![key],
+        |row| row.get::<_, String>(0),
+    )
+    .unwrap_or_else(|_| default.to_string())
 }

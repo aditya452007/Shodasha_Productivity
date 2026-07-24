@@ -2,21 +2,17 @@
 
 import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Sparkles, Move, Calendar as CalendarIcon, ChevronLeft, ChevronRight, RotateCw } from 'lucide-react'
+import { Sparkles, Calendar as CalendarIcon, ChevronLeft, ChevronRight, RotateCw } from 'lucide-react'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { CategoryFilterBar } from '@/components/timeline/CategoryFilterBar'
-import {
-  AnalyticsKPIGrid,
-  CumulativeScreenTimeWidget,
-  DistributionChartsWidget,
-} from '@/components/timeline/ActivityDistributionChart'
-import { TimelineStream } from '@/components/timeline/TimelineStream'
-import { DraggableGrid, DraggableItem } from '@/components/ui/DraggableGrid'
+import { AnalyticsKPIGrid } from '@/components/timeline/ActivityDistributionChart'
+import { DailyUsageBarChart } from '@/components/timeline/DailyUsageBarChart'
+import { ActivePeriodsTimeline } from '@/components/timeline/ActivePeriodsTimeline'
+import { AppRankingChart } from '@/components/timeline/AppRankingChart'
 
 export default function TimelinePage() {
-  const { widgetOrder, setWidgetOrder, selectedDate, setSelectedDate, refreshAllData, isRefreshing } = useTimeEntryStore()
+  const { selectedDate, setSelectedDate, refreshAllData, isRefreshing } = useTimeEntryStore()
 
-  // Auto-poll every 15 seconds for real-time live activity updates
   useEffect(() => {
     refreshAllData()
     const interval = setInterval(() => {
@@ -46,25 +42,6 @@ export default function TimelinePage() {
     setSelectedDate(todayStr)
   }
 
-  const availableWidgets: DraggableItem[] = [
-    {
-      id: 'kpi-grid',
-      content: <AnalyticsKPIGrid />,
-    },
-    {
-      id: 'cumulative-screentime-chart',
-      content: <CumulativeScreenTimeWidget />,
-    },
-    {
-      id: 'category-ring-chart',
-      content: <DistributionChartsWidget />,
-    },
-    {
-      id: 'activity-stream',
-      content: <TimelineStream />,
-    },
-  ]
-
   const formattedDateLabel = new Date(selectedDate + 'T00:00:00').toLocaleDateString(undefined, {
     weekday: 'short',
     month: 'short',
@@ -77,28 +54,26 @@ export default function TimelinePage() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
-      className="space-y-8 max-w-7xl mx-auto pb-16 px-2 sm:px-4"
+      className="space-y-6 max-w-7xl mx-auto pb-16 px-2 sm:px-4"
     >
-      {/* Header with Eyebrow Tag & Macro-Whitespace */}
+      {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[var(--border)] pb-6">
         <div>
-          {/* Eyebrow Micro Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--accent)] bg-[var(--accent-muted)] border border-[var(--accent)]/20 mb-2">
             <Sparkles className="size-3" />
-            <span>Windows Activity Analytics • Cumulative Screen Time Dashboard</span>
+            <span>Time Analytics & Glanceable Usage</span>
           </div>
 
           <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-primary)]">
-            Activity Timeline & Analytics
+            Activity & Time Overview
           </h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1 max-w-2xl">
-            Cumulative screen time accumulation, Computer On-Time KPIs, top application duration bar chart, and draggable layout grid.
+            Glanceable desktop usage metrics: total daily hours, active periods with compacted idle gaps, and app ranking by total time.
           </p>
         </div>
 
         {/* Date Selector & Manual Refresh Bar */}
         <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-auto">
-          {/* Quick Date Picker Controls */}
           <div className="flex items-center rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-1 shadow-xs">
             <button
               onClick={handlePrevDay}
@@ -142,7 +117,6 @@ export default function TimelinePage() {
             </button>
           )}
 
-          {/* Refresh Data Button */}
           <button
             onClick={() => refreshAllData()}
             disabled={isRefreshing}
@@ -152,23 +126,24 @@ export default function TimelinePage() {
             <RotateCw className={`size-3.5 ${isRefreshing ? 'animate-spin text-[var(--accent)]' : ''}`} />
             <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
           </button>
-
-          <div className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[var(--bg-surface-hover)] border border-[var(--border)] text-xs text-[var(--text-secondary)] font-medium">
-            <Move className="size-3.5 text-[var(--accent)]" />
-            <span>Drag handles reorder</span>
-          </div>
         </div>
       </div>
 
-      {/* Floating Glass Filter & Control Bar */}
+      {/* Category Filter Bar */}
       <CategoryFilterBar />
 
-      {/* Interactive Draggable Layout Grid */}
-      <DraggableGrid
-        items={availableWidgets}
-        itemIds={widgetOrder}
-        onReorder={setWidgetOrder}
-      />
+      {/* KPI Overview Grid */}
+      <AnalyticsKPIGrid />
+
+      {/* Daily Usage Hours Bar Chart */}
+      <DailyUsageBarChart />
+
+      {/* 2-Column Grid: Active Periods + App Rankings */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ActivePeriodsTimeline />
+        <AppRankingChart />
+      </div>
     </motion.div>
   )
 }
+

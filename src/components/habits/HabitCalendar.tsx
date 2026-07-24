@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'sonner'
 import {
   ChevronLeft,
   ChevronRight,
@@ -258,27 +259,39 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
 
                       {/* Days Checkbox Cells */}
                       {daysInMonth.map((day) => {
-                        const isDone = !!records[`${habit.id}_${day.dateStr}`]
-                        const todayStr = new Date().toISOString().split('T')[0]
-                        const isFuture = day.dateStr > todayStr
+                          const isDone = !!records[`${habit.id}_${day.dateStr}`]
+                          const todayStr = new Date().toISOString().split('T')[0]
+                          const isFuture = day.dateStr > todayStr
+                          const isPast = day.dateStr < todayStr
 
-                        return (
-                          <td
-                            key={day.dateStr}
-                            className={`py-2 px-1 text-center align-middle ${
-                              day.isToday ? 'bg-[var(--accent)]/5' : ''
-                            }`}
-                          >
-                            <button
-                              disabled={isFuture}
-                              onClick={() => !isFuture && toggleHabit(habit.id, day.dateStr)}
-                              className={`w-6 h-6 mx-auto rounded-md flex items-center justify-center transition-all focus:outline-hidden ${
-                                isFuture
-                                  ? 'opacity-30 cursor-not-allowed border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/40'
-                                  : isDone
-                                  ? 'shadow-xs scale-100'
-                                  : 'border border-[var(--border-subtle)] bg-[var(--bg-primary)] hover:border-[var(--border-default)]'
+                          return (
+                            <td
+                              key={day.dateStr}
+                              className={`py-2 px-1 text-center align-middle ${
+                                day.isToday ? 'bg-[var(--accent)]/5' : ''
                               }`}
+                            >
+                              <button
+                                disabled={isFuture}
+                                onClick={() => {
+                                  if (isFuture) return
+                                  if (isPast && !isDone) {
+                                    toast('Logging past habit', {
+                                      description: `${habit.name} for ${day.dateStr}`,
+                                      duration: 2000,
+                                    })
+                                  }
+                                  toggleHabit(habit.id, day.dateStr)
+                                }}
+                                className={`w-6 h-6 mx-auto rounded-md flex items-center justify-center transition-all focus:outline-hidden ${
+                                  isFuture
+                                    ? 'opacity-30 cursor-not-allowed border border-[var(--border)] bg-[var(--bg-tertiary)]/40'
+                                    : isDone
+                                    ? 'shadow-xs scale-100'
+                                    : isPast
+                                    ? 'border border-dashed border-[var(--border)] bg-[var(--bg-surface)] hover:border-[var(--border-strong)]'
+                                    : 'border border-[var(--border)] bg-[var(--bg-surface)] hover:border-[var(--border-strong)]'
+                                }`}
                               style={{
                                 backgroundColor: isDone && !isFuture ? habit.color : undefined,
                                 borderColor: isDone && !isFuture ? habit.color : undefined,

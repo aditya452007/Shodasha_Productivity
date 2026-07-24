@@ -41,12 +41,12 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
       layout
       ref={setNodeRef}
       style={style}
-      className={`group relative flex flex-col gap-2.5 rounded-xl border p-4 shadow-xs transition-all ${
+      className={`group relative flex flex-col gap-2.5 rounded-xl border p-4 shadow-sm transition-all ${
         isDragging
           ? 'z-50 opacity-80 border-[var(--accent)] scale-[1.02] shadow-xl'
           : isDone
           ? 'border-[var(--border)] bg-[var(--bg-surface)]/60 opacity-80'
-          : 'border-[var(--border)] bg-[var(--bg-surface)] hover:border-[var(--border-strong)] hover:shadow-sm'
+          : 'border-[var(--border)] bg-[var(--bg-surface)] hover:border-[var(--border-strong)] hover:shadow-md'
       }`}
     >
       {/* Top Header: Drag Handle & Quick Actions */}

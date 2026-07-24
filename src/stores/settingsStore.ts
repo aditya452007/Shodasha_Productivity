@@ -1,14 +1,15 @@
 import { create } from 'zustand'
 import { AsyncState } from './taskStore'
-import { setAutoStartInDb, fetchSettingsFromDb, saveSettingsToDb } from '@/lib/db'
+import { setAutoStartInDb, fetchSettingsFromDb, saveSettingsToDb, setPollingIntervalInDb, setIdleThresholdInDb } from '@/lib/db'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 export type DataRetentionPeriod = '1_month' | '3_months' | '6_months' | 'indefinite'
 export type AccentColor = '#059669' | '#7c3aed' | '#d97706' | '#e11d48'
 
 interface SettingsState extends AsyncState {
-  pollingInterval: number // in seconds (5 - 60)
+  pollingInterval: number
   idleDetectionEnabled: boolean
+  idleThreshold: number // seconds
   autoStartEnabled: boolean
   dataRetentionPeriod: DataRetentionPeriod
   themeMode: ThemeMode
@@ -17,6 +18,7 @@ interface SettingsState extends AsyncState {
   initializeSettings: () => Promise<void>
   setPollingInterval: (interval: number) => void
   setIdleDetectionEnabled: (enabled: boolean) => void
+  setIdleThreshold: (threshold: number) => void
   setAutoStartEnabled: (enabled: boolean) => void
   setDataRetentionPeriod: (period: DataRetentionPeriod) => void
   setThemeMode: (mode: ThemeMode) => void
@@ -27,6 +29,7 @@ function persistAllSettings(state: Partial<SettingsState>) {
   saveSettingsToDb({
     pollingInterval: String(state.pollingInterval ?? 30),
     idleDetectionEnabled: String(state.idleDetectionEnabled ?? true),
+    idleThreshold: String(state.idleThreshold ?? 300),
     autoStartEnabled: String(state.autoStartEnabled ?? true),
     dataRetentionPeriod: state.dataRetentionPeriod || '6_months',
     themeMode: state.themeMode || 'dark',
@@ -37,6 +40,7 @@ function persistAllSettings(state: Partial<SettingsState>) {
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   pollingInterval: 30,
   idleDetectionEnabled: true,
+  idleThreshold: 300,
   autoStartEnabled: true,
   dataRetentionPeriod: '6_months',
   themeMode: 'dark',
@@ -52,6 +56,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       if (dbSettings && Object.keys(dbSettings).length > 0) {
         const pollingInterval = dbSettings.pollingInterval ? Number(dbSettings.pollingInterval) : get().pollingInterval
         const idleDetectionEnabled = dbSettings.idleDetectionEnabled !== undefined ? dbSettings.idleDetectionEnabled === 'true' : get().idleDetectionEnabled
+        const idleThreshold = dbSettings.idleThreshold ? Number(dbSettings.idleThreshold) : get().idleThreshold
         const autoStartEnabled = dbSettings.autoStartEnabled !== undefined ? dbSettings.autoStartEnabled === 'true' : get().autoStartEnabled
         const dataRetentionPeriod = (dbSettings.dataRetentionPeriod as DataRetentionPeriod) || get().dataRetentionPeriod
         const themeMode = (dbSettings.themeMode as ThemeMode) || get().themeMode
@@ -60,6 +65,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         set({
           pollingInterval,
           idleDetectionEnabled,
+          idleThreshold,
           autoStartEnabled,
           dataRetentionPeriod,
           themeMode,
@@ -67,6 +73,9 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
           isLoading: false,
           isInitialized: true,
         })
+
+        setPollingIntervalInDb(pollingInterval)
+        setIdleThresholdInDb(idleThreshold)
 
         if (typeof document !== 'undefined') {
           const isDark =
@@ -89,10 +98,16 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
   setPollingInterval: (interval) => {
     set({ pollingInterval: interval })
+    setPollingIntervalInDb(interval)
     persistAllSettings(get())
   },
   setIdleDetectionEnabled: (enabled) => {
     set({ idleDetectionEnabled: enabled })
+    persistAllSettings(get())
+  },
+  setIdleThreshold: (threshold) => {
+    set({ idleThreshold: threshold })
+    setIdleThresholdInDb(threshold)
     persistAllSettings(get())
   },
   setAutoStartEnabled: (enabled) => {
