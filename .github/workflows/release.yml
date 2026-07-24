@@ -39,7 +39,6 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.version }}" ]; then
             echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
-            echo "skip=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -47,7 +46,6 @@ jobs:
 
           if [ -z "$LATEST_TAG" ]; then
             echo "version=v0.1.0" >> "$GITHUB_OUTPUT"
-            echo "skip=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -70,11 +68,10 @@ jobs:
           esac
 
           echo "version=v${MAJOR}.${MINOR}.${PATCH}" >> "$GITHUB_OUTPUT"
-          echo "skip=false" >> "$GITHUB_OUTPUT"
 
-      - name: No new commits to release
+      - name: Nothing to release
         if: steps.version.outputs.skip == 'true'
-        run: echo "Nothing to release — no unreleased commits since last tag."
+        run: echo "No unreleased commits since last tag."
 
       - name: Setup Node.js
         if: steps.version.outputs.skip != 'true'
@@ -98,7 +95,7 @@ jobs:
             src-tauri
             tracker
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         if: steps.version.outputs.skip != 'true'
         run: npm ci
 
@@ -106,17 +103,35 @@ jobs:
         if: steps.version.outputs.skip != 'true'
         run: npm run build
 
-      - name: Build background tracker
+      - name: Build background tracker binary
         if: steps.version.outputs.skip != 'true'
         run: cargo build --manifest-path tracker/Cargo.toml --release
 
       - name: Copy tracker binary for Tauri bundle
         if: steps.version.outputs.skip != 'true'
+        shell: bash
         run: |
           mkdir -p target/release
           cp tracker/target/release/tracker.exe target/release/tracker.exe
 
-      - name: Generate release body file
+      - name: Build Tauri app (MSI + NSIS installers)
+        if: steps.version.outputs.skip != 'true'
+        shell: bash
+        run: |
+          npx tauri build --bundles "msi,nsis" 2>&1
+
+      - name: List built installer files
+        if: steps.version.outputs.skip != 'true'
+        shell: bash
+        run: |
+          echo "=== MSI files ==="
+          find src-tauri/target/release -name "*.msi" -type f 2>/dev/null || echo "No MSI found"
+          echo "=== NSIS/EXE files ==="
+          find src-tauri/target/release -name "*.exe" -type f 2>/dev/null || echo "No EXE found"
+          echo "=== All bundle files ==="
+          find src-tauri/target/release/bundle -type f 2>/dev/null || echo "No bundle dir"
+
+      - name: Generate release body
         if: steps.version.outputs.skip != 'true'
         shell: bash
         run: |
@@ -148,9 +163,7 @@ jobs:
 
           **System Requirements:** Windows 10 or later (64-bit)
 
-          1. Download the **.msi** installer attached below
-          2. Run the installer to set up **Shodasha**
-          3. Launch the app — it sits in your system tray and passively tracks your focus time
+          Download the **.msi** or **.exe** installer attached below and run it.
 
           ---
 
@@ -184,22 +197,17 @@ jobs:
             echo "**Full Changelog**: https://github.com/${{ github.repository }}/commits/$VERSION" >> release_body.md
           fi
 
-      - name: Build Tauri app & create release
+      - name: Create GitHub Release with installers
         if: steps.version.outputs.skip != 'true'
-        uses: tauri-apps/tauri-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
-          tagName: ${{ steps.version.outputs.version }}
-          releaseName: Shodasha Desktop Productivity App ${{ steps.version.outputs.version }}
-          releaseBody: Shodasha ${{ steps.version.outputs.version }} — Windows desktop productivity tracker
-          releaseDraft: false
+          tag_name: ${{ steps.version.outputs.version }}
+          name: Shodasha Desktop App ${{ steps.version.outputs.version }}
+          body_path: release_body.md
+          files: |
+            src-tauri/target/release/bundle/msi/*.msi
+            src-tauri/target/release/bundle/nsis/*.exe
+          draft: false
           prerelease: false
-
-      - name: Update release body with detailed notes
-        if: steps.version.outputs.skip != 'true'
-        shell: bash
-        run: |
-          gh release edit "${{ steps.version.outputs.version }}" --notes-file release_body.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
