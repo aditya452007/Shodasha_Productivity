@@ -3,8 +3,8 @@ export interface Achievement {
   title: string
   description: string
   iconName: 'sprout' | 'zap' | 'brain' | 'star' | 'gem' | 'flame' | 'trophy'
-  targetCount: number // days streak or total check-in days needed
-  type: 'streak' | 'total_checkins'
+  targetCount: number // days streak, total check-in days, or focus hours needed
+  type: 'streak' | 'total_checkins' | 'focus_hours'
   category: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'legendary'
 }
 
@@ -27,6 +27,15 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     category: 'bronze',
   },
   {
+    id: 'focus-30',
+    title: '30-Hour Focus Week',
+    description: 'Log 30 hours of total desktop focus time.',
+    iconName: 'zap',
+    targetCount: 30,
+    type: 'focus_hours',
+    category: 'silver',
+  },
+  {
     id: 'streak-15',
     title: 'Momentum Master',
     description: 'Reach a 15-day continuous streak of habit consistency.',
@@ -42,6 +51,15 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     iconName: 'brain',
     targetCount: 21,
     type: 'streak',
+    category: 'gold',
+  },
+  {
+    id: 'focus-100',
+    title: '100 Deep Work Hours',
+    description: 'Cross 100 hours of active focus tracking.',
+    iconName: 'star',
+    targetCount: 100,
+    type: 'focus_hours',
     category: 'gold',
   },
   {
@@ -84,11 +102,15 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
 
 export function computeAchievementsProgress(
   streakDays: number,
-  totalCheckInDays: number
+  totalCheckInDays: number,
+  totalFocusHours: number = 0
 ): UserAchievementProgress[] {
   return ACHIEVEMENTS_LIST.map((achievement) => {
-    const currentProgress =
-      achievement.type === 'streak' ? streakDays : totalCheckInDays
+    let currentProgress = 0
+    if (achievement.type === 'streak') currentProgress = streakDays
+    else if (achievement.type === 'total_checkins') currentProgress = totalCheckInDays
+    else if (achievement.type === 'focus_hours') currentProgress = totalFocusHours
+
     const unlocked = currentProgress >= achievement.targetCount
     const progressPercentage = Math.min(
       100,

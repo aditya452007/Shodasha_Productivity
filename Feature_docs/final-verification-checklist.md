@@ -514,4 +514,7 @@ Last verified: 2026-07-24 (Phase 5 audit)
 | 14. Timeline Rewrite | ✅ Daily total usage bar chart, active periods w/ gap compaction, app ranking by total hours | 100% |
 | 15. Settings Redesign | ✅ 2-column sidebar navigation pattern adapted with Tailwind + Lucide, mobile master-detail pattern | 100% |
 | 16. Web Notifications | ✅ Web Notification API wrapper, habit reminders, idle alerts, daily summary reports | 100% |
+| 17. Productivity Engine | ✅ Daily goal target setting, 0–100 Focus Score index, 6-tile AnalyticsKPIGrid, TodayProgressCard goal ring | 100% |
+| 18. Interactive Charts | ✅ Date-click cross-filtering in DailyUsageBarChart, date range comparison overlays, Category vs App grouping toggle | 100% |
+| 19. Kanban & Streak Link | ✅ Focus Hours milestone achievements, desktop time-tracked badge (⏱️ Xh Ym) on KanbanCard and TaskModal | 100% |
 

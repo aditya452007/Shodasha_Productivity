@@ -50,6 +50,9 @@ export interface TimeKPIs {
   focusEfficiency: number
   contextSwitches: number
   deepWorkRatio: number
+  neutralRatio: number
+  distractionRatio: number
+  focusScore: number // 0-100 score
   topAppName: string
   topAppDurationSeconds: number
 }
@@ -113,6 +116,7 @@ interface TimeEntryState extends AsyncState {
   getTopAppsFiltered: () => AppStatItem[]
   getCumulativeScreenTimeFiltered: () => CumulativePoint[]
   getKPIsFiltered: () => TimeKPIs
+  getTaskLoggedSeconds: (taskId: string) => number
 
   getDailyUsageHours: (daysCount?: number) => DailyUsageBar[]
   getActivePeriods: (dateStr?: string) => TimelinePeriodItem[]
@@ -436,6 +440,8 @@ export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
     let focusSec = 0
     let idleSec = 0
     let workSec = 0
+    let neutralSec = 0
+    let distractionSec = 0
 
     filtered.forEach((entry) => {
       const dur = entry.durationSeconds || 0
@@ -443,14 +449,19 @@ export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
         idleSec += dur
       } else {
         focusSec += dur
-      const cat = getCategoryForEntry(entry, categories)
-      if (cat === 'work') workSec += dur
+        const cat = getCategoryForEntry(entry, categories)
+        if (cat === 'work') workSec += dur
+        else if (cat === 'neutral') neutralSec += dur
+        else if (cat === 'distraction') distractionSec += dur
       }
     })
 
     const totalTracked = focusSec + idleSec || 1
     const focusEfficiency = Math.round((focusSec / totalTracked) * 100)
     const deepWorkRatio = Math.round((workSec / (focusSec || 1)) * 100)
+    const neutralRatio = Math.round((neutralSec / (focusSec || 1)) * 100)
+    const distractionRatio = Math.round((distractionSec / (focusSec || 1)) * 100)
+    const focusScore = Math.min(100, Math.max(0, Math.round(((workSec * 1.0 + neutralSec * 0.3) / (focusSec || 1)) * 100)))
 
     const topApps = get().getTopAppsFiltered()
     const topApp = topApps[0]
@@ -471,9 +482,19 @@ export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
       focusEfficiency,
       contextSwitches,
       deepWorkRatio,
+      neutralRatio,
+      distractionRatio,
+      focusScore,
       topAppName: topApp ? topApp.appName : 'None',
       topAppDurationSeconds: topApp ? topApp.totalSeconds : focusSec,
     }
+  },
+
+  getTaskLoggedSeconds: (taskId: string) => {
+    if (!taskId) return 0
+    return get().entries
+      .filter((e) => e.linkedTaskId === taskId && (e.durationSeconds || 0) > 0)
+      .reduce((sum, e) => sum + (e.durationSeconds || 0), 0)
   },
 
   getDailyUsageHours: (daysCount = 7) => {

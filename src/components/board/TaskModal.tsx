@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import { Task, useTaskStore } from '@/stores/taskStore'
 import { useHabitStore } from '@/stores/habitStore'
+import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { X, Trash2, Calendar, Tag, Link2, AlignLeft, CheckSquare, Loader2 } from 'lucide-react'
+import { X, Trash2, Calendar, Tag, Link2, AlignLeft, CheckSquare, Loader2, Clock } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface TaskModalProps {
@@ -137,7 +138,7 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
               className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-base)] px-3.5 py-2 text-sm font-medium text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
             >
               {columns.map((col) => (
-                <option key={col.id} value={col.id}>
+                <option key={col.id} value={col.id} className="bg-[var(--bg-surface)] text-[var(--text-primary)]">
                   {col.name}
                 </option>
               ))}
@@ -201,13 +202,35 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
               onChange={(e) => setLinkedHabitId(e.target.value)}
               className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-base)] px-3.5 py-2 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
             >
-              <option value="">None (Unlinked)</option>
+              <option value="" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">None (Unlinked)</option>
               {habits.map((habit) => (
-                <option key={habit.id} value={habit.id}>
+                <option key={habit.id} value={habit.id} className="bg-[var(--bg-surface)] text-[var(--text-primary)]">
                   {habit.name}
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Desktop Time Tracking Summary */}
+          <div className="flex items-center justify-between p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-base)]">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-[var(--accent-muted)] text-[var(--accent)]">
+                <Clock className="h-4 w-4" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs font-semibold text-[var(--text-primary)]">Desktop Focus Time Logged</span>
+                <span className="text-[10px] text-[var(--text-secondary)]">Time entries linked to this task</span>
+              </div>
+            </div>
+            <span className="font-mono text-sm font-bold text-[var(--accent)]">
+              {(() => {
+                const getTaskLoggedSeconds = useTimeEntryStore.getState().getTaskLoggedSeconds
+                const totalSecs = getTaskLoggedSeconds(task.id)
+                const hrs = Math.floor(totalSecs / 3600)
+                const mins = Math.floor((totalSecs % 3600) / 60)
+                return hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`
+              })()}
+            </span>
           </div>
 
           {/* Action Buttons */}

@@ -2,41 +2,41 @@
 
 @layer base {
   :root {
-    /* Color Tokens (OKLCH System) */
-    --color-paper: oklch(97% 0.008 80);
-    --color-paper-elevated: oklch(100% 0 0);
-    --color-rule: oklch(88% 0.008 80);
-    --color-neutral: oklch(55% 0.008 80);
-    --color-muted: oklch(45% 0.008 70);
-    --color-ink: oklch(18% 0.01 60);
+    /* Color Tokens (Warm Editorial Light Mode System) */
+    --color-paper: oklch(96.5% 0.006 75);
+    --color-paper-elevated: oklch(98.5% 0.004 75);
+    --color-rule: oklch(89% 0.007 75);
+    --color-neutral: oklch(58% 0.008 75);
+    --color-muted: oklch(48% 0.008 70);
+    --color-ink: oklch(22% 0.012 60);
     --color-accent: oklch(55% 0.19 250);
     --color-success: oklch(50% 0.15 150);
     --color-warning: oklch(55% 0.15 80);
     --color-error: oklch(50% 0.18 30);
-    --color-rule-strong: oklch(75% 0.015 80);
-    --color-ink-secondary: oklch(38% 0.008 70);
+    --color-rule-strong: oklch(78% 0.012 75);
+    --color-ink-secondary: oklch(40% 0.008 70);
     --color-accent-hover: oklch(45% 0.19 250);
-    --color-accent-muted: oklch(85% 0.05 250);
+    --color-accent-muted: oklch(88% 0.04 250);
 
-    /* Legacy & Semantic Variable Aliases */
-    --bg-base: #f5f5f4;
-    --bg-surface: #ffffff;
-    --bg-surface-hover: #e7e5e4;
-    --bg-primary: #f5f5f4;
-    --bg-secondary: #e7e5e4;
-    --bg-tertiary: #d6d3d1;
-    --bg-surface-elevated: #ffffff;
-    --text-primary: #1c1917;
-    --text-secondary: #57534e;
-    --text-muted: #a8a29e;
-    --text-tertiary: #a8a29e;
+    /* Warm Linen / Cream Light Mode Palette (No stark harsh #ffffff) */
+    --bg-base: #f4f1eb;
+    --bg-surface: #faf8f4;
+    --bg-surface-hover: #eae6df;
+    --bg-primary: #f4f1eb;
+    --bg-secondary: #faf8f4;
+    --bg-tertiary: #eae6df;
+    --bg-surface-elevated: #fcfbfa;
+    --text-primary: #262320;
+    --text-secondary: #615b53;
+    --text-muted: #918a80;
+    --text-tertiary: #918a80;
     --accent: #059669;
     --accent-hover: #047857;
     --accent-muted: #d1fae5;
-    --border: #d6d3d1;
-    --border-strong: #a8a29e;
-    --border-subtle: #e7e5e4;
-    --border-default: #d6d3d1;
+    --border: #ded8cf;
+    --border-strong: #a8a095;
+    --border-subtle: #e8e3da;
+    --border-default: #ded8cf;
     --error: #dc2626;
     --success: #059669;
 
@@ -85,53 +85,53 @@
     --z-tooltip: 600;
 
     /* Shadow Tokens */
-    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(40, 30, 20, 0.06), 0 1px 2px -1px rgba(40, 30, 20, 0.04);
+    --shadow-md: 0 4px 6px -1px rgba(40, 30, 20, 0.06), 0 2px 4px -1px rgba(40, 30, 20, 0.03);
+    --shadow-lg: 0 10px 15px -3px rgba(40, 30, 20, 0.08), 0 4px 6px -2px rgba(40, 30, 20, 0.04);
   }
 
   .dark {
-    /* Color Tokens (OKLCH System) */
-    --color-paper: oklch(14% 0.008 40);
-    --color-paper-elevated: oklch(18% 0.01 40);
-    --color-rule: oklch(28% 0.008 40);
-    --color-neutral: oklch(55% 0.008 40);
-    --color-muted: oklch(70% 0.006 40);
-    --color-ink: oklch(94% 0.006 80);
+    /* Color Tokens (Rich Warm Espresso / Charcoal Dark Mode) */
+    --color-paper: oklch(19% 0.012 50);
+    --color-paper-elevated: oklch(23% 0.014 50);
+    --color-rule: oklch(32% 0.01 50);
+    --color-neutral: oklch(62% 0.008 50);
+    --color-muted: oklch(72% 0.006 50);
+    --color-ink: oklch(93% 0.006 70);
     --color-accent: oklch(65% 0.19 250);
     --color-success: oklch(50% 0.15 150);
     --color-warning: oklch(55% 0.15 80);
     --color-error: oklch(50% 0.18 30);
-    --color-rule-strong: oklch(38% 0.01 40);
-    --color-ink-secondary: oklch(75% 0.006 60);
+    --color-rule-strong: oklch(40% 0.012 50);
+    --color-ink-secondary: oklch(78% 0.006 60);
     --color-accent-hover: oklch(75% 0.19 250);
     --color-accent-muted: oklch(25% 0.05 250);
 
-    /* Legacy & Semantic Variable Aliases */
-    --bg-base: #0c0a09;
-    --bg-surface: #1c1917;
-    --bg-surface-hover: #292524;
-    --bg-primary: #0c0a09;
-    --bg-secondary: #1c1917;
-    --bg-tertiary: #292524;
-    --bg-surface-elevated: #292524;
-    --text-primary: #f5f5f4;
-    --text-secondary: #a8a29e;
-    --text-muted: #78716c;
-    --text-tertiary: #78716c;
+    /* Warm Espresso & Charcoal Dark Palette (No Z-black / pitch black) */
+    --bg-base: #171513;
+    --bg-surface: #24211e;
+    --bg-surface-hover: #332f2a;
+    --bg-primary: #171513;
+    --bg-secondary: #24211e;
+    --bg-tertiary: #332f2a;
+    --bg-surface-elevated: #332f2a;
+    --text-primary: #f2eee8;
+    --text-secondary: #b8b0a5;
+    --text-muted: #888075;
+    --text-tertiary: #888075;
     --accent: #10b981;
     --accent-hover: #34d399;
-    --accent-muted: #022c22;
-    --border: #292524;
-    --border-strong: #44403c;
-    --border-subtle: #1c1917;
-    --border-default: #292524;
+    --accent-muted: #042f2e;
+    --border: #38332c;
+    --border-strong: #544d44;
+    --border-subtle: #24211e;
+    --border-default: #38332c;
     --error: #ef4444;
     --success: #10b981;
 
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
   }
 
   body {
@@ -148,6 +148,29 @@
     font-family: var(--font-display);
     font-style: normal;
     text-wrap: balance;
+  }
+
+  /* Global Select & Option Dropdown Contrast Enforcements */
+  select {
+    background-color: var(--bg-surface) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border) !important;
+  }
+
+  select option {
+    background-color: var(--bg-surface) !important;
+    color: var(--text-primary) !important;
+  }
+
+  .dark select {
+    background-color: #24211e !important;
+    color: #f2eee8 !important;
+    border-color: #38332c !important;
+  }
+
+  .dark select option {
+    background-color: #24211e !important;
+    color: #f2eee8 !important;
   }
 
   /* Micro-interactions: Focus ring, button hover/press, transitions */

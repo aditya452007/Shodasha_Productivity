@@ -76,7 +76,6 @@ export const useNotificationStore = create<NotificationState>()(
       checkAndTriggerNotifications: () => {
         const {
           notificationsEnabled,
-          permission,
           habitRemindersEnabled,
           habitReminderTime,
           dailySummaryEnabled,
@@ -85,7 +84,7 @@ export const useNotificationStore = create<NotificationState>()(
           lastHabitReminderDate,
         } = get();
 
-        if (!notificationsEnabled || permission !== 'granted') return;
+        if (!notificationsEnabled) return;
 
         const now = new Date();
         const todayStr = now.toISOString().split('T')[0];

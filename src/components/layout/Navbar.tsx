@@ -86,8 +86,9 @@ export function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6" data-tauri-drag-region>
         {/* Brand Logo & Name */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--accent)] text-white shadow-xs transition-transform group-hover:scale-105">
-            <span className="font-mono text-lg font-bold tracking-tighter">十六</span>
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] overflow-hidden shadow-xs transition-transform group-hover:scale-105">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Shodasha Logo" className="h-full w-full object-contain p-0.5" />
           </div>
           <div className="flex flex-col">
             <span className="font-display text-lg font-bold tracking-tight text-[var(--text-primary)]">

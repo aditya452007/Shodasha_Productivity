@@ -32,7 +32,9 @@ export function AnalyticsKPIGrid() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <LoadingSkeleton height={100} />
+        <LoadingSkeleton height={100} />
         <LoadingSkeleton height={100} />
         <LoadingSkeleton height={100} />
         <LoadingSkeleton height={100} />
@@ -46,10 +48,10 @@ export function AnalyticsKPIGrid() {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
       <KPICard
         eyebrow="SYSTEM ON-TIME"
-        title="Computer On Time Today"
+        title="Computer On Time"
         value={formatDuration(kpis.computerOnTimeSeconds)}
         trend="Power Active"
         trendType="positive"
@@ -66,13 +68,31 @@ export function AnalyticsKPIGrid() {
         subtitle="Active window foreground time"
       />
       <KPICard
-        eyebrow="IDLE / LOCKED"
-        title="Lock Screen & Sleep"
-        value={formatDuration(kpis.idleTimeSeconds)}
-        trend="Excluded"
+        eyebrow="PRODUCTIVITY INDEX"
+        title="Focus Score"
+        value={`${kpis.focusScore} / 100`}
+        trend={`${kpis.deepWorkRatio}% Work`}
+        trendType="positive"
+        icon={ShieldCheck}
+        subtitle="Weighted category efficiency"
+      />
+      <KPICard
+        eyebrow="WORK RATIO"
+        title="Deep Work Share"
+        value={`${kpis.deepWorkRatio}%`}
+        trend={`${kpis.distractionRatio}% Distraction`}
+        trendType={kpis.deepWorkRatio >= 50 ? 'positive' : 'neutral'}
+        icon={TrendingUp}
+        subtitle="Work category focus proportion"
+      />
+      <KPICard
+        eyebrow="CONTEXT SWITCHES"
+        title="App Transitions"
+        value={`${kpis.contextSwitches}`}
+        trend="Switches"
         trendType="neutral"
-        icon={Moon}
-        subtitle="Excluded from focus duration"
+        icon={BarChart3}
+        subtitle="Distinct foreground app switches"
       />
       <KPICard
         eyebrow="MOST USED APP"

@@ -126,12 +126,12 @@ export function DataManagement() {
             <select
               value={dataRetentionPeriod}
               onChange={(e) => setDataRetentionPeriod(e.target.value as DataRetentionPeriod)}
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--bg-base)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] cursor-pointer"
             >
-              <option value="1_month">1 Month</option>
-              <option value="3_months">3 Months</option>
-              <option value="6_months">6 Months (Default)</option>
-              <option value="indefinite">Keep Indefinitely</option>
+              <option value="1_month" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">1 Month</option>
+              <option value="3_months" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">3 Months</option>
+              <option value="6_months" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">6 Months (Default)</option>
+              <option value="indefinite" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">Keep Indefinitely</option>
             </select>
           </div>
 

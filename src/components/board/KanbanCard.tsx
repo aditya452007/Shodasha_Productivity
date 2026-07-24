@@ -1,9 +1,10 @@
 'use client'
 
 import { Task, useTaskStore } from '@/stores/taskStore'
+import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { CheckCircle2, GripVertical, Calendar, Link2, MoreHorizontal } from 'lucide-react'
+import { CheckCircle2, GripVertical, Calendar, Link2, MoreHorizontal, Clock } from 'lucide-react'
 import { motion } from 'motion/react'
 
 interface KanbanCardProps {
@@ -13,6 +14,15 @@ interface KanbanCardProps {
 
 export function KanbanCard({ task, onEdit }: KanbanCardProps) {
   const toggleTaskStatus = useTaskStore((state) => state.toggleTaskStatus)
+  const getTaskLoggedSeconds = useTimeEntryStore((state) => state.getTaskLoggedSeconds)
+  const taskSeconds = getTaskLoggedSeconds(task.id)
+
+  const formatTaskDuration = (secs: number) => {
+    const hrs = Math.floor(secs / 3600)
+    const mins = Math.floor((secs % 3600) / 60)
+    if (hrs > 0) return `${hrs}h ${mins}m`
+    return `${mins}m`
+  }
 
   const {
     attributes,
@@ -115,8 +125,16 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
       </div>
 
       {/* Tags & Badges Footer */}
-      {((task.tags && task.tags.length > 0) || task.dueDate || task.linkedHabitId) && (
+      {((task.tags && task.tags.length > 0) || task.dueDate || task.linkedHabitId || taskSeconds > 0) && (
         <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[var(--border)]/60">
+          {/* Cumulative Tracked Desktop Time Badge */}
+          {taskSeconds > 0 && (
+            <span className="flex items-center gap-1 rounded-md bg-[var(--accent-muted)] px-2 py-0.5 text-[10px] font-mono font-semibold text-[var(--accent)] border border-[var(--accent)]/20">
+              <Clock className="h-3 w-3" />
+              <span>{formatTaskDuration(taskSeconds)} logged</span>
+            </span>
+          )}
+
           {/* Linked Habit Badge */}
           {task.linkedHabitId && (
             <span className="flex items-center gap-1 rounded-md bg-[var(--accent-muted)] px-2 py-0.5 text-[10px] font-semibold text-[var(--accent)]">

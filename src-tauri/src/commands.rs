@@ -197,9 +197,7 @@ pub fn set_auto_start(enable: bool) -> Result<(), String> {
         }
 
         if enable {
-            let mut exe_path = std::env::current_exe().map_err(|e| e.to_string())?;
-            exe_path.pop();
-            exe_path.push("tracker.exe");
+            let exe_path = std::env::current_exe().map_err(|e| e.to_string())?;
             let exe_str = format!("\"{}\"\0", exe_path.to_string_lossy());
             let exe_utf16: Vec<u16> = exe_str.encode_utf16().collect();
 

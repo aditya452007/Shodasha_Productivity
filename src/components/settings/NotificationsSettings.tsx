@@ -177,12 +177,12 @@ export function NotificationsSettings() {
               <select
                 value={idleThresholdMinutes}
                 onChange={(e) => setIdleThresholdMinutes(Number(e.target.value))}
-                className="px-2.5 py-1 rounded-md border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] font-medium focus:outline-hidden focus:border-emerald-500"
+                className="px-2.5 py-1 rounded-md border border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)] font-medium focus:outline-hidden focus:border-[var(--accent)] cursor-pointer"
               >
-                <option value={15}>15 minutes</option>
-                <option value={30}>30 minutes</option>
-                <option value={45}>45 minutes</option>
-                <option value={60}>60 minutes</option>
+                <option value={15} className="bg-[var(--bg-surface)] text-[var(--text-primary)]">15 minutes</option>
+                <option value={30} className="bg-[var(--bg-surface)] text-[var(--text-primary)]">30 minutes</option>
+                <option value={45} className="bg-[var(--bg-surface)] text-[var(--text-primary)]">45 minutes</option>
+                <option value={60} className="bg-[var(--bg-surface)] text-[var(--text-primary)]">60 minutes</option>
               </select>
             </div>
           )}

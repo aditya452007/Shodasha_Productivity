@@ -1,4 +1,4 @@
-'use client';
+import { toast } from 'sonner';
 
 export interface ShodashaNotificationOptions {
   title: string;
@@ -32,31 +32,41 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
 }
 
 export function sendWebNotification({ title, body, icon, tag, data }: ShodashaNotificationOptions): boolean {
-  if (!isNotificationSupported() || Notification.permission !== 'granted') {
-    console.warn('Cannot send notification: Permission not granted or unsupported.');
-    return false;
+  let nativeSent = false;
+
+  // Try native Web Notification if supported and granted
+  if (isNotificationSupported() && Notification.permission === 'granted') {
+    try {
+      const notification = new Notification(title, {
+        body,
+        icon: icon || '/icon.png',
+        tag: tag || 'shodasha-alert',
+        data,
+      });
+
+      notification.onclick = () => {
+        if (typeof window !== 'undefined') {
+          window.focus();
+        }
+        notification.close();
+      };
+
+      nativeSent = true;
+    } catch (err) {
+      console.warn('Native notification failed, falling back to toast alert:', err);
+    }
+  } else if (isNotificationSupported() && Notification.permission === 'default') {
+    // Attempt permission request asynchronously for next time
+    Notification.requestPermission().catch(() => {});
   }
 
-  try {
-    const notification = new Notification(title, {
-      body,
-      icon: icon || '/icon.png',
-      tag: tag || 'shodasha-alert',
-      data,
-    });
+  // Always render in-app toast alert as guaranteed delivery channel
+  toast.info(title, {
+    description: body,
+    duration: 6000,
+  });
 
-    notification.onclick = () => {
-      if (typeof window !== 'undefined') {
-        window.focus();
-      }
-      notification.close();
-    };
-
-    return true;
-  } catch (err) {
-    console.error('Failed to dispatch notification:', err);
-    return false;
-  }
+  return nativeSent || true;
 }
 
 export function sendHabitReminderNotification(habitName: string): boolean {

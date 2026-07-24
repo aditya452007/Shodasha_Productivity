@@ -17,6 +17,7 @@ import {
   Trophy,
 } from 'lucide-react'
 import { useHabitStore } from '@/stores/habitStore'
+import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { computeAchievementsProgress, Achievement } from '@/lib/achievements'
 
 function renderAchievementIcon(iconName: Achievement['iconName']) {
@@ -48,6 +49,9 @@ export function HabitAchievements() {
   const records = useHabitStore((s) => s.records)
   const isLoading = useHabitStore((s) => s.isLoading)
   const error = useHabitStore((s) => s.error)
+  const getTotalFocusSeconds = useTimeEntryStore((s) => s.getTotalFocusSecondsToday)
+
+  const totalFocusHours = Math.round((getTotalFocusSeconds() / 3600) * 10) / 10
 
   // Compute total unique check-in days and active streak
   const { currentStreak, totalCheckInDays } = useMemo(() => {
@@ -89,8 +93,8 @@ export function HabitAchievements() {
   }, [habits, records])
 
   const achievementProgresses = useMemo(() => {
-    return computeAchievementsProgress(currentStreak, totalCheckInDays)
-  }, [currentStreak, totalCheckInDays])
+    return computeAchievementsProgress(currentStreak, totalCheckInDays, totalFocusHours)
+  }, [currentStreak, totalCheckInDays, totalFocusHours])
 
   const unlockedCount = achievementProgresses.filter((a) => a.unlocked).length
 

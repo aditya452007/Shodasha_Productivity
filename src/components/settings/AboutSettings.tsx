@@ -14,8 +14,9 @@ export function AboutSettings() {
 
       <div className="p-5 rounded-xl border border-[var(--border)] bg-[var(--card)] space-y-4">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500">
-            <Info className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] overflow-hidden shrink-0 flex items-center justify-center p-1">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Shodasha Logo" className="w-full h-full object-contain" />
           </div>
           <div>
             <h3 className="text-base font-bold text-[var(--foreground)]">Shodasha Productivity</h3>

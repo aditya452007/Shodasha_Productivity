@@ -1,4 +1,4 @@
-name: Shodasha CI/CD Pipeline
+name: Shodasha CI Pipeline
 
 on:
   push:
@@ -7,15 +7,15 @@ on:
     branches: [ main, master ]
 
 jobs:
-  build-and-verify:
-    name: Build & Verify (Windows)
+  verify-and-build:
+    name: Lint, Typecheck & Compile (Windows)
     runs-on: windows-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -37,6 +37,9 @@ jobs:
       - name: Install Frontend Dependencies
         run: npm ci
 
+      - name: Run ESLint Checks
+        run: npm run lint
+
       - name: Run TypeScript Typecheck
         run: npm run typecheck
 
@@ -48,14 +51,3 @@ jobs:
 
       - name: Verify Tauri Rust Workspace (src-tauri)
         run: cargo check --manifest-path src-tauri/Cargo.toml
-
-      - name: Build Tauri Desktop Application
-        uses: tauri-apps/tauri-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: v__VERSION__
-          releaseName: 'Shodasha v__VERSION__'
-          releaseBody: 'Automated release build for Shodasha desktop app.'
-          releaseDraft: true
-          prerelease: false

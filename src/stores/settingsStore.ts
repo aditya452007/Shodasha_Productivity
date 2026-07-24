@@ -11,6 +11,7 @@ interface SettingsState extends AsyncState {
   idleDetectionEnabled: boolean
   idleThreshold: number // seconds
   autoStartEnabled: boolean
+  dailyGoalHours: number // target focus hours per day
   dataRetentionPeriod: DataRetentionPeriod
   themeMode: ThemeMode
   accentColor: AccentColor
@@ -20,6 +21,7 @@ interface SettingsState extends AsyncState {
   setIdleDetectionEnabled: (enabled: boolean) => void
   setIdleThreshold: (threshold: number) => void
   setAutoStartEnabled: (enabled: boolean) => void
+  setDailyGoalHours: (hours: number) => void
   setDataRetentionPeriod: (period: DataRetentionPeriod) => void
   setThemeMode: (mode: ThemeMode) => void
   setAccentColor: (color: AccentColor) => void
@@ -31,6 +33,7 @@ function persistAllSettings(state: Partial<SettingsState>) {
     idleDetectionEnabled: String(state.idleDetectionEnabled ?? true),
     idleThreshold: String(state.idleThreshold ?? 300),
     autoStartEnabled: String(state.autoStartEnabled ?? true),
+    dailyGoalHours: String(state.dailyGoalHours ?? 6.0),
     dataRetentionPeriod: state.dataRetentionPeriod || '6_months',
     themeMode: state.themeMode || 'dark',
     accentColor: state.accentColor || '#059669',
@@ -42,6 +45,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   idleDetectionEnabled: true,
   idleThreshold: 300,
   autoStartEnabled: true,
+  dailyGoalHours: 6.0,
   dataRetentionPeriod: '6_months',
   themeMode: 'dark',
   accentColor: '#059669',
@@ -58,6 +62,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         const idleDetectionEnabled = dbSettings.idleDetectionEnabled !== undefined ? dbSettings.idleDetectionEnabled === 'true' : get().idleDetectionEnabled
         const idleThreshold = dbSettings.idleThreshold ? Number(dbSettings.idleThreshold) : get().idleThreshold
         const autoStartEnabled = dbSettings.autoStartEnabled !== undefined ? dbSettings.autoStartEnabled === 'true' : get().autoStartEnabled
+        const dailyGoalHours = dbSettings.dailyGoalHours ? Number(dbSettings.dailyGoalHours) : get().dailyGoalHours
         const dataRetentionPeriod = (dbSettings.dataRetentionPeriod as DataRetentionPeriod) || get().dataRetentionPeriod
         const themeMode = (dbSettings.themeMode as ThemeMode) || get().themeMode
         const accentColor = (dbSettings.accentColor as AccentColor) || get().accentColor
@@ -67,6 +72,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
           idleDetectionEnabled,
           idleThreshold,
           autoStartEnabled,
+          dailyGoalHours,
           dataRetentionPeriod,
           themeMode,
           accentColor,
@@ -113,6 +119,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   setAutoStartEnabled: (enabled) => {
     set({ autoStartEnabled: enabled })
     setAutoStartInDb(enabled)
+    persistAllSettings(get())
+  },
+  setDailyGoalHours: (hours) => {
+    set({ dailyGoalHours: hours })
     persistAllSettings(get())
   },
   setDataRetentionPeriod: (period) => {

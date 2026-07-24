@@ -4,7 +4,8 @@ import { useMemo } from 'react'
 import { useTaskStore } from '@/stores/taskStore'
 import { useHabitStore } from '@/stores/habitStore'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
-import { CheckCircle2, Clock, Flame, Target, RotateCw } from 'lucide-react'
+import { useSettingsStore } from '@/stores/settingsStore'
+import { CheckCircle2, Clock, Flame, Target, RotateCw, Zap, Award } from 'lucide-react'
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorBanner } from '@/components/ui/ErrorBanner'
@@ -22,10 +23,13 @@ export function TodayProgressCard() {
   const habitError = useHabitStore((state) => state.error)
 
   const getTotalFocusSeconds = useTimeEntryStore((state) => state.getTotalFocusSecondsToday)
+  const getKPIsFiltered = useTimeEntryStore((state) => state.getKPIsFiltered)
   const refreshAllData = useTimeEntryStore((state) => state.refreshAllData)
   const isRefreshing = useTimeEntryStore((state) => state.isRefreshing)
   const isTimeLoading = useTimeEntryStore((state) => state.isLoading)
   const timeError = useTimeEntryStore((state) => state.error)
+
+  const dailyGoalHours = useSettingsStore((state) => state.dailyGoalHours)
 
   const isLoading = isTaskLoading || isHabitLoading || isTimeLoading
 
@@ -41,6 +45,15 @@ export function TodayProgressCard() {
   const focusSeconds = getTotalFocusSeconds()
   const focusHours = Math.floor(focusSeconds / 3600)
   const focusMins = Math.floor((focusSeconds % 3600) / 60)
+
+  const kpis = getKPIsFiltered()
+  const focusScore = kpis.focusScore
+  const deepWorkRatio = kpis.deepWorkRatio
+
+  // Goal calculation
+  const goalSeconds = (dailyGoalHours || 6.0) * 3600
+  const goalProgressPercent = Math.min(100, Math.round((focusSeconds / goalSeconds) * 100))
+  const isGoalAchieved = focusSeconds >= goalSeconds
 
   // Dynamic habit streak calculation
   const streak = useMemo(() => {
@@ -71,7 +84,8 @@ export function TodayProgressCard() {
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-xs space-y-4">
         <LoadingSkeleton height={32} width="40%" />
         <LoadingSkeleton height={18} width="65%" />
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-4">
+          <LoadingSkeleton height={80} />
           <LoadingSkeleton height={80} />
           <LoadingSkeleton height={80} />
           <LoadingSkeleton height={80} />
@@ -107,7 +121,7 @@ export function TodayProgressCard() {
             Stay aligned with your daily rhythm.
           </h2>
           <p className="text-sm text-[var(--text-secondary)]">
-            Tracked focus time, kanban goals, and active habit streaks in one unified overview.
+            Tracked focus time, productivity index, daily goal target, and habit streaks in one unified overview.
           </p>
         </div>
 
@@ -141,8 +155,46 @@ export function TodayProgressCard() {
         </div>
       </div>
 
-      {/* Metric Cards Row */}
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      {/* Metric Cards Row (4 Column Layout) */}
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Daily Goal Target Engine Metric */}
+        <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-4" aria-label={`Daily goal target: ${goalProgressPercent}% of ${dailyGoalHours}h`}>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-[var(--text-muted)]">Daily Goal ({dailyGoalHours}h)</span>
+            <div className="flex items-baseline gap-1">
+              <span className="font-mono text-xl font-bold text-[var(--text-primary)]">
+                {goalProgressPercent}%
+              </span>
+              <span className="text-xs text-[var(--text-muted)] font-mono">
+                ({focusHours}h / {dailyGoalHours}h)
+              </span>
+            </div>
+            <span className={`text-[10px] font-semibold ${isGoalAchieved ? 'text-emerald-500' : 'text-[var(--text-muted)]'}`}>
+              {isGoalAchieved ? '✓ Target Goal Met!' : `${Math.max(0, Math.round((dailyGoalHours * 3600 - focusSeconds) / 3600 * 10) / 10)}h remaining`}
+            </span>
+          </div>
+          <ProgressRing value={goalProgressPercent} size={44} strokeWidth={4} />
+        </div>
+
+        {/* Productivity Index / Focus Score Metric */}
+        <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-4" aria-label={`Focus score index: ${focusScore} of 100`}>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-[var(--text-muted)]">Focus Score</span>
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono text-2xl font-bold text-[var(--accent)]">
+                <NumberTicker value={focusScore} />
+              </span>
+              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[var(--accent-muted)] text-[var(--accent)]">
+                {deepWorkRatio}% Work
+              </span>
+            </div>
+            <span className="text-[10px] text-[var(--text-muted)]">Productivity Index (0-100)</span>
+          </div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent-muted)] text-[var(--accent)]">
+            <Zap className="h-5 w-5" />
+          </div>
+        </div>
+
         {/* Task Completion Metric */}
         <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-4" aria-label={`Tasks completed: ${completedTasks} of ${totalTasks}`}>
           <div className="flex flex-col gap-1">
@@ -152,19 +204,9 @@ export function TodayProgressCard() {
                 <NumberTicker value={completedTasks} /> / {totalTasks}
               </span>
             </div>
+            <span className="text-[10px] text-[var(--text-muted)]">{taskProgress}% completed</span>
           </div>
           <ProgressRing value={taskProgress} size={44} strokeWidth={4} />
-        </div>
-
-        {/* Habits Checked Metric */}
-        <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-4" aria-label={`Habits checked: ${completedHabits} of ${totalHabits}`}>
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-[var(--text-muted)]">Habits Checked</span>
-            <span className="font-mono text-xl font-bold text-[var(--text-primary)]">
-              <NumberTicker value={completedHabits} /> / {totalHabits}
-            </span>
-          </div>
-          <ProgressRing value={habitProgress} size={44} strokeWidth={4} />
         </div>
 
         {/* Streak Counter */}
@@ -174,6 +216,7 @@ export function TodayProgressCard() {
             <span className="font-mono text-2xl font-bold text-amber-600 dark:text-amber-400">
               <NumberTicker value={streak} /> {streak === 1 ? 'Day' : 'Days'}
             </span>
+            <span className="text-[10px] text-[var(--text-muted)]">{completedHabits}/{totalHabits} habits today</span>
           </div>
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400">
             <Flame className="h-5 w-5" />
