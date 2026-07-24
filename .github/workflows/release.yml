@@ -1,17 +1,31 @@
-name: Shodasha Release Pipeline
+name: Shodasha Build & Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Manual version (e.g. v0.2.0) — leave empty for auto bump'
+        required: false
+        default: ''
+      release_type:
+        description: 'Auto bump type'
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 permissions:
   contents: write
 
 jobs:
-  publish-release:
-    name: Build & Release Desktop App (Windows)
+  build-and-release:
+    name: Build & Release Desktop App
     runs-on: windows-latest
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repository
@@ -19,107 +33,64 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Generate Release Body
-        id: body
-        shell: pwsh
+      - name: Determine version
+        id: version
+        shell: bash
         run: |
-          $version = "${{ github.ref_name }}"
-          $lastTag = git describe --tags --abbrev=0 HEAD~1 2>$null
-          if (-not $lastTag) {
-            $tags = git tag --sort=-creatordate
-            if ($tags.Count -gt 1) { $lastTag = $tags[1] }
-          }
-          if (-not $lastTag -or $lastTag -eq $version) { $lastTag = $null }
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
-          $commits = @()
-          if ($lastTag) {
-            $raw = git log "$lastTag..HEAD" --oneline --no-decorate
-            foreach ($line in $raw) {
-              if ($line -match '^(\w+)\s(.+)$') {
-                $hash = $matches[1].Substring(0,7)
-                $msg = $matches[2]
-                $commits += "- $msg ($hash)"
-              }
-            }
-            $compareUrl = "https://github.com/${{ github.repository }}/compare/$lastTag...$version"
-          } else {
-            $raw = git log --oneline --no-decorate
-            foreach ($line in $raw) {
-              if ($line -match '^(\w+)\s(.+)$') {
-                $hash = $matches[1].Substring(0,7)
-                $msg = $matches[2]
-                $commits += "- $msg ($hash)"
-              }
-            }
-            $compareUrl = "https://github.com/${{ github.repository }}/commits/$version"
-          }
+          LATEST_TAG=$(git tag --sort=-creatordate | head -1)
 
-          $commitStr = if ($commits.Count -gt 0) { $commits -join "`n" } else { "- No significant changes" }
+          if [ -z "$LATEST_TAG" ]; then
+            echo "version=v0.1.0" >> "$GITHUB_OUTPUT"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
-          $body = @"
-# Shodasha Productivity Engine $version
+          UNRELEASED=$(git rev-list "$LATEST_TAG..HEAD" --count 2>/dev/null || echo "0")
+          if [ "$UNRELEASED" -eq 0 ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
-Shodasha is a local-first, privacy-focused desktop productivity tracker built with **Tauri v2**, **Next.js 16**, **React 19**, **Rust**, and **SQLite**. It fuses passive Windows activity tracking, habit tracking, and kanban task management into a single, beautiful desktop app.
+          BUMP="patch"
+          [ "${{ github.event_name }}" = "workflow_dispatch" ] && BUMP="${{ github.event.inputs.release_type }}"
 
----
+          CLEAN="${LATEST_TAG#v}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CLEAN"
 
-## ✨ Key Features
+          case "$BUMP" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+          esac
 
-- **Kanban Board** — Drag-and-drop task management with customizable columns and desktop time-tracking
-- **Habit Tracking** — Daily check-ins with calendar heatmaps, streak tracking, and milestone badges
-- **Passive Time Tracking** — Automatically tracks foreground windows via background Rust service (no manual timers)
-- **Interactive Dashboard** — Real-time focus score (0-100), time distribution charts, progress rings, recent activity
-- **Timeline Analytics** — Daily timeline view, weekly charts, app usage breakdown, date range comparison
-- **Focus Target Engine** — Set daily focus goals with real-time progress tracking
-- **Background Tray** — Minimizes to system tray on close with near-zero CPU overhead and auto-start support
-- **Notifications** — Dual-channel in-app toasts paired with native OS alerts
-- **Warm Dark Theme** — Eye-strain-reduced linen and espresso palette with multiple contrast options
-- **100% Offline** — Zero data leaves your machine. No accounts, no cloud, no telemetry
+          echo "version=v${MAJOR}.${MINOR}.${PATCH}" >> "$GITHUB_OUTPUT"
+          echo "skip=false" >> "$GITHUB_OUTPUT"
 
----
-
-## 📥 Installation (Windows)
-
-1. Download the attached **.msi** installer below
-2. Run the installer to set up **Shodasha**
-3. Launch the app — it will sit in your system tray and passively track your focus time
-
-> **System Requirements:** Windows 10 or later, 64-bit
-
----
-
-## 🔒 Privacy Guarantee
-
-100% offline. All activity data, tasks, and habits are stored exclusively in a local SQLite database on your machine. Shodasha never phones home.
-
----
-
-## 🧾 Changelog
-
-$commitStr
-
----
-
-$compareUrl
-"@
-
-          $body = $body -replace '%', '%25'
-          $body = $body -replace "`n", '%0A'
-          $body = $body -replace "`r", '%0D'
-          echo "body=$body" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+      - name: No new commits to release
+        if: steps.version.outputs.skip == 'true'
+        run: echo "Nothing to release — no unreleased commits since last tag."
 
       - name: Setup Node.js
+        if: steps.version.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'npm'
 
-      - name: Install Rust Toolchain (MSVC)
+      - name: Install Rust toolchain
+        if: steps.version.outputs.skip != 'true'
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-pc-windows-msvc
 
-      - name: Rust Dependency Cache
+      - name: Rust cache
+        if: steps.version.outputs.skip != 'true'
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
@@ -127,33 +98,108 @@ $compareUrl
             src-tauri
             tracker
 
-      - name: Install Dependencies
+      - name: Install dependencies
+        if: steps.version.outputs.skip != 'true'
         run: npm ci
 
-      - name: Run ESLint Checks
-        run: npm run lint
-
-      - name: Run TypeScript Typecheck
-        run: npm run typecheck
-
-      - name: Build Next.js Frontend
+      - name: Build Next.js frontend
+        if: steps.version.outputs.skip != 'true'
         run: npm run build
 
-      - name: Build Background Tracker Binary (tracker.exe)
+      - name: Build background tracker
+        if: steps.version.outputs.skip != 'true'
         run: cargo build --manifest-path tracker/Cargo.toml --release
 
-      - name: Copy Tracker Binary for Tauri Bundle
+      - name: Copy tracker binary for Tauri bundle
+        if: steps.version.outputs.skip != 'true'
         run: |
           mkdir -p target/release
           cp tracker/target/release/tracker.exe target/release/tracker.exe
 
-      - name: Build & Publish Release with Tauri Action
+      - name: Generate release body file
+        if: steps.version.outputs.skip != 'true'
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          cat > release_body.md << 'EOF'
+          # Shodasha Productivity Engine
+
+          A local-first, privacy-focused desktop productivity tracker that fuses passive Windows activity tracking, habit tracking, and kanban task management into a single, beautiful desktop app — 100% offline, no accounts, no cloud.
+
+          ---
+
+          ## ✨ Features
+
+          - **Kanban Board** — Drag-and-drop task cards with customizable columns and desktop time-tracking
+          - **Habit Tracking** — Daily check-ins with calendar heatmaps, streak tracking, and milestone badges
+          - **Passive Time Tracking** — Automatically tracks foreground windows via background Rust service (no manual timers)
+          - **Interactive Dashboard** — Real-time focus score (0-100), time distribution charts, progress rings
+          - **Timeline Analytics** — Daily timeline, weekly charts, app usage breakdown, date range comparison
+          - **Focus Target Engine** — Set daily focus goals with live progress rings
+          - **Background Tray & Auto-Start** — Minimizes to system tray with near-zero CPU overhead
+          - **Dual-Channel Notifications** — In-app toasts paired with native OS alerts
+          - **Warm Dark Theme** — Eye-strain-reduced linen & espresso palette with contrast options
+          - **100% Offline** — Zero data leaves your machine. No telemetry, no cloud
+
+          ---
+
+          ## 📥 Installation
+
+          **System Requirements:** Windows 10 or later (64-bit)
+
+          1. Download the **.msi** installer attached below
+          2. Run the installer to set up **Shodasha**
+          3. Launch the app — it sits in your system tray and passively tracks your focus time
+
+          ---
+
+          ## 🔒 Privacy Guarantee
+
+          100% offline. All activity data, tasks, and habits live exclusively in a local SQLite database. Shodasha never phones home.
+
+          ---
+
+          ## 🧾 What's Changed
+          EOF
+
+          echo "" >> release_body.md
+
+          LAST_TAG=$(git tag --sort=-creatordate | head -1)
+          if [ "$LAST_TAG" = "$VERSION" ] || [ -z "$LAST_TAG" ]; then
+            LAST_TAG=""
+          fi
+
+          if [ -n "$LAST_TAG" ]; then
+            git log "$LAST_TAG..HEAD" --oneline --no-decorate | while IFS= read -r line; do
+              echo "- $line" >> release_body.md
+            done
+            echo "" >> release_body.md
+            echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/$LAST_TAG...$VERSION" >> release_body.md
+          else
+            git log --oneline --no-decorate | while IFS= read -r line; do
+              echo "- $line" >> release_body.md
+            done
+            echo "" >> release_body.md
+            echo "**Full Changelog**: https://github.com/${{ github.repository }}/commits/$VERSION" >> release_body.md
+          fi
+
+      - name: Build Tauri app & create release
+        if: steps.version.outputs.skip != 'true'
         uses: tauri-apps/tauri-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: Shodasha Desktop Productivity App ${{ github.ref_name }}
-          releaseBody: ${{ steps.body.outputs.body }}
+          tagName: ${{ steps.version.outputs.version }}
+          releaseName: Shodasha Desktop Productivity App ${{ steps.version.outputs.version }}
+          releaseBody: Shodasha ${{ steps.version.outputs.version }} — Windows desktop productivity tracker
           releaseDraft: false
           prerelease: false
+
+      - name: Update release body with detailed notes
+        if: steps.version.outputs.skip != 'true'
+        shell: bash
+        run: |
+          gh release edit "${{ steps.version.outputs.version }}" --notes-file release_body.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

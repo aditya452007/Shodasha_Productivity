@@ -174,17 +174,19 @@ Execute Shodasha redesign incrementally in strictly controlled, verifiable phase
   - `npm run build` (Next.js 16 production export passed with 0 errors)
   - `cargo check` (Rust backend dev profile passed with 0 errors)
 
-### CI/CD & Release Pipeline Improvements
-- [x] Updated README.md with comprehensive project documentation (tech stack, features, installation, privacy)
-- [x] Fixed `release.yml` with auto-generated changelog from git commits between tags
-- [x] Added dynamic release body generation with formatted features list, installation instructions, and commit log
-- [x] Fixed Node.js version alignment across CI and release workflows (Node 22 LTS)
-- [x] Created `auto-release.yml` — auto-creates patch version tags on every push to main/master
-- [x] Auto-release workflow also supports manual `workflow_dispatch` with version input or patch/minor/major bump options
-- [x] Tag creation triggers `release.yml` which builds the full Tauri desktop app and publishes MSI installer to GitHub Releases
-- [x] Release pipeline now fetches full git history (`fetch-depth: 0`) for accurate changelog generation
+### CI/CD Release Pipeline Overhaul (Jul 2026)
+- [x] Combined auto-release + build into single `release.yml` workflow (removed separate `auto-release.yml`)
+- [x] Triggers on push to `main`/`master`: auto-detects unreleased commits, bumps patch version, builds, and creates GitHub Release
+- [x] Uses `tauri-apps/tauri-action@v2` for proper Tauri build (handles WiX Toolset, creates `.msi` installer)
+- [x] Generates rich release body via file (avoids multiline YAML issues) — app description, feature list, installation guide, privacy notice, and auto-changelog from git commits
+- [x] Updates release body post-creation using `gh release edit --notes-file`
+- [x] Uploads `.msi` installer as downloadable release asset (not just source code zip)
+- [x] Supports `workflow_dispatch` for manual releases with custom version or bump type (patch/minor/major)
+- [x] Skips automatically when no unreleased commits exist since last tag
+- [x] Updated README.md with comprehensive project documentation (features, tech stack, installation, privacy)
+- [x] Node.js version aligned across all workflows (22 LTS)
 
-## Project Status: CI/CD AUTOMATED — RELEASES ON EVERY PUSH
+## Project Status: CI/CD AUTOMATED — FULL .MSI RELEASES ON EVERY PUSH 🚀
 
 ## Open Questions
 
