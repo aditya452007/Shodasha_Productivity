@@ -175,17 +175,17 @@ Generated: 2026-07-24 | Type: EXHAUSTIVE — every change that must happen
 - [x] AddHabitModal: submitting state | N/A | validation error | form
 
 ### Timeline Components
-- [ ] FilterBar: N/A | N/A | N/A | filter controls
-- [ ] TimelineStream: loading skeleton | empty "No entries for this date" | error banner | entry list
-- [ ] CumulativeScreenTimeWidget: loading skeleton | empty "Start tracking" | error | Recharts AreaChart
-- [ ] AnalyticsKPIGrid: loading skeleton | empty "0s tracked" | error | 3 KPI cards
-- [ ] DistributionChartsWidget: loading skeleton | empty "No data" | error | chart
+- [x] FilterBar: N/A | N/A | N/A | filter controls
+- [x] TimelineStream: loading skeleton | empty "No entries for this date" | error banner | entry list
+- [x] CumulativeScreenTimeWidget: loading skeleton | empty "Start tracking" | error | Recharts AreaChart
+- [x] AnalyticsKPIGrid: loading skeleton | empty "0s tracked" | error | 3 KPI cards
+- [x] DistributionChartsWidget: loading skeleton | empty "No data" | error | chart
 
 ### Settings Components
-- [ ] DataManagement: loading (during export) | empty counts | error on export/clear | management UI
-- [ ] AppearanceSettings: N/A | N/A | error on save failure | settings form
-- [ ] TrackingPreferences: loading (during interval change) | N/A | error on save | settings form
-- [ ] AppCategoryManager: loading skeleton | empty "No apps found" | error | category grid
+- [x] DataManagement: loading (during export) | empty counts | error on export/clear | management UI
+- [x] AppearanceSettings: N/A | N/A | error on save failure | settings form
+- [x] TrackingPreferences: loading (during interval change) | N/A | error on save | settings form
+- [x] AppCategoryManager: loading skeleton | empty "No apps found" | error | category grid
 
 ---
 

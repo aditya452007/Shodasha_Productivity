@@ -16,6 +16,8 @@ import { KPICard } from '@/components/ui/charts/KPICard'
 import { LineChart } from '@/components/ui/charts/LineChart'
 import { RingChart } from '@/components/ui/charts/RingChart'
 import { BarChart } from '@/components/ui/charts/BarChart'
+import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
+import { ErrorBanner } from '@/components/ui/ErrorBanner'
 
 const formatDuration = (seconds: number) => {
   const h = Math.floor(seconds / 3600)
@@ -25,8 +27,23 @@ const formatDuration = (seconds: number) => {
 }
 
 export function AnalyticsKPIGrid() {
-  const { getKPIsFiltered } = useTimeEntryStore()
+  const { getKPIsFiltered, isLoading, error } = useTimeEntryStore()
   const kpis = getKPIsFiltered()
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <LoadingSkeleton height={100} />
+        <LoadingSkeleton height={100} />
+        <LoadingSkeleton height={100} />
+        <LoadingSkeleton height={100} />
+      </div>
+    )
+  }
+
+  if (error) {
+    return <ErrorBanner title="Failed to load analytics KPIs" message={error} />
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

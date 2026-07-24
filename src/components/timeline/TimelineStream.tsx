@@ -15,6 +15,9 @@ import {
 } from 'lucide-react'
 import { useTimeEntryStore, TimeEntry } from '@/stores/timeEntryStore'
 import { useTaskStore } from '@/stores/taskStore'
+import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
+import { ErrorBanner } from '@/components/ui/ErrorBanner'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 const getAppIcon = (appName: string): LucideIcon => {
   const name = appName.toLowerCase()
@@ -43,10 +46,31 @@ const formatDuration = (seconds?: number) => {
 }
 
 export function TimelineStream() {
-  const { getFilteredEntries, categories, linkTaskToTimeEntry } = useTimeEntryStore()
+  const { getFilteredEntries, categories, linkTaskToTimeEntry, isLoading, error, refreshAllData } = useTimeEntryStore()
   const { tasks } = useTaskStore()
 
   const entries = getFilteredEntries()
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <LoadingSkeleton height={32} width="40%" />
+        <LoadingSkeleton height={64} />
+        <LoadingSkeleton height={64} />
+        <LoadingSkeleton height={64} />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <ErrorBanner
+        title="Failed to load activity stream"
+        message={error}
+        onRetry={() => refreshAllData()}
+      />
+    )
+  }
 
   return (
     <div className="space-y-6">

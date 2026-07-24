@@ -4,6 +4,9 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Plus, Tag, Check, Trash2, Edit3, Monitor, X } from 'lucide-react'
 import { useTimeEntryStore, CategoryType } from '@/stores/timeEntryStore'
+import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { ErrorBanner } from '@/components/ui/ErrorBanner'
 
 const categoryColors: Record<CategoryType, { bg: string; text: string; dot: string; border: string; label: string }> = {
   work: {
@@ -30,7 +33,7 @@ const categoryColors: Record<CategoryType, { bg: string; text: string; dot: stri
 }
 
 export function AppCategoryManager() {
-  const { categories, setCategory, entries } = useTimeEntryStore()
+  const { categories, setCategory, entries, isLoading, error } = useTimeEntryStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [newAppName, setNewAppName] = useState('')
@@ -98,13 +101,27 @@ export function AppCategoryManager() {
         </div>
 
         {/* Executable Classification Grid / List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pr-1">
-          {filteredApps.length === 0 ? (
-            <div className="col-span-full py-8 text-center text-xs text-[var(--text-tertiary)] bg-[var(--bg-base)] rounded-xl border border-dashed border-[var(--border-subtle)]">
-              No executables match "{searchQuery}"
-            </div>
-          ) : (
-            filteredApps.map((appName) => {
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <LoadingSkeleton height={56} />
+            <LoadingSkeleton height={56} />
+            <LoadingSkeleton height={56} />
+            <LoadingSkeleton height={56} />
+          </div>
+        ) : error ? (
+          <ErrorBanner title="Failed to load categories" message={error} />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pr-1">
+            {filteredApps.length === 0 ? (
+              <div className="col-span-full">
+                <EmptyState
+                  icon={Monitor}
+                  title="No application processes found"
+                  description={searchQuery ? `No applications match "${searchQuery}"` : "Click 'Add Executable' to map an application process."}
+                />
+              </div>
+            ) : (
+              filteredApps.map((appName) => {
               const category = categories[appName] || 'neutral'
               const config = categoryColors[category]
 
@@ -154,6 +171,7 @@ export function AppCategoryManager() {
             })
           )}
         </div>
+        )}
       </div>
 
       {/* Add Executable Modal */}
