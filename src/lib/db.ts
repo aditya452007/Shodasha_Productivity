@@ -270,6 +270,16 @@ export async function setIdleThresholdInDb(thresholdSecs: number) {
   }
 }
 
+export async function getIdleSeconds(): Promise<number> {
+  if (!isTauri()) return 0;
+  try {
+    return await invoke<number>('get_idle_seconds');
+  } catch (err) {
+    handleIpcError('get_idle_seconds', err);
+    return 0;
+  }
+}
+
 // Exports
 export async function exportTimeEntriesCsvFromDb(startDate: string, endDate: string) {
   if (!isTauri()) return null;

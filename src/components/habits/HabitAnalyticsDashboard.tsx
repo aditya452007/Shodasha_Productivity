@@ -135,7 +135,8 @@ export function HabitAnalyticsDashboard() {
 
       let count = 0
       habits.forEach((h) => {
-        if (records[`${h.id}_${dateStr}`]) count++
+        const startDate = h.createdAt.split('T')[0]
+        if (dateStr >= startDate && records[`${h.id}_${dateStr}`]) count++
       })
 
       const percentage = habits.length > 0 ? Math.round((count / habits.length) * 100) : 0
@@ -199,7 +200,8 @@ export function HabitAnalyticsDashboard() {
       const dayIdx = d.getDay()
 
       habits.forEach((h) => {
-        if (records[`${h.id}_${dateStr}`]) counts[dayIdx]++
+        const startDate = h.createdAt.split('T')[0]
+        if (dateStr >= startDate && records[`${h.id}_${dateStr}`]) counts[dayIdx]++
       })
     }
 
@@ -229,8 +231,13 @@ export function HabitAnalyticsDashboard() {
     let maxDone = -1
 
     habits.forEach((h) => {
+      const startDate = h.createdAt.split('T')[0]
+      const daysSinceCreation = Math.round(
+        (today.getTime() - new Date(startDate).getTime()) / (1000 * 3600 * 24)
+      ) + 1
+      const lookbackDays = Math.min(30, Math.max(1, daysSinceCreation))
       let count = 0
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < lookbackDays; i++) {
         const d = new Date(today)
         d.setDate(today.getDate() - i)
         const dateStr = d.toISOString().split('T')[0]
@@ -242,7 +249,11 @@ export function HabitAnalyticsDashboard() {
       }
     })
 
-    const topHabitRate = Math.round((maxDone / 30) * 100)
+    const topHabitRate = Math.round((maxDone / Math.max(...habits.map((h) => {
+      const sd = h.createdAt.split('T')[0]
+      const dsc = Math.round((today.getTime() - new Date(sd).getTime()) / (1000 * 3600 * 24)) + 1
+      return Math.min(30, Math.max(1, dsc))
+    }), 1)) * 100)
 
     return {
       peakDayName: peakDay.day,
@@ -426,15 +437,20 @@ export function HabitAnalyticsDashboard() {
           <div className="space-y-3">
             {habits.map((habit) => {
               const today = new Date()
+              const startDate = habit.createdAt.split('T')[0]
+              const daysSinceCreation = Math.round(
+                (today.getTime() - new Date(startDate).getTime()) / (1000 * 3600 * 24)
+              ) + 1
+              const lookbackDays = Math.min(30, Math.max(1, daysSinceCreation))
               let doneCount = 0
-              for (let i = 0; i < 30; i++) {
+              for (let i = 0; i < lookbackDays; i++) {
                 const d = new Date(today)
                 d.setDate(today.getDate() - i)
                 const dateStr = d.toISOString().split('T')[0]
                 if (records[`${habit.id}_${dateStr}`]) doneCount++
               }
 
-              const rate = Math.round((doneCount / 30) * 100)
+              const rate = Math.round((doneCount / lookbackDays) * 100)
               const circumference = 2 * Math.PI * 15
               const strokeDashoffset = circumference - (rate / 100) * circumference
               const linkedTask = tasks.find((t) => t.id === habit.linkedTaskId)

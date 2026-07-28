@@ -216,6 +216,67 @@ Execute Shodasha redesign incrementally in strictly controlled, verifiable phase
 - [x] **Live Data & Inter-Component Reactivity**: Removed all dummy/random fallbacks (`Math.random()`, static 50% habit rate). Connected 100% live SQLite/Zustand state calculations, and wired task/habit toggle actions directly to SQLite persistence and real-time dashboard UI re-rendering.
 - [x] **Full Verification Passed**: `npm run typecheck` (0 errors), `npm run lint` (0 errors), `npm run build` (0 errors).
 
+## Desktop Pet Notification Service (Jul 2026)
+
+### Phase 0 — Design Brief
+- [x] Feature spec written at `Feature_docs/desktop_pet_notifications/spec.md`
+- [x] Integration approach: Direct Local IPC (named pipe via Win32 API)
+- [x] Notification types mapped to pet reactions (idle, habit, daily summary, focus goal, task deadline, streak, error, time-based reminders)
+- [x] Fallback chain: OpenPets → Web Notification → silent (configurable per type)
+- [x] Pet selection: Both (Shodasha Settings + OpenPets app)
+- [x] Time reminders: Relative duration + absolute deadline on tasks/habits
+
+### Phase 1 — Rust IPC Client (Complete)
+- [x] Created `src-tauri/src/services/openpets_client.rs` — full IPC client connecting to OpenPets via named pipe:
+  - `discover()` — reads discovery file, checks pipe availability
+  - `status()` — queries OpenPets status, returns pet info
+  - `say(message, reaction, pet_id)` — sends speech bubble to pet
+  - `react(reaction, pet_id)` — sets pet reaction animation
+  - `list_pets()` — enumerates installed pets
+- [x] All errors handled gracefully: NotInstalled, NotRunning, Timeout, Platform, IpcError
+- [x] Thread-safe named pipe I/O with configurable timeouts (2s connect, 3s response)
+- [x] Raw Win32 FFI via `kernel32` (CreateFileW, WriteFile, ReadFile, CloseHandle) — zero extra dependencies
+- [x] Added `Win32_Storage_FileSystem` feature to `windows-sys`
+- [x] Registered 4 new Tauri commands: `openpets_discover`, `openpets_say`, `openpets_react`, `openpets_list_pets`
+- [x] `cargo check` — 0 errors, 0 warnings
+
+### Phase 2 — Frontend (Pending)
+- [ ] Extend `notifications.ts` with OpenPets delivery channel
+- [ ] Extend `notificationStore.ts` with per-type pet delivery preferences
+- [ ] Wire existing notification triggers to pet delivery
+
+### Phase 3 — Pet Browser in Settings (Complete)
+- [x] Create `DesktopPetSettings.tsx` component
+  - Connection status banner (loading / available / not_installed / not_running / no_pets / error)
+  - Master pet delivery toggle
+  - Pet browser grid with selection (2-column, chip-style cards)
+  - Per-type delivery channel selectors (Habit / Idle / Summary → both, pet, web, silent)
+  - Test pet notification button with loading state
+  - Refresh/retry button on connection banner
+  - Follows warm editorial design system (existing CSS tokens, card patterns, spacing)
+- [x] Add "Desktop Pet" nav item to SettingsSidebar (Cat icon)
+- [x] Wire into Settings page render switch
+- [x] Export from settings/index.ts
+
+### Phase 4 — Notification Quality & Polish (Complete)
+- [x] Improved `sendWebNotification` for Windows system policy compliance:
+  - Proper `tag` deduplication in Windows Action Center
+  - Auto-close after 8s via `setTimeout` — no stale notifications
+  - `onclick` handler focuses app window and closes notification
+  - `requireInteraction` flags for time-sensitive alerts (idle, deadline)
+  - Cooldown map prevents duplicate spam (30s per tag)
+- [x] Polished notification message copy — concise, scannable, actionable:
+  - `sendHabitReminderNotification`: `"Time for "{name}" — keep your streak going!"`
+  - `sendIdleAlertNotification`: `"You've been idle for {n} min. Take a breather or jump back in."`
+  - `sendDailySummaryNotification`: `"{h}h tracked today. Top app: {name}."`
+  - `sendTaskDeadlineNotification`: `"due in {n} min" / "is due now!"`
+  - `sendFocusGoalNotification`: `"You hit {n} min of focused work. Great session!"`
+  - `sendDurationElapsedNotification`: `"{n} min on "{task}". Taking a break?"`
+- [x] Pet notification rate limiting (30s cooldown per pet)
+- [x] Pet messages prefixed with emoji per type (⏰ habit, 💤 idle, 📊 summary, etc.)
+- [x] Cleaned up notificationStore messages matching improved copy
+- [x] Background 60s timer integrated in dashboard page (pre-existing, now using improved pipeline)
+
 ## Project Status: CI/CD AUTOMATED — FULL .MSI RELEASES ON EVERY PUSH 🚀
 
 ## Open Questions

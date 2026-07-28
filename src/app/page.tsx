@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect } from 'react'
 import { HeaderGreetingCard } from '@/components/dashboard/HeaderGreetingCard'
 import { TopKPIGrid } from '@/components/dashboard/TopKPIGrid'
 import { ScheduleActivityCard } from '@/components/dashboard/ScheduleActivityCard'
@@ -10,20 +9,8 @@ import { StreakHeroCard } from '@/components/dashboard/StreakHeroCard'
 import { PerformanceOverviewChart } from '@/components/dashboard/PerformanceOverviewChart'
 import { QuickTaskInput } from '@/components/dashboard/QuickTaskInput'
 import { InsightCard } from '@/components/dashboard/InsightCard'
-import { useNotificationStore } from '@/stores/notificationStore'
 
 export default function DashboardPage() {
-  const checkAndTriggerNotifications = useNotificationStore((state) => state.checkAndTriggerNotifications)
-
-  useEffect(() => {
-    // Initial notification check & 60s background tick
-    checkAndTriggerNotifications()
-    const interval = setInterval(() => {
-      checkAndTriggerNotifications()
-    }, 60000)
-    return () => clearInterval(interval)
-  }, [checkAndTriggerNotifications])
-
   return (
     <div className="flex flex-col gap-6 w-full pb-12">
       {/* 1. Top Greeting Header Bar */}

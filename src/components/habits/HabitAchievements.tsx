@@ -58,6 +58,10 @@ export function HabitAchievements() {
     const today = new Date()
     const todayStr = today.toISOString().split('T')[0]
 
+    // Find earliest habit creation date for streak boundary
+    const creationDates = habits.map((h) => h.createdAt.split('T')[0]).sort()
+    const globalStartBoundary = creationDates.length > 0 ? creationDates[0] : todayStr
+
     // Unique dates where at least 1 habit was completed
     const uniqueDates = new Set<string>()
     Object.entries(records).forEach(([key, done]) => {
@@ -77,7 +81,11 @@ export function HabitAchievements() {
 
     while (true) {
       const dateStr = checkDate.toISOString().split('T')[0]
-      const hasCompleted = habits.some((h) => !!records[`${h.id}_${dateStr}`])
+      if (dateStr < globalStartBoundary) break
+      const hasCompleted = habits.some((h) => {
+        const startDate = h.createdAt.split('T')[0]
+        return dateStr >= startDate && !!records[`${h.id}_${dateStr}`]
+      })
       if (hasCompleted) {
         streak++
         checkDate.setDate(checkDate.getDate() - 1)

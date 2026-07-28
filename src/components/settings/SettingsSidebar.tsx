@@ -1,6 +1,6 @@
 'use client';
 
-import { LucideIcon, Sliders, Palette, Bell, Database, Info } from 'lucide-react';
+import { LucideIcon, Sliders, Palette, Bell, Database, Info, Cat } from 'lucide-react';
 
 export interface SettingsNavItem {
   id: string;
@@ -33,6 +33,12 @@ export const SETTINGS_NAV_ITEMS: SettingsNavItem[] = [
     label: 'Data & Backup',
     description: 'Database export, import, storage management',
     icon: Database,
+  },
+  {
+    id: 'desktop-pet',
+    label: 'Desktop Pet',
+    description: 'OpenPets integration, pet selection, delivery channels',
+    icon: Cat,
   },
   {
     id: 'about',

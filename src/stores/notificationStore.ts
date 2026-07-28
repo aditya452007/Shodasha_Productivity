@@ -9,7 +9,10 @@ import {
   sendHabitReminderNotification,
   sendIdleAlertNotification,
   sendDailySummaryNotification,
+  deliverNotification,
 } from '@/lib/notifications';
+import { getIdleSeconds } from '@/lib/db';
+import { type DeliveryChannel } from '@/lib/openpets';
 import { useHabitStore } from './habitStore';
 import { useTimeEntryStore } from './timeEntryStore';
 
@@ -17,13 +20,19 @@ interface NotificationState {
   notificationsEnabled: boolean;
   permission: NotificationPermission;
   habitRemindersEnabled: boolean;
-  habitReminderTime: string; // e.g. "20:00"
+  habitReminderTime: string;
   idleAlertsEnabled: boolean;
-  idleThresholdMinutes: number; // e.g. 30
+  idleThresholdMinutes: number;
   dailySummaryEnabled: boolean;
-  dailySummaryTime: string; // e.g. "21:00"
+  dailySummaryTime: string;
   lastSummaryTriggerDate: string | null;
   lastHabitReminderDate: string | null;
+
+  petDeliveryEnabled: boolean;
+  petId: string | null;
+  channelHabit: DeliveryChannel;
+  channelIdle: DeliveryChannel;
+  channelSummary: DeliveryChannel;
 
   requestPermission: () => Promise<boolean>;
   setNotificationsEnabled: (enabled: boolean) => void;
@@ -33,8 +42,13 @@ interface NotificationState {
   setIdleThresholdMinutes: (mins: number) => void;
   setDailySummaryEnabled: (enabled: boolean) => void;
   setDailySummaryTime: (time: string) => void;
-  sendTestNotification: () => boolean;
-  checkAndTriggerNotifications: () => void;
+  setPetDeliveryEnabled: (enabled: boolean) => void;
+  setPetId: (id: string | null) => void;
+  setChannelHabit: (ch: DeliveryChannel) => void;
+  setChannelIdle: (ch: DeliveryChannel) => void;
+  setChannelSummary: (ch: DeliveryChannel) => void;
+  sendTestNotification: () => Promise<boolean>;
+  checkAndTriggerNotifications: () => Promise<void>;
 }
 
 export const useNotificationStore = create<NotificationState>()(
@@ -51,6 +65,12 @@ export const useNotificationStore = create<NotificationState>()(
       lastSummaryTriggerDate: null,
       lastHabitReminderDate: null,
 
+      petDeliveryEnabled: true,
+      petId: null,
+      channelHabit: 'both',
+      channelIdle: 'both',
+      channelSummary: 'both',
+
       requestPermission: async () => {
         const perm = await requestNotificationPermission();
         set({ permission: perm, notificationsEnabled: perm === 'granted' });
@@ -64,24 +84,37 @@ export const useNotificationStore = create<NotificationState>()(
       setIdleThresholdMinutes: (mins) => set({ idleThresholdMinutes: mins }),
       setDailySummaryEnabled: (enabled) => set({ dailySummaryEnabled: enabled }),
       setDailySummaryTime: (time) => set({ dailySummaryTime: time }),
+      setPetDeliveryEnabled: (enabled) => set({ petDeliveryEnabled: enabled }),
+      setPetId: (id) => set({ petId: id }),
+      setChannelHabit: (ch) => set({ channelHabit: ch }),
+      setChannelIdle: (ch) => set({ channelIdle: ch }),
+      setChannelSummary: (ch) => set({ channelSummary: ch }),
 
-      sendTestNotification: () => {
-        return sendWebNotification({
-          title: 'Shodasha Productivity',
-          body: 'Notifications are configured and working correctly!',
-          tag: 'test-notification',
-        });
+      sendTestNotification: async () => {
+        const { channelHabit: ch, petDeliveryEnabled, petId } = get();
+        const opts = { title: 'Shodasha', body: 'All systems operational. Notifications working!', tag: 'test-notification' };
+        if (petDeliveryEnabled && (ch === 'pet' || ch === 'both')) {
+          await deliverNotification(opts, ch, 'test', petId ?? undefined);
+        }
+        return sendWebNotification(opts);
       },
 
-      checkAndTriggerNotifications: () => {
+      checkAndTriggerNotifications: async () => {
         const {
           notificationsEnabled,
           habitRemindersEnabled,
           habitReminderTime,
+          idleAlertsEnabled,
+          idleThresholdMinutes,
           dailySummaryEnabled,
           dailySummaryTime,
           lastSummaryTriggerDate,
           lastHabitReminderDate,
+          petDeliveryEnabled,
+          channelHabit,
+          channelSummary,
+          channelIdle,
+          petId,
         } = get();
 
         if (!notificationsEnabled) return;
@@ -90,24 +123,62 @@ export const useNotificationStore = create<NotificationState>()(
         const todayStr = now.toISOString().split('T')[0];
         const currentHoursMins = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-        // 1. Check Habit Reminders
-        if (habitRemindersEnabled && habitReminderTime === currentHoursMins && lastHabitReminderDate !== todayStr) {
+        // Normalize stored times: strip any non-numeric suffix, accept both "20:00" and "08:00 PM"
+        const normalizeTime = (t: string) => t.replace(/\s*[APap][Mm]$/, '').trim().slice(0, 5);
+
+        // 0. Idle Alerts — query system idle time and notify if exceeded
+        if (idleAlertsEnabled) {
+          try {
+            const idleSecs = await getIdleSeconds();
+            if (idleSecs >= idleThresholdMinutes * 60) {
+              const idleMins = Math.floor(idleSecs / 60);
+              if (petDeliveryEnabled) {
+                await deliverNotification(
+                  { title: 'Heads up!', body: `You've been idle for ${idleMins} min. Take a breather or jump back in.`, tag: `idle-alert-${todayStr}` },
+                  channelIdle, 'idle', petId ?? undefined,
+                );
+              } else {
+                await sendIdleAlertNotification(idleMins);
+              }
+            }
+          } catch (err) {
+            console.warn('Idle check failed:', err);
+          }
+        }
+
+        // 1. Habit Reminders
+        if (habitRemindersEnabled && normalizeTime(habitReminderTime) === currentHoursMins && lastHabitReminderDate !== todayStr) {
           const habits = useHabitStore.getState().habits;
           if (habits.length > 0) {
-            sendHabitReminderNotification(habits[0].name);
+            const habit = habits[0];
+            if (petDeliveryEnabled) {
+              await deliverNotification(
+                { title: 'Habit Reminder', body: `Time for "${habit.name}" — keep your streak going!`, tag: `habit-reminder-${habit.name}` },
+                channelHabit, 'habit', petId ?? undefined,
+              );
+            } else {
+              await sendHabitReminderNotification(habit.name);
+            }
             set({ lastHabitReminderDate: todayStr });
           }
         }
 
-        // 2. Check Daily Summary Notification
-        if (dailySummaryEnabled && dailySummaryTime === currentHoursMins && lastSummaryTriggerDate !== todayStr) {
+        // 2. Daily Summary
+        if (dailySummaryEnabled && normalizeTime(dailySummaryTime) === currentHoursMins && lastSummaryTriggerDate !== todayStr) {
           const timeStore = useTimeEntryStore.getState();
           const focusSecs = timeStore.getTotalFocusSecondsToday();
           const hours = Math.round((focusSecs / 3600) * 10) / 10;
           const topApps = timeStore.getTopAppsFiltered();
           const topApp = topApps.length > 0 ? topApps[0].appName : 'Desktop Apps';
 
-          sendDailySummaryNotification(hours, topApp);
+          if (petDeliveryEnabled) {
+            await deliverNotification(
+              { title: 'Daily Summary', body: `${hours}h tracked today. Top app: ${topApp}.`, tag: 'daily-summary' },
+              channelSummary, 'summary', petId ?? undefined,
+            );
+          } else {
+            await sendDailySummaryNotification(hours, topApp);
+          }
           set({ lastSummaryTriggerDate: todayStr });
         }
       },
@@ -124,6 +195,11 @@ export const useNotificationStore = create<NotificationState>()(
         dailySummaryTime: state.dailySummaryTime,
         lastSummaryTriggerDate: state.lastSummaryTriggerDate,
         lastHabitReminderDate: state.lastHabitReminderDate,
+        petDeliveryEnabled: state.petDeliveryEnabled,
+        petId: state.petId,
+        channelHabit: state.channelHabit,
+        channelIdle: state.channelIdle,
+        channelSummary: state.channelSummary,
       }),
     }
   )

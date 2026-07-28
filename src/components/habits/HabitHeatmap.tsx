@@ -15,12 +15,17 @@ export function HabitHeatmap() {
     const totalDays = weeksCount * 7
     const today = new Date()
 
+    // Find earliest habit creation date
+    const creationDates = habits.map((h) => h.createdAt.split('T')[0]).sort()
+    const globalStartBoundary = creationDates.length > 0 ? creationDates[0] : null
+
     const days: {
       dateStr: string
       dayOfWeek: number // 0 = Sun, 1 = Mon, etc.
       count: number
       level: number // 0, 1, 2, 3, 4
       habitNames: string[]
+      isBeforeTracking: boolean
     }[] = []
 
     for (let i = totalDays - 1; i >= 0; i--) {
@@ -28,9 +33,12 @@ export function HabitHeatmap() {
       d.setDate(today.getDate() - i)
       const dateStr = d.toISOString().split('T')[0]
 
+      const isBeforeTracking = globalStartBoundary ? dateStr < globalStartBoundary : false
+
       const completedHabits: string[] = []
       habits.forEach((h) => {
-        if (records[`${h.id}_${dateStr}`]) {
+        const startDate = h.createdAt.split('T')[0]
+        if (dateStr >= startDate && records[`${h.id}_${dateStr}`]) {
           completedHabits.push(h.name)
         }
       })
@@ -48,6 +56,7 @@ export function HabitHeatmap() {
         count,
         level,
         habitNames: completedHabits,
+        isBeforeTracking,
       })
     }
 
@@ -134,6 +143,10 @@ export function HabitHeatmap() {
                       <div className="font-bold text-emerald-400">
                         {day.dateStr}
                       </div>
+                      {day.isBeforeTracking ? (
+                        <div className="text-gray-400">Before habit tracking started</div>
+                      ) : (
+                        <>
                       <div className="text-gray-300">
                         {day.count} {day.count === 1 ? 'habit' : 'habits'} completed
                       </div>
@@ -141,6 +154,8 @@ export function HabitHeatmap() {
                         <div className="text-[10px] text-gray-400 mt-1 border-t border-gray-800 pt-1">
                           {day.habitNames.join(', ')}
                         </div>
+                      )}
+                      </>
                       )}
                     </div>
                   </div>

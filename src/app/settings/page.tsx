@@ -11,6 +11,7 @@ import {
   AppCategoryManager,
   AppearanceSettings,
   NotificationsSettings,
+  DesktopPetSettings,
   DataManagement,
   AboutSettings,
 } from '@/components/settings';
@@ -51,6 +52,8 @@ export default function SettingsPage() {
         return <AppearanceSettings />;
       case 'notifications':
         return <NotificationsSettings />;
+      case 'desktop-pet':
+        return <DesktopPetSettings />;
       case 'data':
         return <DataManagement />;
       case 'about':

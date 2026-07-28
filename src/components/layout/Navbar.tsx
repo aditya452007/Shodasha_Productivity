@@ -17,6 +17,7 @@ import {
   Kanban,
   CalendarCheck,
   LineChart,
+  Timer,
   Settings,
   Minus,
   Square,
@@ -28,6 +29,7 @@ const navItems = [
   { label: 'Board', href: '/board', icon: Kanban, color: 'bg-teal-600 hover:bg-teal-700' },
   { label: 'Habits', href: '/habits', icon: CalendarCheck, color: 'bg-violet-600 hover:bg-violet-700' },
   { label: 'Timeline', href: '/timeline', icon: LineChart, color: 'bg-amber-600 hover:bg-amber-700' },
+  { label: 'Timer', href: '/timer', icon: Timer, color: 'bg-blue-600 hover:bg-blue-700' },
   { label: 'Settings', href: '/settings', icon: Settings, color: 'bg-stone-700 hover:bg-stone-800' },
 ]
 

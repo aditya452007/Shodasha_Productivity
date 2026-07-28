@@ -196,11 +196,15 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                 habits.map((habit, habitIndex) => {
                   const linkedTask = tasks.find((t) => t.id === habit.linkedTaskId)
 
-                  // Compute monthly completion rate for this habit
-                  const doneCountInMonth = daysInMonth.filter(
+                  // Compute monthly completion rate for this habit (only since creation)
+                  const startDate = habit.createdAt.split('T')[0]
+                  const eligibleDaysInMonth = daysInMonth.filter((d) => d.dateStr >= startDate)
+                  const doneCountInMonth = eligibleDaysInMonth.filter(
                     (d) => !!records[`${habit.id}_${d.dateStr}`]
                   ).length
-                  const completionPercentage = Math.round((doneCountInMonth / daysInMonth.length) * 100)
+                  const completionPercentage = eligibleDaysInMonth.length > 0
+                    ? Math.round((doneCountInMonth / eligibleDaysInMonth.length) * 100)
+                    : 0
 
                   return (
                     <motion.tr
@@ -280,6 +284,8 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                           const todayStr = new Date().toISOString().split('T')[0]
                           const isFuture = day.dateStr > todayStr
                           const isPast = day.dateStr < todayStr
+                          const startDate = habit.createdAt.split('T')[0]
+                          const isBeforeStart = day.dateStr < startDate
 
                           return (
                             <td
@@ -288,6 +294,14 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                                 day.isToday ? 'bg-[var(--accent)]/5' : ''
                               }`}
                             >
+                              {isBeforeStart ? (
+                                <div
+                                  className="w-6 h-6 mx-auto rounded-md flex items-center justify-center border border-dashed border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/20 opacity-40 cursor-default"
+                                  title={`${habit.name}: Habit started on ${startDate}`}
+                                >
+                                  <span className="text-[10px] text-[var(--text-tertiary)]">—</span>
+                                </div>
+                              ) : (
                               <button
                                 disabled={isFuture}
                                 onClick={() => {
@@ -329,6 +343,7 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                                 </motion.div>
                               )}
                             </button>
+                              )}
                           </td>
                         )
                       })}

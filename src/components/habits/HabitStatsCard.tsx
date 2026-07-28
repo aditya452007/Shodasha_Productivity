@@ -19,11 +19,14 @@ export function HabitStatsCard() {
     const today = new Date()
     const todayStr = today.toISOString().split('T')[0]
     
+    // Find earliest habit creation date to establish global start boundary
+    const creationDates = habits.map((h) => h.createdAt.split('T')[0]).sort()
+    const globalStartBoundary = creationDates.length > 0 ? creationDates[0] : todayStr
+
     // Calculate current streak (consecutive days where at least 1 habit was done)
     let currentStreak = 0
     let checkDate = new Date(today)
     
-    // If today hasn't had any completed habit yet, check yesterday to avoid breaking streak early
     const anyDoneToday = habits.some((h) => !!records[`${h.id}_${todayStr}`])
     if (!anyDoneToday) {
       checkDate.setDate(checkDate.getDate() - 1)
@@ -31,6 +34,7 @@ export function HabitStatsCard() {
 
     while (true) {
       const dateStr = checkDate.toISOString().split('T')[0]
+      if (dateStr < globalStartBoundary) break
       const hasCompletedHabit = habits.some((h) => !!records[`${h.id}_${dateStr}`])
       if (hasCompletedHabit) {
         currentStreak++

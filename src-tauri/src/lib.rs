@@ -51,6 +51,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_notification::init())
         .manage(TrackerState {
             polling_interval_secs: polling_interval,
             idle_threshold_secs: idle_threshold,
@@ -139,6 +140,15 @@ pub fn run() {
             commands::set_auto_start,
             commands::set_polling_interval,
             commands::set_idle_threshold,
+            commands::openpets_discover,
+            commands::openpets_say,
+            commands::openpets_react,
+            commands::openpets_list_pets,
+            commands::openpets_install_pet,
+            commands::openpets_run_command,
+            commands::openpets_fetch_catalog,
+            commands::openpets_list_installed,
+            commands::get_idle_seconds,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

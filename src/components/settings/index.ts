@@ -4,5 +4,6 @@ export { DataManagement } from './DataManagement'
 export { AppearanceSettings } from './AppearanceSettings'
 export { SettingsSidebar, SETTINGS_NAV_ITEMS, type SettingsNavItem } from './SettingsSidebar'
 export { NotificationsSettings } from './NotificationsSettings'
+export { DesktopPetSettings } from './DesktopPetSettings'
 export { AboutSettings } from './AboutSettings'
 

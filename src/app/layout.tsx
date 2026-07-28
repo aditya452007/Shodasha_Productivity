@@ -6,6 +6,7 @@ import { Navbar } from '@/components/layout/Navbar'
 import { AgentationWrapper } from '@/components/common/AgentationWrapper'
 import { AppInitializer } from '@/components/common/AppInitializer'
 import { PageTransition } from '@/components/ui/PageTransition'
+import { NotificationScheduler } from '@/components/common/NotificationScheduler'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </main>
         <Toaster position="bottom-right" richColors />
         <AgentationWrapper />
+        <NotificationScheduler />
       </body>
     </html>
   )

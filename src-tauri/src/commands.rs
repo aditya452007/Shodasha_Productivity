@@ -6,6 +6,9 @@ use crate::repositories::app_category_repo::{self, AppCategoryDb};
 use crate::repositories::kanban_repo::{self, KanbanColumnDb};
 use crate::repositories::settings_repo;
 use crate::services::export_service;
+use crate::services::openpets_client::{self, OpenPetsStatus, OpenPetsPetInfo, OpenPetsSayResult};
+use crate::services::pet_store;
+use crate::services::tracker_service;
 use crate::TrackerState;
 use std::collections::HashMap;
 use tauri::command;
@@ -238,4 +241,93 @@ pub fn set_idle_threshold(state: tauri::State<'_, TrackerState>, threshold_secs:
     let conn = init_db().map_err(|e| e.to_string())?;
     settings_repo::save_setting(&conn, "idleThreshold", &clamped.to_string()).map_err(|e| e.to_string())?;
     Ok(())
+}
+
+// ── OpenPets Desktop Pet Commands ──────────────────────────────────────
+
+#[command]
+pub fn openpets_discover() -> OpenPetsStatus {
+    openpets_client::discover()
+}
+
+#[command]
+pub fn openpets_say(message: String, reaction: Option<String>, pet_id: Option<String>) -> Result<OpenPetsSayResult, String> {
+    openpets_client::say(&message, reaction.as_deref(), pet_id.as_deref()).map_err(|e| e.to_string())
+}
+
+#[command]
+pub fn openpets_react(reaction: String, pet_id: Option<String>) -> Result<OpenPetsSayResult, String> {
+    openpets_client::react(&reaction, pet_id.as_deref()).map_err(|e| e.to_string())
+}
+
+#[command]
+pub fn openpets_list_pets() -> Result<Vec<OpenPetsPetInfo>, String> {
+    openpets_client::list_pets().map_err(|e| e.to_string())
+}
+
+/// Install a pet by downloading directly from the OpenPets catalog (no npx needed)
+#[command]
+pub fn openpets_install_pet(pet_id: String) -> Result<String, String> {
+    let catalog = pet_store::fetch_catalog()?;
+    let entry = pet_store::find_in_catalog(&catalog, &pet_id)
+        .ok_or_else(|| format!("Pet '{}' not found in catalog", pet_id))?;
+
+    let meta = pet_store::download_and_extract(&entry)?;
+
+    // Also try to copy to OpenPets directory for compatibility
+    let openpets_dir = pet_store::openpets_pets_dir().join(&meta.id);
+    if !openpets_dir.exists() {
+        if std::fs::create_dir_all(&openpets_dir).is_ok() {
+            let pet_folder = std::path::Path::new(&meta.spritesheet_path).parent()
+                .unwrap_or(std::path::Path::new("."));
+            if let Ok(read_dir) = std::fs::read_dir(pet_folder) {
+                for file_entry in read_dir {
+                    if let Ok(fe) = file_entry {
+                        let fname = fe.file_name();
+                        let dst = openpets_dir.join(&fname);
+                        let _ = std::fs::copy(&fe.path(), &dst);
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(format!("{} installed successfully", meta.display_name))
+}
+
+/// Fetch the pet catalog (returns list of available pets)
+#[command]
+pub fn openpets_fetch_catalog() -> Result<Vec<pet_store::CatalogEntry>, String> {
+    pet_store::fetch_catalog()
+}
+
+/// List locally-installed pets (from Shodasha's own store)
+#[command]
+pub fn openpets_list_installed() -> Result<Vec<pet_store::PetMeta>, String> {
+    pet_store::list_installed()
+}
+
+/// Run a shell command (for the command-input section)
+#[command]
+pub fn openpets_run_command(command: String) -> Result<String, String> {
+    let output = std::process::Command::new("cmd")
+        .args(["/C", &command])
+        .output()
+        .map_err(|e| format!("Failed to run command: {}", e))?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+    let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+    let combined = format!("{}{}", stdout.trim(), stderr.trim());
+
+    if output.status.success() {
+        Ok(combined)
+    } else {
+        Err(if combined.is_empty() { "Command failed with no output".to_string() } else { combined })
+    }
+}
+
+/// Query the current system idle time in seconds (since last user input)
+#[command]
+pub fn get_idle_seconds() -> u64 {
+    tracker_service::get_user_idle_seconds()
 }
