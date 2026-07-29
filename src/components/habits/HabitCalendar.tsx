@@ -115,7 +115,7 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
     <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] shadow-xs overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-[var(--border-subtle)]">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-[var(--accent)]/10 text-[var(--accent)]">
+          <div className="p-2 rounded-lg" style={{ backgroundColor: 'var(--accent-rose-muted)', color: 'var(--accent-rose)' }}>
             <CalendarIcon className="w-5 h-5" />
           </div>
           <div>

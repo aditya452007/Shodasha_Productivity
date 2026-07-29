@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="flex min-h-full flex-col bg-[var(--bg-base)] text-[var(--text-primary)] antialiased transition-colors">
         <AppInitializer />
         <Navbar />
-        <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-8">
+        <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-8 overflow-y-auto">
           <PageTransition>{children}</PageTransition>
         </main>
         <Toaster position="bottom-right" richColors />

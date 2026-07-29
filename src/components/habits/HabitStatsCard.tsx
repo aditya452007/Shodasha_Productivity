@@ -92,7 +92,7 @@ export function HabitStatsCard() {
         transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
         className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
       >
-        <div className="p-3 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
+        <div className="p-3 rounded-xl shrink-0" style={{ backgroundColor: 'var(--accent-amber-muted)', color: 'var(--accent-amber)' }}>
           <Flame className="w-5 h-5" />
         </div>
         <div>
@@ -113,7 +113,7 @@ export function HabitStatsCard() {
         transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1], delay: shouldReduceMotion ? 0 : 0.05 }}
         className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
       >
-        <div className="p-3 rounded-xl bg-emerald-500/10 text-[var(--accent)] shrink-0">
+        <div className="p-3 rounded-xl shrink-0" style={{ backgroundColor: 'var(--accent-emerald-muted)', color: 'var(--accent-emerald)' }}>
           <CheckCircle2 className="w-5 h-5" />
         </div>
         <div>
@@ -134,7 +134,7 @@ export function HabitStatsCard() {
         transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1], delay: shouldReduceMotion ? 0 : 0.1 }}
         className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
       >
-        <div className="p-3 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 shrink-0">
+        <div className="p-3 rounded-xl shrink-0" style={{ backgroundColor: 'var(--accent-violet-muted)', color: 'var(--accent-violet)' }}>
           <CalendarCheck className="w-5 h-5" />
         </div>
         <div>
@@ -155,7 +155,7 @@ export function HabitStatsCard() {
         transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1], delay: shouldReduceMotion ? 0 : 0.15 }}
         className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
       >
-        <div className="p-3 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 shrink-0">
+        <div className="p-3 rounded-xl shrink-0" style={{ backgroundColor: 'var(--accent-teal-muted)', color: 'var(--accent-teal)' }}>
           <Trophy className="w-5 h-5" />
         </div>
         <div>

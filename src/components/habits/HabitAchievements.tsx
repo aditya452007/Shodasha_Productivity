@@ -23,21 +23,21 @@ import { computeAchievementsProgress, Achievement } from '@/lib/achievements'
 function renderAchievementIcon(iconName: Achievement['iconName']) {
   switch (iconName) {
     case 'sprout':
-      return <Sprout className="w-5 h-5 text-emerald-500" />
+      return <Sprout className="w-5 h-5" style={{ color: 'var(--accent-emerald)' }} />
     case 'zap':
-      return <Zap className="w-5 h-5 text-amber-500" />
+      return <Zap className="w-5 h-5" style={{ color: 'var(--accent-amber)' }} />
     case 'brain':
-      return <Brain className="w-5 h-5 text-violet-500" />
+      return <Brain className="w-5 h-5" style={{ color: 'var(--accent-violet)' }} />
     case 'star':
-      return <Star className="w-5 h-5 text-yellow-500" />
+      return <Star className="w-5 h-5" style={{ color: 'var(--accent-amber)' }} />
     case 'gem':
-      return <Gem className="w-5 h-5 text-sky-500" />
+      return <Gem className="w-5 h-5" style={{ color: 'var(--accent-teal)' }} />
     case 'flame':
-      return <Flame className="w-5 h-5 text-rose-500" />
+      return <Flame className="w-5 h-5" style={{ color: 'var(--accent-rose)' }} />
     case 'trophy':
-      return <Trophy className="w-5 h-5 text-amber-400" />
+      return <Trophy className="w-5 h-5" style={{ color: 'var(--accent-orange)' }} />
     default:
-      return <Award className="w-5 h-5 text-[var(--accent)]" />
+      return <Award className="w-5 h-5" style={{ color: 'var(--accent-indigo)' }} />
   }
 }
 
@@ -129,7 +129,7 @@ export function HabitAchievements() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 border-b border-[var(--border-subtle)] pb-4">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+          <div className="p-2 rounded-xl" style={{ backgroundColor: 'var(--accent-amber-muted)', color: 'var(--accent-amber)' }}>
             <Award className="w-5 h-5" />
           </div>
           <div>
@@ -143,7 +143,7 @@ export function HabitAchievements() {
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold border border-amber-500/20">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border" style={{ backgroundColor: 'var(--accent-amber-muted)', color: 'var(--accent-amber)', borderColor: 'color-mix(in srgb, var(--accent-amber) 30%, transparent)' }}>
             <Sparkles className="w-3.5 h-3.5" />
             {unlockedCount} / {achievementProgresses.length} Unlocked
           </span>
@@ -160,9 +160,10 @@ export function HabitAchievements() {
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               className={`relative rounded-xl border p-4 transition-all overflow-hidden group ${
                 unlocked
-                  ? 'border-amber-500/30 bg-gradient-to-b from-amber-500/5 to-transparent dark:from-amber-500/10 shadow-xs'
+                  ? 'shadow-xs'
                   : 'border-[var(--border-subtle)] bg-[var(--bg-primary)] opacity-85'
               }`}
+              style={unlocked ? { borderColor: 'color-mix(in srgb, var(--accent-amber) 30%, transparent)', background: `linear-gradient(to bottom, color-mix(in srgb, var(--accent-amber) 5%, transparent), transparent)` } : undefined}
             >
               {/* Category Ribbon / Badge */}
               <div className="flex items-center justify-between gap-2 mb-3">
@@ -172,9 +173,10 @@ export function HabitAchievements() {
                 <span
                   className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${
                     unlocked
-                      ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                      ? 'border'
                       : 'bg-[var(--bg-tertiary)] text-[var(--text-tertiary)] border-[var(--border-subtle)]'
                   }`}
+                  style={unlocked ? { backgroundColor: 'var(--accent-amber-muted)', color: 'var(--accent-amber)', borderColor: 'color-mix(in srgb, var(--accent-amber) 30%, transparent)' } : undefined}
                 >
                   {achievement.category}
                 </span>
@@ -184,7 +186,7 @@ export function HabitAchievements() {
               <h4 className="text-sm font-bold font-display text-[var(--text-primary)] mb-1 flex items-center gap-1.5">
                 {achievement.title}
                 {unlocked ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 inline shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 inline shrink-0" style={{ color: 'var(--accent-emerald)' }} />
                 ) : (
                   <Lock className="w-3 h-3 text-[var(--text-tertiary)] inline shrink-0" />
                 )}
@@ -203,10 +205,8 @@ export function HabitAchievements() {
                 </div>
                 <div className="h-1.5 w-full rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      unlocked ? 'bg-amber-500' : 'bg-[var(--accent)]'
-                    }`}
-                    style={{ width: `${progressPercentage}%` }}
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{ width: `${progressPercentage}%`, backgroundColor: unlocked ? 'var(--accent-amber)' : 'var(--accent-indigo)' }}
                   />
                 </div>
               </div>
@@ -214,14 +214,14 @@ export function HabitAchievements() {
               {/* Dynamic Hover Tooltip Card */}
               <div className="absolute inset-0 bg-gray-950/95 p-4 text-white flex flex-col justify-between opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none rounded-xl">
                 <div>
-                  <div className="flex items-center gap-1.5 text-amber-400 text-xs font-bold font-display mb-1">
+                  <div className="flex items-center gap-1.5 text-xs font-bold font-display mb-1" style={{ color: 'var(--accent-amber)' }}>
                     <ShieldCheck className="w-4 h-4" /> {achievement.title}
                   </div>
                   <p className="text-[11px] text-gray-300 leading-relaxed">
                     {achievement.description}
                   </p>
                 </div>
-                <div className="text-[10px] font-semibold text-emerald-400 border-t border-gray-800 pt-2">
+                <div className="text-[10px] font-semibold border-t border-gray-800 pt-2" style={{ color: 'var(--accent-emerald)' }}>
                   {unlocked
                     ? 'Achievement Unlocked'
                     : `Requires ${achievement.targetCount - currentProgress} more ${

@@ -110,8 +110,8 @@ export default function BoardPage() {
 
             <div className="overflow-x-auto">
               <div className="grid grid-cols-7 gap-1.5 min-w-[280px]">
-                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d) => (
-                  <div key={d} className="text-center text-[10px] font-semibold text-[var(--text-tertiary)] uppercase py-1">
+                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+                  <div key={`${d}-${i}`} className="text-center text-[10px] font-semibold text-[var(--text-tertiary)] uppercase py-1">
                     {d}
                   </div>
                 ))}

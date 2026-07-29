@@ -263,15 +263,24 @@ export function HabitAnalyticsDashboard() {
     }
   }, [dayOfWeekDistribution, habits, records])
 
+  const widgetAccents: Record<string, { accent: string; muted: string }> = {
+    'widget-line': { accent: 'var(--accent-blue)', muted: 'var(--accent-blue-muted)' },
+    'widget-rings': { accent: 'var(--accent-pink)', muted: 'var(--accent-pink-muted)' },
+    'widget-bar': { accent: 'var(--accent-violet)', muted: 'var(--accent-violet-muted)' },
+  }
+
   // Render Widget Helper
   const renderWidget = (id: string) => {
+    const widgetAccent = widgetAccents[id] || { accent: 'var(--accent)', muted: 'var(--accent-muted)' }
+
     if (id === 'widget-line') {
       return (
         <SortableWidgetCard key={id} id={id} className="col-span-full">
+          <div style={{ '--widget-accent': widgetAccent.accent, '--widget-accent-muted': widgetAccent.muted } as React.CSSProperties}>
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2.5">
-              <div className="p-2.5 rounded-xl bg-[var(--accent)]/10 text-[var(--accent)]">
+              <div className="p-2.5 rounded-xl shrink-0" style={{ backgroundColor: 'var(--widget-accent-muted)', color: 'var(--widget-accent)' }}>
                 <TrendingUp className="w-5 h-5" />
               </div>
               <div>
@@ -285,8 +294,8 @@ export function HabitAnalyticsDashboard() {
             </div>
 
             <div className="flex items-center gap-2 self-start sm:self-auto mr-8">
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[var(--accent)]/15 text-[var(--accent)] text-xs font-semibold border border-[var(--accent)]/30">
-                <Flame className="w-3.5 h-3.5" /> High Precision Curve
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border" style={{ backgroundColor: 'color-mix(in srgb, var(--widget-accent) 15%, transparent)', color: 'var(--widget-accent)', borderColor: 'color-mix(in srgb, var(--widget-accent) 30%, transparent)' }}>
+                <Flame className="w-3.5 h-3.5" /> Trend Data
               </span>
             </div>
           </div>
@@ -299,14 +308,9 @@ export function HabitAnalyticsDashboard() {
             >
               <defs>
                 <linearGradient id="vibrantEmeraldGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.0" />
+                  <stop offset="0%" stopColor="var(--widget-accent)" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="var(--widget-accent)" stopOpacity="0.0" />
                 </linearGradient>
-
-                <filter id="emeraldGlow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
               </defs>
 
               {/* Y-Axis Horizontal Gridlines & Values */}
@@ -368,11 +372,10 @@ export function HabitAnalyticsDashboard() {
                 transition={{ duration: 0.9, ease: 'easeOut' }}
                 d={linePathD}
                 fill="none"
-                stroke="var(--accent)"
+                stroke="var(--widget-accent)"
                 strokeWidth="4"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                filter="url(#emeraldGlow)"
               />
 
               {/* Vibrant Data Point Nodes */}
@@ -382,7 +385,8 @@ export function HabitAnalyticsDashboard() {
                     cx={pt.x}
                     cy={pt.y}
                     r="6"
-                    className="fill-[var(--accent)] stroke-[var(--bg-secondary)] stroke-[2.5] hover:r-8 transition-all"
+                    fill="var(--widget-accent)"
+                    className="stroke-[var(--bg-secondary)] stroke-[2.5] hover:r-8 transition-all"
                     onMouseEnter={() => setHoveredLinePoint(pt)}
                     onMouseLeave={() => setHoveredLinePoint(null)}
                   />
@@ -402,7 +406,7 @@ export function HabitAnalyticsDashboard() {
                 }}
               >
                 <div className="bg-[var(--bg-primary)] text-[var(--text-primary)] text-xs py-2 px-3.5 rounded-xl shadow-2xl border border-[var(--border-strong)] whitespace-nowrap">
-                  <div className="font-bold text-[var(--accent)] mb-0.5">
+                  <div className="font-bold mb-0.5" style={{ color: 'var(--widget-accent)' }}>
                     {hoveredLinePoint.label}
                   </div>
                   <div className="text-[var(--text-secondary)] font-medium">
@@ -412,6 +416,7 @@ export function HabitAnalyticsDashboard() {
               </motion.div>
             )}
           </div>
+          </div>
         </SortableWidgetCard>
       )
     }
@@ -419,8 +424,9 @@ export function HabitAnalyticsDashboard() {
     if (id === 'widget-rings') {
       return (
         <SortableWidgetCard key={id} id={id}>
+          <div style={{ '--widget-accent': widgetAccent.accent, '--widget-accent-muted': widgetAccent.muted } as React.CSSProperties}>
           <div className="flex items-center gap-2.5 mb-4 border-b border-[var(--border-subtle)] pb-3">
-            <div className="p-2.5 rounded-xl bg-[var(--accent)]/10 text-[var(--accent)]">
+            <div className="p-2.5 rounded-xl shrink-0" style={{ backgroundColor: 'var(--widget-accent-muted)', color: 'var(--widget-accent)' }}>
               <Target className="w-5 h-5" />
             </div>
             <div>
@@ -522,7 +528,7 @@ export function HabitAnalyticsDashboard() {
           {/* Hover Tooltip for Ring Card */}
           {hoveredRingHabit && (
             <div className="mt-3 p-3 rounded-xl bg-[var(--bg-primary)] text-[var(--text-primary)] text-xs border border-[var(--border-strong)] shadow-xl">
-              <div className="font-bold text-[var(--accent)]">{hoveredRingHabit.name}</div>
+              <div className="font-bold" style={{ color: 'var(--widget-accent)' }}>{hoveredRingHabit.name}</div>
               <div className="text-[var(--text-secondary)] mt-1">
                 Completed {hoveredRingHabit.doneCount} out of 30 days ({hoveredRingHabit.rate}% consistency).
                 {hoveredRingHabit.linkedTaskTitle && (
@@ -533,6 +539,7 @@ export function HabitAnalyticsDashboard() {
               </div>
             </div>
           )}
+          </div>
         </SortableWidgetCard>
       )
     }
@@ -540,8 +547,9 @@ export function HabitAnalyticsDashboard() {
     if (id === 'widget-bar') {
       return (
         <SortableWidgetCard key={id} id={id}>
+          <div style={{ '--widget-accent': widgetAccent.accent, '--widget-accent-muted': widgetAccent.muted } as React.CSSProperties}>
           <div className="flex items-center gap-2.5 mb-4 border-b border-[var(--border-subtle)] pb-3">
-            <div className="p-2.5 rounded-xl bg-[var(--accent)]/10 text-[var(--accent)]">
+            <div className="p-2.5 rounded-xl shrink-0" style={{ backgroundColor: 'var(--widget-accent-muted)', color: 'var(--widget-accent)' }}>
               <BarChart3 className="w-5 h-5" />
             </div>
             <div>
@@ -564,22 +572,20 @@ export function HabitAnalyticsDashboard() {
                 onMouseLeave={() => setHoveredBarDay(null)}
               >
                 {/* Count Badge on top of bar */}
-                <span className="text-[10px] font-bold font-display text-[var(--text-secondary)] group-hover:text-[var(--accent)] transition-colors">
+                <span className="text-[10px] font-bold font-display text-[var(--text-secondary)] transition-colors" style={{ color: 'var(--widget-accent)' }}>
                   {item.count}
                 </span>
 
                 <div className="w-full bg-[var(--bg-tertiary)] rounded-t-xl relative h-full flex items-end overflow-hidden border border-[var(--border-subtle)]">
                   <div className="w-full" style={{ height: `${item.heightPercentage}%` }}>
-                    <motion.div
-                      initial={{ scaleY: 0 }}
-                      animate={{ scaleY: 1 }}
-                      transition={{ duration: 0.6, ease: 'easeOut' }}
-                      className="w-full h-full origin-bottom bg-gradient-to-t from-[var(--accent)] to-[var(--accent-hover)] dark:from-[var(--accent)] dark:to-[var(--accent-hover)] rounded-t-lg group-hover:brightness-110 transition-all border-t border-[var(--accent)]/50"
+                    <div
+                      className="w-full h-full origin-bottom rounded-t-lg transition-all"
+                      style={{ backgroundColor: 'var(--widget-accent)' }}
                     />
                   </div>
                 </div>
 
-                <span className="text-xs font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
+                <span className="text-xs font-bold text-[var(--text-primary)]" style={{ color: 'var(--widget-accent)' }}>
                   {item.day}
                 </span>
               </div>
@@ -589,7 +595,7 @@ export function HabitAnalyticsDashboard() {
           {/* Hover Tooltip for Bar Chart */}
           {hoveredBarDay && (
             <div className="mt-3 p-3 rounded-xl bg-[var(--bg-primary)] text-[var(--text-primary)] text-xs border border-[var(--border-strong)] shadow-xl">
-              <div className="font-bold text-[var(--accent)]">{hoveredBarDay.day} Frequency</div>
+              <div className="font-bold" style={{ color: 'var(--widget-accent)' }}>{hoveredBarDay.day} Frequency</div>
               <div className="text-[var(--text-secondary)] mt-1">
                 {hoveredBarDay.count} total check-ins ({hoveredBarDay.percentage}% of overall activity).
                 <span className="block text-[var(--text-muted)] mt-0.5">
@@ -598,6 +604,7 @@ export function HabitAnalyticsDashboard() {
               </div>
             </div>
           )}
+          </div>
         </SortableWidgetCard>
       )
     }
@@ -622,17 +629,17 @@ export function HabitAnalyticsDashboard() {
   return (
     <div className="space-y-4">
       {/* Performance Highlight Insight Banner */}
-      <div className="rounded-2xl border border-[var(--accent)]/20 bg-gradient-to-r from-[var(--accent)]/10 via-[var(--bg-secondary)] to-[var(--accent)]/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+      <div className="rounded-2xl border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs" style={{ borderColor: 'var(--accent-indigo)/20', background: 'linear-gradient(to right, var(--accent-indigo-muted), var(--bg-secondary), color-mix(in srgb, var(--accent-blue-muted) 30%, transparent))' }}>
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-[var(--accent)] text-white shadow-xs">
+          <div className="p-2 rounded-xl text-white shadow-xs" style={{ backgroundColor: 'var(--accent-indigo)' }}>
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-xs font-bold text-[var(--accent)] uppercase tracking-wider">
+            <div className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--accent-indigo)' }}>
               Performance Insight
             </div>
             <div className="text-sm font-semibold text-[var(--text-primary)]">
-              Peak consistency day is <span className="font-bold text-[var(--accent)]">{highlights.peakDayName}</span> ({highlights.peakDayCount} check-ins). Top habit: <span className="font-bold text-[var(--accent)]">{highlights.topHabitName}</span> ({highlights.topHabitRate}% 30-day rate).
+              Peak consistency day is <span className="font-bold" style={{ color: 'var(--accent-pink)' }}>{highlights.peakDayName}</span> ({highlights.peakDayCount} check-ins). Top habit: <span className="font-bold" style={{ color: 'var(--accent-amber)' }}>{highlights.topHabitName}</span> ({highlights.topHabitRate}% 30-day rate).
             </div>
           </div>
         </div>
@@ -646,7 +653,7 @@ export function HabitAnalyticsDashboard() {
       {/* Instructions Bar */}
       <div className="flex items-center justify-between text-xs text-[var(--text-tertiary)] px-1">
         <span className="flex items-center gap-1.5">
-          <Info className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
+          <Info className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--accent-teal)' }} />
           Drag widget cards using the grip handles to customize your analytics layout.
         </span>
       </div>

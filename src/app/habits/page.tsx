@@ -60,7 +60,7 @@ export default function HabitsPage() {
             <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--text-primary)]">
               Habits Dashboard & Performance
             </h1>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border" style={{ backgroundColor: 'var(--accent-amber-muted)', color: 'var(--accent-amber)', borderColor: 'color-mix(in srgb, var(--accent-amber) 30%, transparent)' }}>
               <Flame className="w-3.5 h-3.5" /> Daily Consistency
             </span>
           </div>

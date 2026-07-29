@@ -310,6 +310,17 @@ Execute Shodasha redesign incrementally in strictly controlled, verifiable phase
 - [x] **globals.css**: Added `--accent-blue/pink/rose/amber/emerald/violet/teal/orange/indigo` with matching muted variants in both light and dark mode.
 - [x] **KPICard.tsx**: Added `accent` prop (`blue | pink | rose | amber | emerald | violet | teal | orange | indigo | default`) with dynamic styling for eyebrow badge and icon container.
 
+### Fixes & Polish
+- [x] **Board duplicate key bug**: Changed `['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d =>` to use `${d}-${i}` as key (unique keys for duplicate letters)
+- [x] **Habits page scroll**: Added `overflow-y-auto` to `<main>` layout element so content scrolls properly when habits increase
+- [x] **Playful accent colors applied across habits page**:
+  - `HabitStatsCard.tsx`: Replaced hardcoded `bg-amber/emerald/violet/sky-500/*` with `var(--accent-*-muted)` tokens for all 4 stat cards
+  - `HabitAnalyticsDashboard.tsx`: Each widget gets its own accent (blue=line, pink=rings, violet=bar chart). Insight banner uses indigo/pink/amber tri-color. SVG gradients, tooltips, bar fills all use `var(--widget-accent)`
+  - `HabitCalendar.tsx`: Calendar icon uses `accent-rose` 
+  - `HabitAchievements.tsx`: All 7 achievement icon colors, header badge, card gradients, progress bars, checkmarks, tooltips use playful accent tokens
+  - `HabitHeatmap.tsx`: Replaced monochrome emerald cells with 4-color gradient (teal→emerald→blue→indigo), legend, header, tooltip, and footer all use accent tokens
+  - `habits/page.tsx`: "Daily Consistency" badge uses `accent-amber`
+
 ### Verification
 - [x] `npm run typecheck` passes (0 errors)
 - [x] `npm run lint` passes (0 errors, 4 pre-existing warnings)

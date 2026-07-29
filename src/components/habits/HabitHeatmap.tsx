@@ -82,18 +82,15 @@ export function HabitHeatmap() {
     scrollRef.current.scrollLeft = Math.max(0, totalWeeks * cellWidth - scrollRef.current.clientWidth / 2)
   }, [heatmapData.weeks.length])
 
-  const getCellBg = (level: number) => {
-    switch (level) {
-      case 1:
-        return 'bg-emerald-300 dark:bg-emerald-900 border-emerald-400 dark:border-emerald-700 shadow-xs'
-      case 2:
-        return 'bg-emerald-400 dark:bg-emerald-700 border-emerald-500 dark:border-emerald-600 shadow-xs'
-      case 3:
-        return 'bg-emerald-500 dark:bg-emerald-500 border-emerald-600 dark:border-emerald-400 shadow-xs'
-      case 4:
-        return 'bg-emerald-700 dark:bg-emerald-400 border-emerald-800 dark:border-emerald-300 shadow-xs font-bold'
-      default:
-        return 'bg-[var(--bg-tertiary)] border-[var(--border-subtle)]'
+  const cellAccents = ['var(--accent-teal)', 'var(--accent-emerald)', 'var(--accent-blue)', 'var(--accent-indigo)']
+  const cellAccentsDark = ['var(--accent-teal)', 'var(--accent-emerald)', 'var(--accent-violet)', 'var(--accent-indigo)']
+
+  const getCellStyle = (level: number) => {
+    if (level === 0) return { backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border-subtle)' }
+    return {
+      backgroundColor: cellAccents[level - 1],
+      borderColor: 'color-mix(in srgb, var(--bg-base) 40%, transparent)',
+      boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
     }
   }
 
@@ -101,7 +98,7 @@ export function HabitHeatmap() {
     <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-xs">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-[var(--border-subtle)] pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+          <div className="p-2 rounded-xl" style={{ backgroundColor: 'var(--accent-teal-muted)', color: 'var(--accent-teal)' }}>
             <Activity className="w-5 h-5" />
           </div>
           <div>
@@ -117,11 +114,10 @@ export function HabitHeatmap() {
         <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-tertiary)]">
           <span>Less</span>
           <div className="flex gap-1 items-center mx-1">
-            <span className="w-3.5 h-3.5 rounded-xs bg-[var(--bg-tertiary)] border border-[var(--border-subtle)]" />
-            <span className="w-3.5 h-3.5 rounded-xs bg-emerald-300 dark:bg-emerald-900 border border-emerald-400" />
-            <span className="w-3.5 h-3.5 rounded-xs bg-emerald-400 dark:bg-emerald-700 border border-emerald-500" />
-            <span className="w-3.5 h-3.5 rounded-xs bg-emerald-500 dark:bg-emerald-500 border border-emerald-600" />
-            <span className="w-3.5 h-3.5 rounded-xs bg-emerald-700 dark:bg-emerald-400 border border-emerald-800" />
+            <span className="w-3.5 h-3.5 rounded-xs" style={{ backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-subtle)' }} />
+            {cellAccents.map((c, i) => (
+              <span key={i} className="w-3.5 h-3.5 rounded-xs" style={{ backgroundColor: c, border: `1px solid color-mix(in srgb, ${c} 60%, transparent)` }} />
+            ))}
           </div>
           <span>More</span>
         </div>
@@ -136,13 +132,12 @@ export function HabitHeatmap() {
                   key={day.dateStr}
                   whileHover={{ scale: 1.4, zIndex: 30 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                  className={`w-3.5 h-3.5 rounded-xs border transition-all cursor-pointer relative group ${getCellBg(
-                    day.level
-                  )} ${day.isToday ? 'ring-2 ring-blue-500 ring-offset-1 ring-offset-[var(--bg-secondary)]' : ''}`}
+                  className={`w-3.5 h-3.5 rounded-xs transition-all cursor-pointer relative group ${day.isToday ? 'ring-2 ring-blue-500 ring-offset-1 ring-offset-[var(--bg-secondary)]' : ''}`}
+                  style={{ ...getCellStyle(day.level), border: day.level === 0 ? '1px solid var(--border-subtle)' : 'none' }}
                 >
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 pointer-events-none">
                     <div className="bg-gray-950 text-white text-xs font-medium py-1.5 px-3 rounded-xl whitespace-nowrap shadow-2xl border border-gray-800">
-                      <div className={`font-bold ${day.isToday ? 'text-blue-400' : 'text-emerald-400'}`}>
+                      <div className="font-bold" style={{ color: day.isToday ? 'var(--accent-blue)' : 'var(--accent-teal)' }}>
                         {day.dateStr}{day.isToday ? ' (Today)' : ''}
                       </div>
                       {day.isBeforeTracking ? (
@@ -169,10 +164,9 @@ export function HabitHeatmap() {
       </div>
 
       <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-tertiary)] mt-3 border-t border-[var(--border-subtle)] pt-3">
-        <Info className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+        <Info className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--accent-teal)' }} />
         <span>
-          Darker green cells represent days with higher habit completion volume.
-          Today is highlighted with a blue ring.
+          Color intensity reflects habit completion volume — teal to indigo. Today is highlighted with a blue ring.
         </span>
       </div>
     </div>
