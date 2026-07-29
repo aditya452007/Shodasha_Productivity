@@ -4,7 +4,7 @@ import { Task, useTaskStore } from '@/stores/taskStore'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { CheckCircle2, GripVertical, Calendar, Link2, MoreHorizontal, Clock, ExternalLink } from 'lucide-react'
+import { CheckCircle2, GripVertical, Calendar, Link2, MoreHorizontal, Clock, ExternalLink, Layers } from 'lucide-react'
 import { openExternalUrl, getCleanDomain } from '@/lib/utils/url'
 import { motion } from 'motion/react'
 
@@ -16,7 +16,9 @@ interface KanbanCardProps {
 export function KanbanCard({ task, onEdit }: KanbanCardProps) {
   const toggleTaskStatus = useTaskStore((state) => state.toggleTaskStatus)
   const getTaskLoggedSeconds = useTimeEntryStore((state) => state.getTaskLoggedSeconds)
+  const getSubTasks = useTaskStore((state) => state.getSubTasks)
   const taskSeconds = getTaskLoggedSeconds(task.id)
+  const subTasks = getSubTasks(task.id)
 
   const formatTaskDuration = (secs: number) => {
     const hrs = Math.floor(secs / 3600)
@@ -37,7 +39,6 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
     data: { type: 'Task', task },
   })
 
-  // Apple design: spring-like transition
   const defaultTransition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)'
 
   const style = {
@@ -46,6 +47,28 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
   }
 
   const isDone = task.status === 'done'
+
+  const durationLabel: Record<string, string> = {
+    '24h': '24h',
+    '48h': '48h',
+    '72h': '72h',
+    '1week': '1wk',
+    'none': '',
+  }
+
+  const getExpiryStatus = () => {
+    if (!task.expiresAt || isDone) return null
+    const now = new Date()
+    const expires = new Date(task.expiresAt)
+    const diffMs = expires.getTime() - now.getTime()
+    if (diffMs <= 0) return { label: 'Expired', color: 'text-red-500 bg-red-500/10' }
+    const diffHrs = Math.round(diffMs / (1000 * 60 * 60))
+    if (diffHrs <= 1) return { label: `${diffHrs}h left`, color: 'text-amber-500 bg-amber-500/10' }
+    if (diffHrs <= 6) return { label: `${diffHrs}h left`, color: 'text-amber-500 bg-amber-500/10' }
+    return { label: durationLabel[task.duration] || '', color: 'text-[var(--text-tertiary)] bg-[var(--bg-base)]' }
+  }
+
+  const expiryStatus = getExpiryStatus()
 
   return (
     <motion.div
@@ -60,7 +83,6 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
           : 'border-[var(--border)] bg-[var(--bg-surface)] hover:border-[var(--border-strong)] hover:shadow-md'
       }`}
     >
-      {/* Top Header: Drag Handle & Quick Actions */}
       <div className="flex items-center justify-between">
         <div
           {...attributes}
@@ -73,7 +95,6 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
         </div>
 
         <div className="flex items-center gap-1">
-          {/* External Link Redirect Button */}
           {task.url && (
             <motion.button
               whileTap={{ scale: 0.9 }}
@@ -89,7 +110,6 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
             </motion.button>
           )}
 
-          {/* Quick Status Toggle */}
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={(e) => {
@@ -113,7 +133,6 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
             </motion.div>
           </motion.button>
 
-          {/* Edit Task Modal Trigger */}
           <button
             onClick={() => onEdit(task)}
             aria-label={`Edit ${task.title}`}
@@ -125,7 +144,6 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
         </div>
       </div>
 
-      {/* Task Title & Description */}
       <div className="flex flex-col gap-1 cursor-pointer" onClick={() => onEdit(task)}>
         <h4
           className={`text-sm font-semibold tracking-tight transition-colors ${
@@ -133,6 +151,11 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
           }`}
         >
           {task.title}
+          {subTasks.length > 0 && (
+            <span className="ml-1.5 text-[10px] text-[var(--text-tertiary)] font-normal">
+              ({subTasks.length})
+            </span>
+          )}
         </h4>
         {task.description && (
           <p className="line-clamp-2 text-xs text-[var(--text-secondary)]">
@@ -141,10 +164,8 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
         )}
       </div>
 
-      {/* Tags & Badges Footer */}
-      {((task.tags && task.tags.length > 0) || task.dueDate || task.linkedHabitId || taskSeconds > 0 || task.url) && (
+      {((task.tags && task.tags.length > 0) || task.dueDate || task.linkedHabitId || taskSeconds > 0 || task.url || expiryStatus || subTasks.length > 0 || task.duration) && (
         <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[var(--border)]/60">
-          {/* External URL Link Badge */}
           {task.url && (
             <button
               onClick={(e) => {
@@ -159,7 +180,6 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
             </button>
           )}
 
-          {/* Cumulative Tracked Desktop Time Badge */}
           {taskSeconds > 0 && (
             <span className="flex items-center gap-1 rounded-md bg-[var(--accent-muted)] px-2 py-0.5 text-[10px] font-mono font-semibold text-[var(--accent)] border border-[var(--accent)]/20">
               <Clock className="h-3 w-3" />
@@ -167,7 +187,6 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
             </span>
           )}
 
-          {/* Linked Habit Badge */}
           {task.linkedHabitId && (
             <span className="flex items-center gap-1 rounded-md bg-[var(--accent-muted)] px-2 py-0.5 text-[10px] font-semibold text-[var(--accent)]">
               <Link2 className="h-3 w-3" />
@@ -175,7 +194,20 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
             </span>
           )}
 
-          {/* Due Date */}
+          {subTasks.length > 0 && (
+            <span className="flex items-center gap-1 rounded-md bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold text-violet-500 border border-violet-500/20">
+              <Layers className="h-3 w-3" />
+              <span>{subTasks.length} sub-task{subTasks.length > 1 ? 's' : ''}</span>
+            </span>
+          )}
+
+          {expiryStatus && (
+            <span className={`flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold border ${expiryStatus.color}`}>
+              <Clock className="h-3 w-3" />
+              <span>{expiryStatus.label}</span>
+            </span>
+          )}
+
           {task.dueDate && (
             <span className="flex items-center gap-1 rounded-md bg-[var(--bg-base)] px-2 py-0.5 text-[10px] font-mono text-[var(--text-muted)] border border-[var(--border)]">
               <Calendar className="h-3 w-3" />
@@ -183,7 +215,6 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
             </span>
           )}
 
-          {/* Tag Badges */}
           {task.tags?.map((tag) => (
             <span
               key={tag}

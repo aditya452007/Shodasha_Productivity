@@ -5,6 +5,7 @@ import { Bell, Clock, Zap, FileText, CheckCircle2, AlertCircle, Timer, Play, Squ
 import { toast } from 'sonner';
 import { useState, useEffect, useRef } from 'react';
 import { deliverNotification, sendWebNotification } from '@/lib/notifications';
+import { isTauri } from '@/lib/db';
 import type { DeliveryChannel } from '@/lib/openpets';
 
 export function NotificationsSettings() {
@@ -39,15 +40,13 @@ export function NotificationsSettings() {
 
   const handleSendTest = async () => {
     if (permission !== 'granted') {
-      toast.error('Please grant notification permission first.');
-      return;
+      const granted = await requestPermission();
+      if (!granted) {
+        toast.error('Please grant notification permission first.');
+        return;
+      }
     }
-    const success = await sendTestNotification();
-    if (success) {
-      toast.success('Test notification sent!');
-    } else {
-      toast.error('Failed to send test notification.');
-    }
+    await sendTestNotification();
   };
 
   const [timerMinutes, setTimerMinutes] = useState(1);
@@ -80,37 +79,31 @@ export function NotificationsSettings() {
         clearTimerInterval();
         setTimerRunning(false);
         setTimerDisplay('00:00');
-        // Fire the notification — try both channels independently with visible feedback
         const msg = timerMessage.trim() || `Timer finished — ${timerMinutes}m ${timerSeconds}s elapsed.`;
         const store = useNotificationStore.getState();
-        const opts = { title: 'Shodasha Timer', body: msg, tag: `custom-timer-${Date.now()}` };
-        const petDeliveryAvailable = store.petDeliveryEnabled && store.petId && (timerChannel === 'pet' || timerChannel === 'both');
+        const opts = { title: 'Shodasha Timer Test', body: msg, tag: `custom-timer-${Date.now()}`, requireInteraction: true };
 
         if (timerChannel === 'silent') {
-          toast('Timer done (silent mode — no notification sent)', { icon: '🔇' });
-          clearTimerInterval();
-          setTimerRunning(false);
-          setTimerDisplay('');
+          toast('Timer done (silent mode)', { icon: '🔇' });
           return;
         }
 
-        // Always try web notification if permission is granted and channel includes web
         let webOk = false;
         if (timerChannel !== 'pet' && store.permission === 'granted') {
           webOk = await sendWebNotification(opts);
         }
 
-        // Try pet delivery if configured
         let petOk = false;
+        const petDeliveryAvailable = store.petDeliveryEnabled && store.petId && (timerChannel === 'pet' || timerChannel === 'both');
         if (petDeliveryAvailable) {
           try {
             petOk = await deliverNotification(opts, timerChannel, 'test', store.petId ?? undefined);
           } catch {}
         }
 
-        // Build result message
         const results: string[] = [];
         if (webOk) results.push('Web ✅');
+        else if (store.permission !== 'granted' && isTauri()) results.push('Web ⛔ (Tauri: install app for native notif)');
         else if (store.permission !== 'granted') results.push('Web ⛔ (no permission)');
         else results.push('Web ❌');
 
@@ -118,11 +111,11 @@ export function NotificationsSettings() {
         else if (timerChannel === 'web') results.push('Pet ⛔ (web-only mode)');
         else if (!store.petId) results.push('Pet ⛔ (no pet selected)');
         else if (!store.petDeliveryEnabled) results.push('Pet ⛔ (pet delivery disabled)');
-        else results.push('Pet ❌ (OpenPets not available)');
+        else results.push('Pet ❌');
 
         toast.success(`Timer done — ${results.join(' · ')}`);
         if (!webOk && !petOk) {
-          toast.error('Both delivery channels failed. Check notification permissions and pet configuration.');
+          toast.error('Both channels failed. Install the app or check permissions.');
         }
       } else {
         setTimerDisplay(formatTimer(remainingRef.current));

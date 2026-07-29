@@ -3,9 +3,11 @@ import { say, reactionForNotification, type DeliveryChannel, type NotificationTy
 import { invoke } from '@tauri-apps/api/core';
 
 let tauriNotification: typeof import('@tauri-apps/plugin-notification') | null = null;
+let tauriNotificationLoadAttempted = false;
 
 async function getTauriNotification() {
-  if (!tauriNotification) {
+  if (!tauriNotification && !tauriNotificationLoadAttempted) {
+    tauriNotificationLoadAttempted = true;
     try {
       tauriNotification = await import('@tauri-apps/plugin-notification');
     } catch {
@@ -43,7 +45,6 @@ function isTauriAvailable(): boolean {
 }
 
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
-  // Try Tauri notification plugin first
   if (isTauriAvailable()) {
     try {
       const notif = await getTauriNotification();
@@ -58,7 +59,6 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
     }
   }
 
-  // Fallback: Web Notification API
   if (!('Notification' in window)) {
     console.warn('Web Notification API is not supported in this browser environment.');
     return 'denied';
@@ -103,7 +103,7 @@ export async function sendWebNotification({ title, body, icon, tag, data, requir
   }
 
   // Fallback: Web Notification API
-  if (!nativeSent && isNotificationSupported() && Notification.permission === 'granted') {
+  if (!nativeSent && 'Notification' in window && Notification.permission === 'granted') {
     try {
       const notification = new Notification(title, {
         body,
@@ -134,12 +134,14 @@ export async function sendWebNotification({ title, body, icon, tag, data, requir
     Notification.requestPermission().catch(() => {});
   }
 
-  toast.info(title, {
-    description: body,
-    duration: 5000,
-  });
+  if (!nativeSent) {
+    toast.info(title, {
+      description: body,
+      duration: 5000,
+    });
+  }
 
-  return nativeSent || true;
+  return nativeSent;
 }
 
 export async function sendHabitReminderNotification(habitName: string): Promise<boolean> {

@@ -99,9 +99,12 @@ fn run_migrations(conn: &Connection) -> Result<()> {
         );"
     )?;
 
-    // Safe migration: add url column if existing database does not have it yet
+    // Safe migrations: add columns if missing
     conn.execute("ALTER TABLE tasks ADD COLUMN url TEXT", []).ok();
     conn.execute("ALTER TABLE habits ADD COLUMN url TEXT", []).ok();
+    conn.execute("ALTER TABLE tasks ADD COLUMN parent_id TEXT", []).ok();
+    conn.execute("ALTER TABLE tasks ADD COLUMN duration TEXT NOT NULL DEFAULT '24h'", []).ok();
+    conn.execute("ALTER TABLE tasks ADD COLUMN expires_at TEXT", []).ok();
 
     // Check schema_version
     let version: i32 = conn.query_row(

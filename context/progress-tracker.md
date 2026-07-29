@@ -277,6 +277,44 @@ Execute Shodasha redesign incrementally in strictly controlled, verifiable phase
 - [x] Cleaned up notificationStore messages matching improved copy
 - [x] Background 60s timer integrated in dashboard page (pre-existing, now using improved pipeline)
 
+## Business Logic & UX Work Session (Jul 2026) — Kanban Timer Habits Notifications
+
+### Kanban — Task Expiry & Nested Sub-Tasks
+- [x] **taskStore.ts**: Added `TaskDuration` type (`'24h' | '48h' | '72h' | '1week' | 'none'`), `parentId` field for nested sub-tasks, `expiresAt` computed from duration + `createdAt`. `initializeTasks` auto-removes expired tasks with toast count. Selectors: `getActiveTasks`, `getExpiredTasks`, `getSubTasks`, `getTodayCompletedTasks`, `getTasksByDateRange`.
+- [x] **KanbanColumn.tsx**: Duration selector dropdown on quick-add, parent/sub-task tree rendering.
+- [x] **KanbanCard.tsx**: Expiry countdown badge (`/h left`), sub-task count indicator, duration label.
+- [x] **TaskModal.tsx**: Parent task selector dropdown, duration selector, sub-task delete warning.
+- [x] **board/page.tsx**: Collapsible Completed Tasks History with month calendar grid showing per-day task count.
+
+### Habits — 2-Day Edit Limit
+- [x] **habitStore.ts** `toggleHabit`: Enforces 2-day edit limit (rejects dates older than 2 days ago or future).
+- [x] **HabitCalendar.tsx**: Habit names column `sticky left-0` with shadow; rate column `sticky right-0`. Today centered on mount via `scrollContainerRef.scrollLeft`. Only `canEditDate(dateStr)` cells are clickable; locked cells shown with dashed border + toast message.
+- [x] **HabitHeatmap.tsx**: Scroll sync — `scrollLeft` auto-centered to latest weeks. Today highlighted with `ring-2 ring-blue-500`. Tooltip shows date, count, habit names.
+
+### Timer — Global Persistence Across Pages
+- [x] **timerStore.ts**: New global Zustand store with localStorage persistence, global `setInterval` (runs in background), calculates remaining time from `startedAt + duration`, syncs on page restore. Timer continues across page navigation, app background, and tab switches.
+
+### Timeline — Meaningful Bar Chart Metrics
+- [x] **DailyUsageBarChart.tsx**: Replaced static KPIs with Today vs Yesterday comparison row. 7d/14d/30d range toggle; comparison toggle for prev-period overlay. Bars show actual data with hover labels.
+
+### Notifications — Test & Timer Delivery Fix
+- [x] **lib/notifications.ts**: Removed false `|| true` fallback on `sendWebNotification` so it accurately returns `nativeSent`. Cached `tauriNotification` module load (only tries once). Web API notification fallback still fires + toast sent only if no native variant succeeded.
+- [x] **notificationStore.ts** `sendTestNotification()`: Returns detailed channel-by-channel success/failure via `toast.success`.
+- [x] **NotificationsSettings.tsx**: `handleSendTest` re-requests permission if not granted before calling store. Test timer notification now shows per-channel result (Web ✅/❌, Pet ✅/❌) instead of silent success.
+
+### Rust Backend — Schema Migration
+- [x] **db.rs**: Migration adds `parent_id`, `duration`, `expires_at` columns to `tasks` table.
+- [x] **task_repo.rs**: `TaskDb` struct updated with all new fields; all CRUD queries adjusted.
+
+### Color Palette — Playful Accent Tokens
+- [x] **globals.css**: Added `--accent-blue/pink/rose/amber/emerald/violet/teal/orange/indigo` with matching muted variants in both light and dark mode.
+- [x] **KPICard.tsx**: Added `accent` prop (`blue | pink | rose | amber | emerald | violet | teal | orange | indigo | default`) with dynamic styling for eyebrow badge and icon container.
+
+### Verification
+- [x] `npm run typecheck` passes (0 errors)
+- [x] `npm run lint` passes (0 errors, 4 pre-existing warnings)
+- [x] `npm run build` passes (0 errors, 6 static routes)
+
 ## Project Status: CI/CD AUTOMATED — FULL .MSI RELEASES ON EVERY PUSH 🚀
 
 ## Open Questions

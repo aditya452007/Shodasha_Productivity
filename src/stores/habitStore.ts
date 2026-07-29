@@ -80,6 +80,21 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     }
   },
   toggleHabit: async (habitId, date) => {
+    const todayStr = new Date().toISOString().split('T')[0]
+    const twoDaysAgo = new Date(todayStr + 'T00:00:00')
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2)
+    const twoDaysAgoStr = twoDaysAgo.toISOString().split('T')[0]
+
+    if (date < twoDaysAgoStr) {
+      console.warn(`Cannot edit habit for ${date}: only last 2 days are editable`)
+      return
+    }
+
+    if (date > todayStr) {
+      console.warn(`Cannot edit habit for ${date}: future dates are not editable`)
+      return
+    }
+
     const key = `${habitId}_${date}`
     const currentlyDone = !!get().records[key]
     const nextDone = !currentlyDone
@@ -104,7 +119,6 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       return
     }
 
-    // Domain Rule: Completing a Habit for a day auto-completes its linked Task (one-way link)
     if (nextDone) {
       const targetHabit = get().habits.find((h) => h.id === habitId)
       if (targetHabit?.linkedTaskId) {

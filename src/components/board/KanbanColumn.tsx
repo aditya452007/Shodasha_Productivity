@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { KanbanColumn as ColumnType, Task, useTaskStore } from '@/stores/taskStore'
+import { KanbanColumn as ColumnType, Task, useTaskStore, TaskDuration } from '@/stores/taskStore'
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable'
 import { KanbanCard } from './KanbanCard'
-import { Plus, Trash2, Check, GripVertical, AlertTriangle, X } from 'lucide-react'
+import { Plus, Trash2, Check, GripVertical, AlertTriangle, X, ChevronDown, ChevronRight, Clock } from 'lucide-react'
 import { CSS } from '@dnd-kit/utilities'
 import { motion } from 'motion/react'
 
@@ -14,6 +14,14 @@ interface KanbanColumnProps {
   onEditTask: (task: Task) => void
   isOverlay?: boolean
 }
+
+const DURATION_OPTIONS: { label: string; value: TaskDuration }[] = [
+  { label: '24h', value: '24h' },
+  { label: '48h', value: '48h' },
+  { label: '72h', value: '72h' },
+  { label: '1 Week', value: '1week' },
+  { label: 'None', value: 'none' },
+]
 
 export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanColumnProps) {
   const addTask = useTaskStore((state) => state.addTask)
@@ -25,6 +33,7 @@ export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanCol
   const [quickTitle, setQuickTitle] = useState('')
   const [showAddForm, setShowAddForm] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [taskDuration, setTaskDuration] = useState<TaskDuration>('24h')
 
   const {
     attributes,
@@ -59,7 +68,7 @@ export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanCol
   const handleQuickAdd = (e: React.FormEvent) => {
     e.preventDefault()
     if (!quickTitle.trim()) return
-    addTask(quickTitle.trim(), column.id)
+    addTask(quickTitle.trim(), column.id, undefined, undefined, undefined, undefined, undefined, undefined, taskDuration)
     setQuickTitle('')
     setShowAddForm(false)
   }
@@ -67,6 +76,20 @@ export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanCol
   const handleDeleteConfirm = () => {
     deleteColumn(column.id)
     setConfirmDelete(false)
+  }
+
+  const parentTasks = tasks.filter((t) => !t.parentId)
+  const subTaskMap = new Map<string, Task[]>()
+  tasks.forEach((t) => {
+    if (t.parentId) {
+      const existing = subTaskMap.get(t.parentId) || []
+      existing.push(t)
+      subTaskMap.set(t.parentId, existing)
+    }
+  })
+
+  const getTotalSubTasks = (taskId: string) => {
+    return subTaskMap.get(taskId)?.length || 0
   }
 
   return (
@@ -82,7 +105,6 @@ export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanCol
           : 'border-[var(--border)]'
       }`}
     >
-      {/* Column Header */}
       <div className="flex items-center justify-between pb-3 mb-2 border-b border-[var(--border)]">
         <div className="flex items-center gap-2">
           <div
@@ -120,7 +142,10 @@ export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanCol
           )}
 
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--bg-surface)] font-mono text-[10px] font-bold text-[var(--text-secondary)] border border-[var(--border)]">
-            {tasks.length}
+            {parentTasks.length}
+            {tasks.filter((t) => t.parentId).length > 0 && (
+              <span className="text-[8px] text-[var(--text-tertiary)] ml-0.5">+{tasks.filter((t) => t.parentId).length}</span>
+            )}
           </span>
         </div>
 
@@ -147,31 +172,57 @@ export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanCol
         </div>
       </div>
 
-      {/* Quick Add Inline Form */}
       {showAddForm && (
-        <form onSubmit={handleQuickAdd} className="mb-3 flex gap-2">
+        <form onSubmit={handleQuickAdd} className="mb-3 space-y-2">
           <input
             type="text"
             value={quickTitle}
             onChange={(e) => setQuickTitle(e.target.value)}
             placeholder="Task title..."
-            className="flex-1 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-1.5 text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+            className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-1.5 text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
             autoFocus
           />
-          <button
-            type="submit"
-            className="rounded-xl bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-white shadow-xs"
-          >
-            Add
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 text-[10px] text-[var(--text-tertiary)]">
+              <Clock className="w-3 h-3" />
+              <select
+                value={taskDuration}
+                onChange={(e) => setTaskDuration(e.target.value as TaskDuration)}
+                className="text-[10px] bg-transparent border-none text-[var(--text-secondary)] font-medium focus:outline-hidden cursor-pointer"
+              >
+                {DURATION_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="submit"
+              className="ml-auto rounded-xl bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-white shadow-xs"
+            >
+              Add
+            </button>
+          </div>
         </form>
       )}
 
-      {/* Droppable Sortable Tasks List */}
       <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
         <div className="flex flex-col gap-3 min-h-[100px]">
-          {tasks.map((task) => (
-            <KanbanCard key={task.id} task={task} onEdit={onEditTask} />
+          {parentTasks.map((task) => (
+            <div key={task.id}>
+              <KanbanCard task={task} onEdit={onEditTask} />
+              {getTotalSubTasks(task.id) > 0 && (
+                <div className="ml-4 mt-2 space-y-2 border-l-2 border-[var(--border-subtle)] pl-3">
+                  {subTaskMap.get(task.id)?.map((sub) => (
+                    <div key={sub.id} className="flex items-center gap-1.5">
+                      <div className="w-2 h-px bg-[var(--border-subtle)]" />
+                      <div className="flex-1">
+                        <KanbanCard task={sub} onEdit={onEditTask} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
 
           {tasks.length === 0 && !showAddForm && (
@@ -186,7 +237,6 @@ export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanCol
         </div>
       </SortableContext>
 
-      {/* Delete Confirmation Dialog */}
       {confirmDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-black/50" onClick={() => setConfirmDelete(false)} />

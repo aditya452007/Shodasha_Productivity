@@ -11,6 +11,9 @@ import {
   deleteKanbanColumnFromDb,
   reorderKanbanColumnsInDb,
 } from '@/lib/db'
+import { toast } from 'sonner'
+
+export type TaskDuration = '24h' | '48h' | '72h' | '1week' | 'none'
 
 export interface Task {
   id: string
@@ -22,8 +25,11 @@ export interface Task {
   tags?: string[]
   linkedHabitId?: string
   url?: string
+  parentId?: string
+  duration: TaskDuration
   createdAt: string
   updatedAt: string
+  expiresAt?: string
 }
 
 export interface KanbanColumn {
@@ -42,7 +48,7 @@ interface TaskState extends AsyncState {
   tasks: Task[]
   columns: KanbanColumn[]
   initializeTasks: () => Promise<void>
-  addTask: (title: string, status?: string, description?: string, tags?: string[], dueDate?: string, linkedHabitId?: string, url?: string) => void
+  addTask: (title: string, status?: string, description?: string, tags?: string[], dueDate?: string, linkedHabitId?: string, url?: string, parentId?: string, duration?: TaskDuration) => void
   updateTask: (id: string, updates: Partial<Task>) => void
   toggleTaskStatus: (id: string) => void
   moveTask: (id: string, targetStatus: string) => void
@@ -52,6 +58,30 @@ interface TaskState extends AsyncState {
   renameColumn: (id: string, name: string) => void
   reorderColumns: (activeId: string, overId: string) => void
   deleteColumn: (id: string) => void
+  getActiveTasks: () => Task[]
+  getExpiredTasks: () => Task[]
+  getSubTasks: (parentId: string) => Task[]
+  getTodayCompletedTasks: () => Task[]
+  getTasksByDateRange: (startDate: string, endDate: string) => Task[]
+}
+
+const DURATION_MS: Record<TaskDuration, number | null> = {
+  '24h': 24 * 60 * 60 * 1000,
+  '48h': 48 * 60 * 60 * 1000,
+  '72h': 72 * 60 * 60 * 1000,
+  '1week': 7 * 24 * 60 * 60 * 1000,
+  'none': null,
+}
+
+function computeExpiresAt(duration: TaskDuration, createdAt: string): string | undefined {
+  const ms = DURATION_MS[duration]
+  if (ms === null) return undefined
+  return new Date(new Date(createdAt).getTime() + ms).toISOString()
+}
+
+function isExpired(task: Task): boolean {
+  if (!task.expiresAt || task.status === 'done') return false
+  return new Date(task.expiresAt) < new Date()
 }
 
 const initialTasks: Task[] = []
@@ -94,10 +124,26 @@ export const useTaskStore = create<TaskState>((set, get) => ({
           tags: t.tags ? JSON.parse(t.tags) : [],
           linkedHabitId: t.linked_habit_id || undefined,
           url: t.url || undefined,
+          parentId: t.parent_id || undefined,
+          duration: t.duration || 'none',
           createdAt: t.created_at,
           updatedAt: t.updated_at,
+          expiresAt: t.expires_at || undefined,
         }))
-        set({ tasks: mappedTasks, isLoading: false, isInitialized: true })
+
+        const expiredTasks = mappedTasks.filter(isExpired)
+        if (expiredTasks.length > 0) {
+          expiredTasks.forEach((task) => {
+            deleteTaskFromDb(task.id).catch(() => {})
+          })
+          const remainingTasks = mappedTasks.filter((t) => !isExpired(t))
+          set({ tasks: remainingTasks, isLoading: false, isInitialized: true })
+          if (expiredTasks.length > 0) {
+            toast(`${expiredTasks.length} task(s) expired and auto-removed`, { duration: 3000 })
+          }
+        } else {
+          set({ tasks: mappedTasks, isLoading: false, isInitialized: true })
+        }
       } else {
         set({ isLoading: false, isInitialized: true })
       }
@@ -105,7 +151,9 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       set({ error: err?.message || 'Failed to initialize tasks', isLoading: false, isInitialized: true })
     }
   },
-  addTask: (title, status = 'todo', description, tags, dueDate, linkedHabitId, url) => {
+  addTask: (title, status = 'todo', description, tags, dueDate, linkedHabitId, url, parentId, duration = '24h') => {
+    const now = new Date().toISOString()
+    const expiresAt = duration && duration !== 'none' ? computeExpiresAt(duration, now) : undefined
     const newTask: Task = {
       id: `t-${Date.now()}`,
       title,
@@ -116,8 +164,11 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       dueDate,
       linkedHabitId,
       url,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      parentId,
+      duration: duration || '24h',
+      createdAt: now,
+      updatedAt: now,
+      expiresAt,
     }
     set((state) => ({ tasks: [newTask, ...state.tasks] }))
     createTaskInDb({
@@ -130,6 +181,9 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       tags: newTask.tags ? JSON.stringify(newTask.tags) : null,
       linked_habit_id: newTask.linkedHabitId || null,
       url: newTask.url || null,
+      parent_id: newTask.parentId || null,
+      duration: newTask.duration,
+      expires_at: newTask.expiresAt || null,
       created_at: newTask.createdAt,
       updated_at: newTask.updatedAt,
     })
@@ -152,6 +206,9 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         tags: updated.tags ? JSON.stringify(updated.tags) : null,
         linked_habit_id: updated.linkedHabitId || null,
         url: updated.url || null,
+        parent_id: updated.parentId || null,
+        duration: updated.duration,
+        expires_at: updated.expiresAt || null,
         created_at: updated.createdAt,
         updated_at: updated.updatedAt,
       })
@@ -213,8 +270,12 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     }
   },
   deleteTask: (id) => {
+    const subTasks = get().tasks.filter((t) => t.parentId === id)
+    subTasks.forEach((st) => {
+      deleteTaskFromDb(st.id)
+    })
     set((state) => ({
-      tasks: state.tasks.filter((task) => task.id !== id),
+      tasks: state.tasks.filter((task) => task.id !== id && task.parentId !== id),
     }))
     deleteTaskFromDb(id)
   },
@@ -257,5 +318,18 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       set({ columns })
       reorderKanbanColumnsInDb(columns.map((c) => ({ id: c.id, name: c.name, sort_order: c.order })))
     }
+  },
+  getActiveTasks: () => get().tasks.filter((t) => t.status !== 'done'),
+  getExpiredTasks: () => get().tasks.filter(isExpired),
+  getSubTasks: (parentId) => get().tasks.filter((t) => t.parentId === parentId).sort((a, b) => a.order - b.order),
+  getTodayCompletedTasks: () => {
+    const todayStr = new Date().toISOString().split('T')[0]
+    return get().tasks.filter((t) => t.status === 'done' && t.updatedAt.startsWith(todayStr))
+  },
+  getTasksByDateRange: (startDate, endDate) => {
+    return get().tasks.filter((t) => {
+      const d = t.updatedAt.split('T')[0]
+      return d >= startDate && d <= endDate
+    })
   },
 }))

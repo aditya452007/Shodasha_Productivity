@@ -11,10 +11,11 @@ import {
   sendDailySummaryNotification,
   deliverNotification,
 } from '@/lib/notifications';
-import { getIdleSeconds } from '@/lib/db';
+import { getIdleSeconds, isTauri } from '@/lib/db';
 import { type DeliveryChannel } from '@/lib/openpets';
 import { useHabitStore } from './habitStore';
 import { useTimeEntryStore } from './timeEntryStore';
+import { toast } from 'sonner';
 
 interface NotificationState {
   notificationsEnabled: boolean;
@@ -92,11 +93,33 @@ export const useNotificationStore = create<NotificationState>()(
 
       sendTestNotification: async () => {
         const { channelHabit: ch, petDeliveryEnabled, petId } = get();
-        const opts = { title: 'Shodasha', body: 'All systems operational. Notifications working!', tag: 'test-notification' };
-        if (petDeliveryEnabled && (ch === 'pet' || ch === 'both')) {
-          await deliverNotification(opts, ch, 'test', petId ?? undefined);
+        const opts = { title: 'Shodasha', body: 'All systems operational. Notifications working!', tag: 'test-notification', requireInteraction: true };
+
+        let webOk = false;
+        if (ch !== 'pet') {
+          webOk = await sendWebNotification(opts);
         }
-        return sendWebNotification(opts);
+
+        let petOk = false;
+        if (petDeliveryEnabled && (ch === 'pet' || ch === 'both')) {
+          try {
+            petOk = await deliverNotification(opts, ch, 'test', petId ?? undefined);
+          } catch {}
+        }
+
+        const results: string[] = [];
+        if (webOk) results.push('Web ✅');
+        else if (!isTauri() && !('Notification' in window)) results.push('Web ⛔ (not supported)');
+        else results.push('Web ⛔');
+
+        if (petOk) results.push('Pet ✅');
+        else if (ch === 'web') results.push('Pet ⛔ (web-only mode)');
+        else if (!petDeliveryEnabled) results.push('Pet ⛔ (disabled)');
+        else if (!petId) results.push('Pet ⛔ (no pet)');
+        else results.push('Pet ⛔');
+
+        toast.success(`Test notification: ${results.join(' · ')}`);
+        return webOk || petOk;
       },
 
       checkAndTriggerNotifications: async () => {

@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Task, useTaskStore } from '@/stores/taskStore'
+import { Task, useTaskStore, TaskDuration } from '@/stores/taskStore'
 import { useHabitStore } from '@/stores/habitStore'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { X, Trash2, Calendar, Tag, Link2, AlignLeft, CheckSquare, Loader2, Clock, ExternalLink, Globe } from 'lucide-react'
+import { X, Trash2, Calendar, Tag, Link2, AlignLeft, Loader2, Clock, ExternalLink, Globe, Layers } from 'lucide-react'
 import { openExternalUrl } from '@/lib/utils/url'
 import { toast } from 'sonner'
 
@@ -15,10 +15,19 @@ interface TaskModalProps {
   onClose: () => void
 }
 
+const DURATION_OPTIONS: { label: string; value: TaskDuration }[] = [
+  { label: '24 hours', value: '24h' },
+  { label: '48 hours', value: '48h' },
+  { label: '72 hours', value: '72h' },
+  { label: '1 week', value: '1week' },
+  { label: 'No expiry', value: 'none' },
+]
+
 export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
   const updateTask = useTaskStore((state) => state.updateTask)
   const deleteTask = useTaskStore((state) => state.deleteTask)
   const columns = useTaskStore((state) => state.columns)
+  const tasks = useTaskStore((state) => state.tasks)
   const habits = useHabitStore((state) => state.habits)
 
   const [title, setTitle] = useState('')
@@ -28,8 +37,12 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
   const [tagsInput, setTagsInput] = useState('')
   const [linkedHabitId, setLinkedHabitId] = useState('')
   const [url, setUrl] = useState('')
+  const [parentId, setParentId] = useState('')
+  const [duration, setDuration] = useState<TaskDuration>('24h')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const shouldReduceMotion = useReducedMotion()
+
+  const eligibleParents = tasks.filter((t) => t.id !== task?.id && !t.parentId)
 
   useEffect(() => {
     if (task) {
@@ -40,6 +53,8 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
       setTagsInput(task.tags ? task.tags.join(', ') : '')
       setLinkedHabitId(task.linkedHabitId || '')
       setUrl(task.url || '')
+      setParentId(task.parentId || '')
+      setDuration(task.duration || '24h')
     }
   }, [task])
 
@@ -59,6 +74,17 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
         .map((t) => t.trim())
         .filter(Boolean)
 
+      const now = new Date().toISOString()
+      const DURATION_MS: Record<TaskDuration, number | null> = {
+        '24h': 24 * 60 * 60 * 1000,
+        '48h': 48 * 60 * 60 * 1000,
+        '72h': 72 * 60 * 60 * 1000,
+        '1week': 7 * 24 * 60 * 60 * 1000,
+        'none': null,
+      }
+      const durationMs = DURATION_MS[duration]
+      const expiresAt = durationMs ? new Date(new Date().getTime() + durationMs).toISOString() : undefined
+
       await updateTask(task.id, {
         title: title.trim(),
         description: description.trim() || undefined,
@@ -67,6 +93,9 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
         tags,
         linkedHabitId: linkedHabitId || undefined,
         url: url.trim() || undefined,
+        parentId: parentId || undefined,
+        duration,
+        expiresAt,
       })
       toast.success('Task details updated')
       onClose()
@@ -78,10 +107,20 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
   }
 
   const handleDelete = () => {
+    const subTasks = tasks.filter((t) => t.parentId === task.id)
+    if (subTasks.length > 0) {
+      if (!confirm(`${subTasks.length} sub-task(s) will also be deleted. Continue?`)) return
+    }
     deleteTask(task.id)
     toast.success('Task deleted')
     onClose()
   }
+
+  const getTaskLoggedSeconds = useTimeEntryStore.getState().getTaskLoggedSeconds
+  const totalSecs = getTaskLoggedSeconds(task.id)
+  const hrs = Math.floor(totalSecs / 3600)
+  const mins = Math.floor((totalSecs % 3600) / 60)
+  const timeDisplay = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`
 
   return (
     <AnimatePresence>
@@ -102,10 +141,8 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
             transition={{ duration: 0.42, ease: [0.23, 1, 0.32, 1] }}
             className="relative w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-xl z-10"
           >
-            {/* Header */}
             <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
               <div className="flex items-center gap-2">
-                <img src="/logo.png" alt="Shodasha Logo" className="h-5 w-5 object-contain" />
                 <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
                   Task Details
                 </h2>
@@ -119,9 +156,7 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
               </button>
             </div>
 
-        {/* Form Body */}
         <form onSubmit={handleSave} className="flex flex-col gap-4 mt-4">
-          {/* Title */}
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-[var(--text-secondary)]">Title</label>
             <input
@@ -133,7 +168,6 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
             />
           </div>
 
-          {/* Status / Column */}
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-[var(--text-secondary)]">Column Status</label>
             <select
@@ -149,7 +183,6 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
             </select>
           </div>
 
-          {/* Description */}
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)]">
               <AlignLeft className="h-3.5 w-3.5" />
@@ -164,12 +197,11 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
             />
           </div>
 
-          {/* Web Link / URL (Optional) */}
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)]">
                 <Globe className="h-3.5 w-3.5" />
-                <span>Web Link / URL (Optional)</span>
+                <span>Web Link / URL</span>
               </div>
               {url.trim() && (
                 <button
@@ -191,7 +223,6 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            {/* Due Date */}
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)]">
                 <Calendar className="h-3.5 w-3.5" />
@@ -205,11 +236,10 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
               />
             </div>
 
-            {/* Tags */}
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)]">
                 <Tag className="h-3.5 w-3.5" />
-                <span>Tags (comma separated)</span>
+                <span>Tags</span>
               </div>
               <input
                 type="text"
@@ -221,11 +251,47 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
             </div>
           </div>
 
-          {/* Linked Habit */}
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)]">
+              <Clock className="h-3.5 w-3.5" />
+              <span>Auto-expiry Duration</span>
+            </div>
+            <select
+              value={duration}
+              onChange={(e) => setDuration(e.target.value as TaskDuration)}
+              className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-base)] px-3.5 py-2 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+            >
+              {DURATION_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value} className="bg-[var(--bg-surface)] text-[var(--text-primary)]">
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)]">
+              <Layers className="h-3.5 w-3.5" />
+              <span>Parent Task (for sub-tasks)</span>
+            </div>
+            <select
+              value={parentId}
+              onChange={(e) => setParentId(e.target.value)}
+              className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-base)] px-3.5 py-2 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+            >
+              <option value="">None (Top-level task)</option>
+              {eligibleParents.map((t) => (
+                <option key={t.id} value={t.id} className="bg-[var(--bg-surface)] text-[var(--text-primary)]">
+                  {t.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)]">
               <Link2 className="h-3.5 w-3.5 text-[var(--accent)]" />
-              <span>Linked Habit (Auto-completes task when habit is done)</span>
+              <span>Linked Habit</span>
             </div>
             <select
               value={linkedHabitId}
@@ -241,7 +307,6 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
             </select>
           </div>
 
-          {/* Desktop Time Tracking Summary */}
           <div className="flex items-center justify-between p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-base)]">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-[var(--accent-muted)] text-[var(--accent)]">
@@ -253,17 +318,10 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
               </div>
             </div>
             <span className="font-mono text-sm font-bold text-[var(--accent)]">
-              {(() => {
-                const getTaskLoggedSeconds = useTimeEntryStore.getState().getTaskLoggedSeconds
-                const totalSecs = getTaskLoggedSeconds(task.id)
-                const hrs = Math.floor(totalSecs / 3600)
-                const mins = Math.floor((totalSecs % 3600) / 60)
-                return hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`
-              })()}
+              {timeDisplay}
             </span>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex items-center justify-between pt-4 border-t border-[var(--border)] mt-2">
             <button
               type="button"

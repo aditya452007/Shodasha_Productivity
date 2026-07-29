@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Activity, Info } from 'lucide-react'
 import { useHabitStore } from '@/stores/habitStore'
@@ -8,24 +8,24 @@ import { useHabitStore } from '@/stores/habitStore'
 export function HabitHeatmap() {
   const habits = useHabitStore((s) => s.habits)
   const records = useHabitStore((s) => s.records)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
-  // Build 24 weeks (~168 days) dataset for optimal desktop display
   const heatmapData = useMemo(() => {
     const weeksCount = 24
     const totalDays = weeksCount * 7
     const today = new Date()
 
-    // Find earliest habit creation date
     const creationDates = habits.map((h) => h.createdAt.split('T')[0]).sort()
     const globalStartBoundary = creationDates.length > 0 ? creationDates[0] : null
 
     const days: {
       dateStr: string
-      dayOfWeek: number // 0 = Sun, 1 = Mon, etc.
+      dayOfWeek: number
       count: number
-      level: number // 0, 1, 2, 3, 4
+      level: number
       habitNames: string[]
       isBeforeTracking: boolean
+      isToday: boolean
     }[] = []
 
     for (let i = totalDays - 1; i >= 0; i--) {
@@ -57,10 +57,10 @@ export function HabitHeatmap() {
         level,
         habitNames: completedHabits,
         isBeforeTracking,
+        isToday: dateStr === today.toISOString().split('T')[0],
       })
     }
 
-    // Group into 7-day columns (weeks)
     const weeks: typeof days[] = []
     let currentWeek: typeof days = []
 
@@ -75,7 +75,13 @@ export function HabitHeatmap() {
     return { weeks, totalDays }
   }, [habits, records])
 
-  // Color mappings for high-contrast vibrant intensity levels in light & dark mode
+  useEffect(() => {
+    if (!scrollRef.current || heatmapData.weeks.length === 0) return
+    const cellWidth = 20
+    const totalWeeks = heatmapData.weeks.length
+    scrollRef.current.scrollLeft = Math.max(0, totalWeeks * cellWidth - scrollRef.current.clientWidth / 2)
+  }, [heatmapData.weeks.length])
+
   const getCellBg = (level: number) => {
     switch (level) {
       case 1:
@@ -93,7 +99,6 @@ export function HabitHeatmap() {
 
   return (
     <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-xs">
-      {/* Header & Legend */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-[var(--border-subtle)] pb-3">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -109,7 +114,6 @@ export function HabitHeatmap() {
           </div>
         </div>
 
-        {/* Legend */}
         <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-tertiary)]">
           <span>Less</span>
           <div className="flex gap-1 items-center mx-1">
@@ -123,9 +127,8 @@ export function HabitHeatmap() {
         </div>
       </div>
 
-      {/* Heatmap Grid Container */}
-      <div className="overflow-x-auto pb-2 pt-1">
-        <div className="flex gap-1.5 min-w-[650px] justify-between">
+      <div ref={scrollRef} className="overflow-x-auto pb-2 pt-1">
+        <div className="flex gap-1.5 min-w-[650px] justify-start">
           {heatmapData.weeks.map((week, wIdx) => (
             <div key={wIdx} className="flex flex-col gap-1.5">
               {week.map((day) => (
@@ -135,13 +138,12 @@ export function HabitHeatmap() {
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                   className={`w-3.5 h-3.5 rounded-xs border transition-all cursor-pointer relative group ${getCellBg(
                     day.level
-                  )}`}
+                  )} ${day.isToday ? 'ring-2 ring-blue-500 ring-offset-1 ring-offset-[var(--bg-secondary)]' : ''}`}
                 >
-                  {/* Tooltip on Hover directly over cell */}
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 pointer-events-none">
                     <div className="bg-gray-950 text-white text-xs font-medium py-1.5 px-3 rounded-xl whitespace-nowrap shadow-2xl border border-gray-800">
-                      <div className="font-bold text-emerald-400">
-                        {day.dateStr}
+                      <div className={`font-bold ${day.isToday ? 'text-blue-400' : 'text-emerald-400'}`}>
+                        {day.dateStr}{day.isToday ? ' (Today)' : ''}
                       </div>
                       {day.isBeforeTracking ? (
                         <div className="text-gray-400">Before habit tracking started</div>
@@ -170,6 +172,7 @@ export function HabitHeatmap() {
         <Info className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
         <span>
           Darker green cells represent days with higher habit completion volume.
+          Today is highlighted with a blue ring.
         </span>
       </div>
     </div>

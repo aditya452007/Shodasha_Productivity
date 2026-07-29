@@ -40,6 +40,21 @@ export async function updateTaskInDb(task: any) {
   }
 }
 
+export async function fetchCompletedTasksByDateRange(startDate: string, endDate: string) {
+  if (!isTauri()) return null;
+  try {
+    const tasks = await invoke<any[]>('get_tasks');
+    if (!tasks) return null;
+    return tasks.filter((t: any) => {
+      const d = (t.updated_at || t.created_at).split('T')[0];
+      return d >= startDate && d <= endDate && t.status === 'done';
+    });
+  } catch (err) {
+    handleIpcError('fetch_completed_tasks', err);
+    return null;
+  }
+}
+
 export async function deleteTaskFromDb(id: string) {
   if (!isTauri()) return;
   try {

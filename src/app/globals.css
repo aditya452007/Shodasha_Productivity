@@ -45,6 +45,26 @@
     --habit-work: #d97706;
     --habit-personal: #e11d48;
 
+    /* Playful Accent Palette (for card accents, badges, micro-interactions) */
+    --accent-blue: #3b82f6;
+    --accent-blue-muted: #dbeafe;
+    --accent-pink: #ec4899;
+    --accent-pink-muted: #fce7f3;
+    --accent-rose: #f43f5e;
+    --accent-rose-muted: #ffe4e6;
+    --accent-amber: #f59e0b;
+    --accent-amber-muted: #fef3c7;
+    --accent-emerald: #10b981;
+    --accent-emerald-muted: #d1fae5;
+    --accent-violet: #8b5cf6;
+    --accent-violet-muted: #ede9fe;
+    --accent-teal: #14b8a6;
+    --accent-teal-muted: #ccfbf1;
+    --accent-orange: #f97316;
+    --accent-orange-muted: #ffedd5;
+    --accent-indigo: #6366f1;
+    --accent-indigo-muted: #e0e7ff;
+
     /* Typography Tokens */
     --font-ui: var(--font-geist), var(--font-inter), system-ui, -apple-system, sans-serif;
     --font-display: var(--font-geist), var(--font-inter), 'Cabinet Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -128,6 +148,26 @@
     --border-default: #38332c;
     --error: #ef4444;
     --success: #10b981;
+
+    /* Playful Accent Palette Dark Mode */
+    --accent-blue: #60a5fa;
+    --accent-blue-muted: #1e3a5f;
+    --accent-pink: #f472b6;
+    --accent-pink-muted: #4a1d3a;
+    --accent-rose: #fb7185;
+    --accent-rose-muted: #4c1d2a;
+    --accent-amber: #fbbf24;
+    --accent-amber-muted: #452d0a;
+    --accent-emerald: #34d399;
+    --accent-emerald-muted: #0d3328;
+    --accent-violet: #a78bfa;
+    --accent-violet-muted: #2e1e4a;
+    --accent-teal: #2dd4bf;
+    --accent-teal-muted: #0e332e;
+    --accent-orange: #fb923c;
+    --accent-orange-muted: #45220a;
+    --accent-indigo: #818cf8;
+    --accent-indigo-muted: #1e1b4b;
 
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.25);

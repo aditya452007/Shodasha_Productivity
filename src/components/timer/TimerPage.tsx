@@ -1,131 +1,31 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Timer, Play, Square, RotateCcw, Coffee, Bell, Smartphone } from 'lucide-react'
-import { toast } from 'sonner'
-import { useNotificationStore } from '@/stores/notificationStore'
-import { sendWebNotification, deliverNotification } from '@/lib/notifications'
-import type { DeliveryChannel } from '@/lib/openpets'
+import { Timer, Play, Square, RotateCcw, Coffee, Bell, Smartphone, Settings2 } from 'lucide-react'
+import { useTimerStore } from '@/stores/timerStore'
 
 const PRESETS = [
-  { label: '5 min', seconds: 300 },
-  { label: '10 min', seconds: 600 },
-  { label: '15 min', seconds: 900 },
-  { label: '25 min', seconds: 1500 },
-  { label: '30 min', seconds: 1800 },
-  { label: '60 min', seconds: 3600 },
+  { label: '5 min', minutes: 5 },
+  { label: '10 min', minutes: 10 },
+  { label: '15 min', minutes: 15 },
+  { label: '25 min', minutes: 25 },
+  { label: '30 min', minutes: 30 },
+  { label: '60 min', minutes: 60 },
 ]
 
 export function TimerPage() {
-  const [totalSeconds, setTotalSeconds] = useState(1500)
-  const [remaining, setRemaining] = useState(1500)
-  const [running, setRunning] = useState(false)
-  const [customMessage, setCustomMessage] = useState('')
-  const [channel, setChannel] = useState<DeliveryChannel | 'silent'>('both')
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const audioContextRef = useRef<AudioContext | null>(null)
+  const {
+    totalSeconds, remaining, isRunning, status,
+    customMessage, channel, presetMinutes,
+    setTotalSeconds, setCustomMessage, setChannel,
+    start, stop, reset, setPresetMinutes,
+  } = useTimerStore()
 
-  const clearTimer = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
-    }
-  }, [])
+  const [customMinutes, setCustomMinutes] = useState(27)
+  const [showCustom, setShowCustom] = useState(false)
 
-  useEffect(() => {
-    return clearTimer
-  }, [clearTimer])
-
-  const playBeep = useCallback(() => {
-    try {
-      if (!audioContextRef.current) {
-        audioContextRef.current = new AudioContext()
-      }
-      const ctx = audioContextRef.current
-      const oscillator = ctx.createOscillator()
-      const gain = ctx.createGain()
-      oscillator.connect(gain)
-      gain.connect(ctx.destination)
-      oscillator.frequency.value = 880
-      oscillator.type = 'sine'
-      gain.gain.value = 0.3
-      oscillator.start()
-      oscillator.stop(ctx.currentTime + 0.5)
-    } catch {}
-  }, [])
-
-  const fireNotification = useCallback(async () => {
-    playBeep()
-    const msg = customMessage.trim() || `Timer finished — ${formatTime(totalSeconds)}`
-    const opts = { title: 'Shodasha Timer', body: msg, tag: `timer-${Date.now()}` }
-    const store = useNotificationStore.getState()
-
-    if (channel === 'silent') {
-      toast('Timer done (silent mode)', { icon: '🔇' })
-      return
-    }
-
-    let webOk = false
-    if (channel !== 'pet' && store.permission === 'granted') {
-      webOk = await sendWebNotification(opts)
-    }
-
-    let petOk = false
-    if (store.petDeliveryEnabled && store.petId && (channel === 'pet' || channel === 'both')) {
-      try {
-        petOk = await deliverNotification(opts, channel, 'test', store.petId ?? undefined)
-      } catch {}
-    }
-
-    const results: string[] = []
-    if (webOk) results.push('Web ✅')
-    else results.push('Web ❌')
-    if (petOk) results.push('Pet ✅')
-    else if (channel !== 'web') results.push('Pet ❌')
-    toast.success(`Timer done — ${results.join(' · ')}`)
-  }, [customMessage, totalSeconds, channel, playBeep])
-
-  useEffect(() => {
-    if (!running) return
-    intervalRef.current = setInterval(() => {
-      setRemaining((prev) => {
-        if (prev <= 1) {
-          clearTimer()
-          setRunning(false)
-          fireNotification()
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-    return clearTimer
-  }, [running, clearTimer, fireNotification])
-
-  const startTimer = () => {
-    if (remaining <= 0) {
-      setRemaining(totalSeconds)
-    }
-    clearTimer()
-    setRunning(true)
-  }
-
-  const stopTimer = () => {
-    clearTimer()
-    setRunning(false)
-  }
-
-  const resetTimer = () => {
-    clearTimer()
-    setRunning(false)
-    setRemaining(totalSeconds)
-  }
-
-  const selectPreset = (seconds: number) => {
-    if (running) return
-    setTotalSeconds(seconds)
-    setRemaining(seconds)
-  }
+  const progress = totalSeconds > 0 ? ((totalSeconds - remaining) / totalSeconds) * 100 : 0
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60)
@@ -133,7 +33,12 @@ export function TimerPage() {
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
   }
 
-  const progress = totalSeconds > 0 ? ((totalSeconds - remaining) / totalSeconds) * 100 : 0
+  const handleCustomApply = () => {
+    if (customMinutes >= 1 && customMinutes <= 1440) {
+      setTotalSeconds(customMinutes * 60)
+      setShowCustom(false)
+    }
+  }
 
   return (
     <motion.div
@@ -142,7 +47,6 @@ export function TimerPage() {
       transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
       className="max-w-2xl mx-auto space-y-8 pb-16"
     >
-      {/* Header */}
       <div className="border-b border-[var(--border-subtle)] pb-5">
         <div className="flex items-center gap-2.5 mb-1">
           <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500">
@@ -153,13 +57,17 @@ export function TimerPage() {
           </h1>
         </div>
         <p className="text-sm text-[var(--text-secondary)]">
-          Set a countdown timer. A notification fires when time runs out.
+          Timer runs even when you switch pages. It stops when finished or you stop it.
         </p>
+        {isRunning && (
+          <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-500 text-[10px] font-semibold uppercase tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+            Running in background
+          </div>
+        )}
       </div>
 
-      {/* Timer Display */}
       <div className="flex flex-col items-center gap-8">
-        {/* Circular Progress Ring */}
         <div className="relative w-64 h-64">
           <svg className="w-full h-full transform -rotate-90" viewBox="0 0 256 256">
             <circle
@@ -181,17 +89,16 @@ export function TimerPage() {
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className={`font-mono text-6xl font-bold tabular-nums tracking-tight ${running ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
+            <span className={`font-mono text-6xl font-bold tabular-nums tracking-tight ${isRunning ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
               {formatTime(remaining)}
             </span>
           </div>
         </div>
 
-        {/* Controls */}
         <div className="flex items-center gap-4">
-          {!running ? (
+          {!isRunning ? (
             <button
-              onClick={startTimer}
+              onClick={start}
               disabled={remaining <= 0}
               className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent)] text-white text-sm font-semibold hover:opacity-90 transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
             >
@@ -199,35 +106,40 @@ export function TimerPage() {
             </button>
           ) : (
             <button
-              onClick={stopTimer}
+              onClick={stop}
               className="flex items-center gap-2 px-6 py-3 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-all shadow-xs active:scale-95"
             >
               <Square className="w-5 h-5" /> Stop
             </button>
           )}
           <button
-            onClick={resetTimer}
+            onClick={reset}
             className="flex items-center gap-2 px-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95"
           >
             <RotateCcw className="w-4 h-4" /> Reset
           </button>
         </div>
+
+        {status === 'completed' && (
+          <div className="px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-500 text-xs font-semibold">
+            Timer completed! Check your notifications.
+          </div>
+        )}
       </div>
 
-      {/* Preset Durations */}
       <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 shadow-xs">
         <div className="flex items-center gap-2 mb-3">
           <Coffee className="w-4 h-4 text-[var(--text-tertiary)]" />
-          <h3 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider">Preset Durations</h3>
+          <h3 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider">Duration</h3>
         </div>
         <div className="flex flex-wrap gap-2">
           {PRESETS.map((preset) => (
             <button
-              key={preset.seconds}
-              onClick={() => selectPreset(preset.seconds)}
-              disabled={running}
+              key={preset.minutes}
+              onClick={() => { if (!isRunning) setPresetMinutes(preset.minutes) }}
+              disabled={isRunning}
               className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all border ${
-                totalSeconds === preset.seconds
+                !showCustom && presetMinutes === preset.minutes && totalSeconds === preset.minutes * 60
                   ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-xs'
                   : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--border-default)]'
               } disabled:opacity-40 disabled:cursor-not-allowed`}
@@ -235,10 +147,42 @@ export function TimerPage() {
               {preset.label}
             </button>
           ))}
+          <button
+            onClick={() => { if (!isRunning) setShowCustom(!showCustom) }}
+            disabled={isRunning}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all border ${
+              showCustom
+                ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-xs'
+                : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--border-default)]'
+            } disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5`}
+          >
+            <Settings2 className="w-3.5 h-3.5" />
+            Custom
+          </button>
         </div>
+
+        {showCustom && (
+          <div className="mt-3 flex items-center gap-2 p-3 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-subtle)]">
+            <input
+              type="number"
+              min={1}
+              max={1440}
+              value={customMinutes}
+              onChange={(e) => setCustomMinutes(Math.max(1, Math.min(1440, Number(e.target.value) || 1)))}
+              className="w-16 text-center text-sm font-mono font-semibold px-2 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-hidden focus:border-[var(--accent)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              placeholder="min"
+            />
+            <span className="text-xs text-[var(--text-secondary)] font-medium">minutes</span>
+            <button
+              onClick={handleCustomApply}
+              className="px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-semibold hover:opacity-90 transition-opacity"
+            >
+              Apply
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Custom Settings */}
       <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 shadow-xs space-y-4">
         <div className="flex items-center gap-2 mb-1">
           <Bell className="w-4 h-4 text-[var(--text-tertiary)]" />
@@ -263,7 +207,7 @@ export function TimerPage() {
           </div>
           <select
             value={channel}
-            onChange={(e) => setChannel(e.target.value as DeliveryChannel | 'silent')}
+            onChange={(e) => setChannel(e.target.value as any)}
             className="px-2.5 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-primary)] text-[var(--text-primary)] text-xs font-medium focus:outline-hidden focus:border-[var(--accent)] cursor-pointer"
           >
             <option value="both">Both</option>
