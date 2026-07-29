@@ -1,0 +1,47 @@
+# Shodasha Productivity — Exhaustive Technical Specification for AI Agents
+
+> **Shodasha** is a personal time-management desktop application that fuses passive Windows activity tracking, habit heatmaps, and Kanban task management. Single user, fully local/offline, Windows-only.
+
+## 1. Domain Entities & Database Schema
+
+### Task
+- **id**: string (UUID)
+- **title**: short string description of the task
+- **description**: optional long text
+- **status**: string (column ID, e.g. "to-do", "in-progress", "done")
+- **order**: integer (position within column)
+- **dueDate**: optional ISO date string
+- **tags**: comma-separated string labels
+- **linkedHabitId**: optional reference to a Habit; when that habit is marked done for the day, this task auto-completes.
+
+### Habit & HabitRecord
+- **id**: string (UUID)
+- **name**: display title
+- **color**: hex string for calendar heatmap rendering
+- **linkedTaskId**: optional reference to a Task
+- **HabitRecord**: one day's check-in (date: YYYY-MM-DD, done: boolean). Records created lazily on check-in.
+
+### TimeEntry
+- **id**: string (UUID)
+- **appName**: executable name (e.g. "Code.exe")
+- **windowTitle**: active window title at capture
+- **startTime**, **endTime**: ISO timestamps
+- **endReason**: null (active), 'idle' (lock screen / screensaver), 'closed'
+- **duration**: seconds
+
+---
+
+## 2. Core Domain Rules
+
+1. **Habit -> Task Link is One-Way**: Completing a Habit for the day auto-completes its linked Task (if any). Completing a Task does not mark its linked Habit as done.
+2. **Offline Local Privacy**: All entries persist in `%APPDATA%\Shodasha\shodasha.db`. The application never connects to external HTTP endpoints or analytics servers.
+3. **Idle Time Exclusion**: Sessions closed with `endReason = 'idle'` are excluded from focus hours metrics.
+4. **Rust Win32 Performance**: Compiled natively with Rust using lightweight Win32 API hooks for 30-second window polling.
+
+---
+
+## 3. Installation & Direct Download
+
+- **Windows Setup Installer**: [Shodasha_0.1.0_x64-setup.exe](https://github.com/aditya452007/Shodasha_Productivity/releases/download/v0.1.6/Shodasha_0.1.0_x64-setup.exe)
+- **Release Version**: v0.1.6
+- **Architecture**: Windows x86_64

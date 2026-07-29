@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/agents-v1.json",
+  "name": "Shodasha Productivity Agent Manifest",
+  "version": "0.1.6",
+  "description": "WebMCP Agent Manifest for Shodasha Productivity desktop time and habit tracking app.",
+  "capabilities": {
+    "local_tracking": true,
+    "habit_heatmaps": true,
+    "kanban_tasks": true,
+    "cloud_dependency": false,
+    "platform": ["Windows 10", "Windows 11"]
+  },
+  "documentation": "https://shodasha.app/llms-full.txt",
+  "repository": "https://github.com/aditya452007/Shodasha_Productivity"
+}

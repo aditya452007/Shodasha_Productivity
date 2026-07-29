@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" fill="none">
+  <defs>
+    <linearGradient id="shodasha-grad" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#9d4e7c" />
+      <stop offset="100%" stop-color="#5c2a47" />
+    </linearGradient>
+    <linearGradient id="accent-grad" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#e8a0bf" />
+      <stop offset="100%" stop-color="#ffffff" />
+    </linearGradient>
+  </defs>
+
+  <!-- Outer Rounded Container -->
+  <rect width="120" height="120" rx="30" fill="url(#shodasha-grad)" />
+
+  <!-- Inner Subtle Swiss Border -->
+  <rect x="6" y="6" width="108" height="108" rx="24" stroke="rgba(255,255,255,0.2)" stroke-width="2" />
+
+  <!-- Clock & Habit Matrix Symbol -->
+  <circle cx="60" cy="60" r="38" stroke="url(#accent-grad)" stroke-width="5" stroke-dasharray="180 30" stroke-linecap="round" />
+
+  <!-- Center Clock Hands -->
+  <path d="M60 60V34" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" />
+  <path d="M60 60L78 60" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" />
+
+  <!-- Habit Streak Matrix Dots (Shodasha 16) -->
+  <circle cx="36" cy="36" r="3.5" fill="#e8a0bf" />
+  <circle cx="84" cy="36" r="3.5" fill="#e8a0bf" />
+  <circle cx="36" cy="84" r="3.5" fill="#e8a0bf" />
+  <circle cx="84" cy="84" r="3.5" fill="#e8a0bf" />
+</svg>

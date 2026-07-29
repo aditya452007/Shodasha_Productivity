@@ -1,0 +1,32 @@
+# ==========================================================================
+# SHODASHA PRODUCTIVITY - ROBOTS & AI AGENT DISCOVERY MANIFEST (2026)
+# Canonical URL: https://shodasha.app/
+# ==========================================================================
+
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# AI Crawlers & LLM Indexers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: DeepSeekBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Sitemap & LLM Manifest Locations
+Sitemap: https://shodasha.app/sitemap.xml
+LLMs-Txt: https://shodasha.app/llms.txt
+LLMs-Full-Txt: https://shodasha.app/llms-full.txt

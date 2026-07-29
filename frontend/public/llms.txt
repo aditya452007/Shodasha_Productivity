@@ -1,0 +1,31 @@
+# Shodasha Productivity — Track your desktop time and Grow with your habits
+
+> **Shodasha Productivity** is an ultra-fast, local-first Windows 10 & 11 desktop application compiled natively in Rust. It fuses passive desktop time tracking, visual habit heatmaps, and Kanban task management with zero cloud telemetry.
+
+## System Overview & Core Capabilities
+
+- **Tagline**: Track your desktop time and Grow with your habits
+- **Operating Systems**: Windows 10, Windows 11 (64-bit x86_64)
+- **Primary License**: Open Source (MIT)
+- **Release Version**: v0.1.6 (Stable)
+- **Windows Setup Installer**: [Shodasha_0.1.0_x64-setup.exe](https://github.com/aditya452007/Shodasha_Productivity/releases/download/v0.1.6/Shodasha_0.1.0_x64-setup.exe)
+- **Repository**: [aditya452007/Shodasha_Productivity](https://github.com/aditya452007/Shodasha_Productivity)
+
+## Technical Architecture & Performance Specs
+
+- **Backend Engine**: Native Rust using Win32 API (`GetForegroundWindow()`) for foreground application polling every 30 seconds.
+- **Resource Footprint**: Minimal memory consumption (< 15 MB RAM), 0.0% background idle CPU.
+- **Local Data Privacy**: 100% offline SQLite database (`%APPDATA%\Shodasha\shodasha.db`). Zero network telemetry or cloud API calls.
+- **Habit-Task Sync**: 1-way automated trigger — checking off a daily habit automatically completes its linked Kanban task.
+
+## Key Concepts & Terminology
+
+1. **TimeEntry**: Logged window/app session automatically captured by the Windows activity tracker.
+2. **Habit & HabitRecord**: Daily binary check-in (Done / Not Done) with GitHub-style calendar heatmaps and streak counters.
+3. **Task & KanbanColumn**: Drag-and-drop task card residing in configurable board columns (To Do, In Progress, Done).
+4. **AppCategory**: User-defined classification of applications into Work, Distraction, or Neutral.
+
+## Full Documentation
+
+- [Full LLM Manifest](https://shodasha.app/llms-full.txt)
+- [GitHub Releases & Binary Download](https://github.com/aditya452007/Shodasha_Productivity/releases)

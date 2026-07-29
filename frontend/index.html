@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Core Web Vitals LCP Preloads & Resource Hints -->
+    <link rel="preload" as="image" href="/logo.png" type="image/png" fetchpriority="high" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Primary SEO Meta Tags -->
+    <title>Shodasha Productivity — Track your desktop time and Grow with your habits</title>
+    <meta name="title" content="Shodasha Productivity — Track your desktop time and Grow with your habits" />
+    <meta name="description" content="Shodasha is an ultra-fast, local-first Windows 10 & 11 desktop app written in Rust by Shodasha Agency. Track active screen time, build habit heatmaps, and manage Kanban tasks offline with zero cloud telemetry." />
+    <meta name="keywords" content="Shodasha Productivity, Shodasha Agency, habit tracker, desktop time tracker, windows application, windows 10 time tracker, windows 11 habit tracker, rust backend, offline habit heatmap, kanban to do list, desktop screen time app, rust time management" />
+    <meta name="author" content="Shodasha Agency" />
+    <link rel="canonical" href="https://shodasha.app/" />
+
+    <!-- AI Agent & Crawler Manifest Links (2026 Standards) -->
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM Agent Manifest" />
+    <link rel="author" href="/.well-known/agents.json" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://shodasha.app/" />
+    <meta property="og:title" content="Shodasha Productivity — Track your desktop time and Grow with your habits" />
+    <meta property="og:description" content="Lightweight Windows time tracker & habit heatmap manager engineered by Shodasha Agency. 100% offline, zero cloud telemetry, minimal CPU footprint (< 15 MB RAM)." />
+    <meta property="og:image" content="https://shodasha.app/logo.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://shodasha.app/" />
+    <meta property="twitter:title" content="Shodasha Productivity — Windows Habit & Desktop Time Tracker" />
+    <meta property="twitter:description" content="Track your desktop time and Grow with your habits. Rust-powered local Windows application built by Shodasha Agency." />
+    <meta property="twitter:image" content="https://shodasha.app/logo.png" />
+
+    <!-- Google Fonts with Swap Display -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Structured Data: JSON-LD SoftwareApplication & Organization Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Shodasha Productivity",
+      "operatingSystem": "Windows 10, Windows 11 (x64)",
+      "applicationCategory": "ProductivityApplication",
+      "softwareVersion": "0.1.6",
+      "description": "Personal time-management desktop app engineered by Shodasha Agency that fuses passive Windows activity tracking, daily habit heatmaps, and Kanban task management with zero cloud telemetry.",
+      "downloadUrl": "https://github.com/aditya452007/Shodasha_Productivity/releases/download/v0.1.6/Shodasha_0.1.0_x64-setup.exe",
+      "offers": {
+        "@type": "Offer",
+        "price": "0.00",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "Shodasha Agency",
+        "url": "https://shodasha.vercel.app/"
+      },
+      "featureList": [
+        "Passive Windows active window session tracking",
+        "30-second deduplication engine",
+        "GitHub-style habit calendar heatmaps",
+        "1-way automated habit to Kanban task completion",
+        "100% offline local SQLite storage",
+        "Ultra-fast Rust Win32 backend (< 15 MB RAM)"
+      ]
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

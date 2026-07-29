@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Shodasha Productivity",
+  "name_for_model": "shodasha_productivity",
+  "description_for_human": "Track your desktop time and grow with your habits. Rust-powered offline Windows desktop application.",
+  "description_for_model": "Shodasha Productivity is a local-first Windows 10/11 application written in Rust. It tracks active screen time, visualizes habit heatmaps, and manages Kanban tasks with zero cloud telemetry.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://shodasha.app/llms.txt"
+  },
+  "logo_url": "https://shodasha.app/shodasha-logo.svg",
+  "contact_email": "support@shodasha.app",
+  "legal_info_url": "https://github.com/aditya452007/Shodasha_Productivity/blob/main/LICENSE"
+}
