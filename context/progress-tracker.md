@@ -4,11 +4,11 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-**Phase 5 — Verify 100% Completed**
+**Phase 0 — Color System Unification 100% Completed**
 
 ## Current Goal
 
-Execute Shodasha redesign incrementally in strictly controlled, verifiable phases.
+Proceed to Phase 1 — Premium UI Patterns (bento grid, BaseCard, micro-interactions).
 
 ## Completed
 
@@ -71,6 +71,22 @@ Execute Shodasha redesign incrementally in strictly controlled, verifiable phase
   - Fixed hardcoded 5-day streak bug on dashboard — replaced with dynamic streak calculation (`0 Days` on fresh install)
   - Added manual **Refresh Data** buttons with spinning animation and 15s live auto-polling to Dashboard and Timeline
    - Verified with `npm run typecheck` and `cargo check --workspace` (0 errors across all TypeScript & Rust crates)
+
+### Phase 0 — Color System Unification (2026-07-29)
+- [x] Resolved 3-way token conflict in `globals.css`: removed conflicting OKLCH `--color-accent*` (blue), kept hex `--accent` (emerald) as single source of truth
+- [x] Aliased `--color-success` → `var(--success)` and `--color-error` → `var(--error)` so dark mode variants propagate through 3 dependent components
+- [x] Added dark mode variant for `--color-warning: oklch(65% 0.18 80)` in `.dark` block
+- [x] Added dark mode variants for `--habit-*` tokens (`#34d399`, `#a78bfa`, `#fbbf24`, `#fb7185`)
+- [x] Created utility CSS classes: `bg-accent-gradient`, `icon-bg-*` (violet/amber/emerald/sky/rose), `dot-*` legend utilities
+- [x] Fixed **StreakHeroCard**: replaced purple "AI gradient" (`from-violet-600 via-indigo-600 to-purple-700`) with `bg-accent-gradient` using `--accent` tokens; replaced all Tailwind color utilities with CSS var references
+- [x] Fixed **LearningProgressCard**: replaced hardcoded SVG gradient `#7c3aed`/`#0284c7` with `var(--accent-violet)`/`var(--accent-blue)`; replaced legend dots and icon bg with CSS utilities
+- [x] Fixed **PerformanceOverviewChart**: replaced `#7c3aed` in SVG gradient, stroke, and tooltip with `var(--accent-violet)`; replaced icon bg with `icon-bg-sky`
+- [x] Fixed **TopKPIGrid**: replaced 4 inline hex `color` values with `var(--accent-*)` and 4 Tailwind utility classes with `icon-bg-*`
+- [x] Fixed **GoalsHabitsCard**: replaced `'#059669'` hex fallbacks with `'var(--accent-emerald)'`; replaced icon bg and checkbox border colors with css vars
+- [x] Fixed **AddHabitModal**: replaced raw `'#059669'` fallback strings with `'var(--accent-emerald)'`
+- [x] Fixed **AppearanceSettings**: replaced hex accentOptions (`#059669`, `#7c3aed`, etc.) with `var(--accent-*)` references for dark-mode-aware accent switching
+- [x] Fixed **settingsStore**: updated `AccentColor` type and defaults to use `var(--accent-*)` values
+- [x] Verified: `npm run lint` (0 errors), `npm run typecheck` (0 errors), `npm run build` (successful)
 
 ### Phase 5 — Verify
 - [x] `npm run lint` passes (0 errors, 0 warnings) — ESLint configured for Next.js 16 w/ `@next/eslint-plugin-next` + TypeScript parser
@@ -325,6 +341,129 @@ Execute Shodasha redesign incrementally in strictly controlled, verifiable phase
 - [x] `npm run typecheck` passes (0 errors)
 - [x] `npm run lint` passes (0 errors, 4 pre-existing warnings)
 - [x] `npm run build` passes (0 errors, 6 static routes)
+
+## Phase 2 — Dashboard Premium UI Patterns (BaseCard + Bento Grid + Hover States)
+
+### Completed (2026-07-29)
+- [x] Refactored 6 dashboard card components to use `BaseCard` wrapper with proper elevation:
+  - `ScheduleActivityCard`, `LearningProgressCard`, `GoalsHabitsCard` — elevation="raised" with `card-hover-lift`
+  - `StreakHeroCard` — elevation="flat" with gradient className override, border-0, `card-hover-lift`
+  - `PerformanceOverviewChart` — elevation="raised" with `card-hover-lift`, cleaned unused `motion`/`useReducedMotion`/`BarChart2`
+  - `TopKPIGrid` — each of 4 KPI metrics wrapped in BaseCard, removed unused `motion`/`useReducedMotion`
+  - `InsightCard` — uses BaseCard built-in `isLoading`/`hasError` state handling, removed manual `LoadingSkeleton`/`ErrorBanner`
+- [x] Applied bento grid layout to `src/app/page.tsx`:
+  - Middle tier: `bento-grid bento-grid-cols-12 items-stretch` with `bento-col-span-7/5`
+  - Bottom tier: same with `bento-col-span-4/3/5`
+- [x] Added `card-hover-lift` class to all dashboard card containers
+- [x] Removed ~15 unused imports across dashboard components
+- [x] All hover interactions gated by `@media (hover: hover)` (in globals.css)
+- [x] Reduced motion respected via global CSS `@media (prefers-reduced-motion: reduce)` disabling card-hover transforms
+
+### Verification
+- [x] `npm run lint` — 0 errors (4 pre-existing warnings)
+- [x] `npm run typecheck` — 0 errors
+- [x] `npm run build` — successful (6 static routes)
+
+## Phase 3 — Animation Polish, Edge States & Reduced Motion (2026-07-29)
+
+### Completed
+- [x] Created 10 transition utility classes in `globals.css` (`transition-btn`, `transition-lift`, `transition-colors`, `transition-border`, `transition-shadow`, `transition-ring`, `transition-opacity`, `transition-transform`, `transition-width`, `transition-height`) with CSS custom property easing/duration tokens
+- [x] Added `prefers-reduced-motion` overrides for all new transition utility classes
+- [x] Replaced `transition-all` on ~20 most visible interactive elements with specific property transitions:
+  - **Navbar**: 2 nav buttons removed `transition-all` (covered by global CSS)
+  - **SettingsSidebar**: nav items → `transition-colors`
+  - **KanbanCard**: card → `transition-lift`, buttons/checkboxes → `transition-colors` or removed
+  - **KanbanColumn**: column container → `transition-lift`
+  - **SortableWidgetCard** (HabitAnalyticsDashboard): widget → `transition-shadow`
+  - **CategoryFilterBar**: filter pills removed `transition-all`, search → `transition-ring`
+  - **QuickTaskInput**: container → `transition-ring`
+  - **TodayProgressCard**: card → `transition-border`, refresh button removed `transition-all`
+  - **HabitQuickToggle**: toggle cards → `transition-colors`, checkbox → `transition-colors`, link btn removed
+  - **HeaderGreetingCard**, **EmptyState**, **ErrorBanner**: buttons removed `transition-all`
+  - **habits/page.tsx**: action button removed `transition-all`
+  - **timeline/page.tsx**: action buttons removed `transition-all`
+  - **AddHabitModal**: 3 inputs → `transition-ring`
+- [x] **Reduced motion safeguards added**:
+  - `TimerPage`: added `useReducedMotion` guard on page entry animation + `motion-reduce:animate-none` on pulse indicator
+  - `habits/page.tsx`: added `useReducedMotion` guard on all 5 section entry animations (header + 4 staggered sections)
+  - `board/page.tsx`: added `useReducedMotion` guard on page entry
+  - `settings/page.tsx`: added `useReducedMotion` guard on page entry
+- [x] **Edge states verified**:
+  - `HabitAnalyticsDashboard` → loading skeleton + error banner ✅
+  - `SortableWidgetCard` → passive wrapper, edge states delegated to children ✅
+  - `AppCategoryManager` → loading skeleton + error banner + empty state ✅
+  - `TrackingPreferences`, `AppearanceSettings`, `NotificationsSettings` → scalar defaults, static UI, no async gaps
+  - `DataManagement` → no explicit loading state on clear/export (minor, acceptable for now)
+
+### Verification
+- [x] `npm run lint` — 0 errors (4 pre-existing warnings)
+- [x] `npm run typecheck` — 0 errors
+- [x] `npm run build` — successful (6 static routes)
+
+## Phase 3 Cleanup — transition-all Replacement + Timer Polish (2026-07-29)
+
+### Completed
+- [x] Fixed ~30 `transition-all` instances across 12 components:
+  - **TimerPage**: Progress bar SVG custom easing, 6 buttons (start/stop/reset/presets/custom), custom input → `transition-ring`
+  - **NotificationsSettings**: 2 buttons removed `transition-all`
+  - **DesktopPetSettings**: 3 card containers → `transition-colors`, 8 buttons removed `transition-all`
+  - **AppCategoryManager**: 1 button removed, search → `transition-ring`, list item → `transition-border`, 2 color icons → `transition-colors`
+  - **DataManagement**: 2 buttons removed `transition-all`
+  - **AppearanceSettings**: Color swatch → `transition-transform`
+  - **HabitCalendar**: Day cell checkbox → `transition-colors`
+  - **HabitAchievements**: Achievement card → `transition-lift`
+  - **ScheduleActivityCard**: Status tag → `transition-colors`
+  - **GoalsHabitsCard**: Habit checkbox → `transition-colors`
+  - **TimelineStream**: Icon double-bezel → `transition-shadow`
+  - **KPICard**: Double-bezel shell → `transition-shadow`
+- [x] TimerPage polish: replaced `bg-blue-500`, `bg-red-500`, `bg-emerald-500` with `var(--accent)`/`var(--error)` tokens; progress bar easing → custom `cubic-bezier(0.23, 1, 0.32, 1)`
+- [x] Hex audit: replaced default habit color `'#059669'` with `'var(--accent-emerald)'` in `habitStore.ts`
+- [x] Added Timer tab (Cmd+6) keyboard shortcut in CommandPalette
+- [x] All colors use `var(--*)` tokens — no inline hex in UI chrome
+- [x] No `transition-all` on interactive elements (only chart animations and toggle knobs)
+
+### Verification
+- [x] `npm run lint` — 0 errors (4 pre-existing warnings)
+- [x] `npm run typecheck` — 0 errors
+- [x] `npm run build` — 0 errors (7 static routes, including /timer)
+
+## Phase 4 — Gamification System (2026-07-29)
+
+### Completed
+- [x] **gamificationStore.ts** — Zustand store with XP/level system, XP formula `100 × level × 1.15^(level-1)`, tier names (Bronze→Legend), XP sources (habit check-in 10xp, all-done bonus 25xp, focus session 5xp/30min, task done 15xp, early task bonus 10xp, achievement 50xp, streak milestone 100xp, first check-in 5xp). Deduplication via trackedXPKeys. Persistence to localStorage + SQLite settings table.
+- [x] **achievements.ts** — Refactored with `category` (streaks/focus/tasks/habits/milestones) replacing old tier-as-category. Added `tier` field. Added 7 new achievements: Task Terminator (50 tasks), Execution Engine (200 tasks), Centurion of Action (1000 tasks), Deep Work Adept (500 focus hours), Focus Grandmaster (1000 focus hours), Habit Collector (5 habits), Ritual Architect (15 habits).
+- [x] **SkillOctagon.tsx** — SVG radar chart with 8 axes (Consistency, Depth, Balance, Focus, Growth, Recovery, Mastery, Discipline). Polygon fill animated with spring `{ stiffness: 80, damping: 12 }`. 4-level grid rings with fade-in, axis labels staggered, data point dots. Empty: dashed outline + CTA text. Loading: skeleton shimmer. Error: ErrorBanner. Reduced motion: skip spring animations. All colors use `var(--accent-*)` per axis.
+- [x] **XPProgressBar.tsx** — Animated horizontal bar with `layout` spring, tier badge with tier color, NumberTicker for XP count. Empty: level 1 at 0 XP. Loading: skeleton. Reduced motion: instant width, no ticker.
+- [x] **LevelUpCelebration.tsx** — Scale-up badge + 12 particle burst overlay. Auto-dismiss after 3s or click. Reduced motion: opacity fade only, no particles. Tier-specific color.
+- [x] **DailyXPGoal.tsx** — Circular progress ring (120px) showing daily XP vs 100 goal. Status text ("Start your day" / "On track" / "Almost there" / "Goal reached!"). Smooth fill animation. Reduced motion: instant.
+- [x] **AchievementBadge.tsx** — Locked (dashed border, desaturated, 0.6 opacity), unlocked (solid border with glow, shimmer sweep), recent unlock (scale pulse, "NEW" gold ribbon fades after 3s). Category-colored section headers. Progress-to-next bar.
+- [x] **AchievementBadgeGrid** groups by category with progress counts.
+- [x] **StreakDisplay.tsx** — Flame icon with 6 intensity tiers (1–6 gray, 7–13 orange, 14–29 orange-red pulse, 30–59 red glow, 60–89 purple-red double pulse, 90+ gold-white intense glow). Streak prediction text, longest streak trophy, streak freeze icons (1–3 ice cubes), broken streak encouragement with bounce. Reduced motion: no scale, just text.
+- [x] **GamificationSettings.tsx** — Settings panel showing level card, XPProgressBar, SkillOctagon preview, achievement count, reset button with confirmation.
+- [x] **Integration wiring**: habitStore.toggleHabit → awardXP(10) + all-done check → awardXP(25); timerStore.fireTimerNotification → awardXP(5×intervals); taskStore.toggleTaskStatus/moveTask → awardXP(15) + early bonus(10); HabitAchievements → checkAndAwardAchievement(50).
+- [x] **Dashboard integration**: XPProgressBar + DailyXPGoal + SkillOctagon (compact 200px) in gamification row between TopKPIGrid and middle tier.
+- [x] **Habits integration**: StreakDisplay in top row, SkillOctagon (full 240px) + AchievementBadgeGrid replacing old HabitAchievements cards.
+- [x] **Settings integration**: "Gamification & XP" tab in sidebar between Notifications and Desktop Pet.
+- [x] **Globals.css**: Added `@keyframes shimmer-sweep` for AchievementBadge unlock shimmer.
+- [x] **Reduced motion**: Every component uses `useReducedMotion()` from framer-motion. Spring animations become instant. Particle effects skipped. Stagger delays flattened.
+
+### Verification
+- [x] `npm run lint` — 0 errors (4 pre-existing warnings)
+- [x] `npm run typecheck` — 0 errors
+- [x] `npm run build` — 0 errors (7 static routes)
+
+### Phase 5 — Final Re-Verification (2026-07-29)
+- [x] `npm run lint` — 0 errors, 4 warnings (pre-existing `<img>` only)
+- [x] `npm run typecheck` — 0 errors
+- [x] `npm run build` — 0 errors (7 static routes)
+- [x] `transition-all` audit: 15 matches — all acceptable (chart animations + toggle knobs only)
+- [x] `scale(0)` audit: 0 matches — no banned zero-scale entry animations
+- [x] Inline hex audit: 21 matches — all data values (streak colors, tier colors, habit presets) — known safe patterns
+- [x] `prefers-reduced-motion`: 23 components with `useReducedMotion()` + CSS `@media` block + 6 `motion-reduce` guards
+- [x] `@media (hover: hover)` hover gating: 4 blocks in globals.css
+- [x] `backdrop-blur` glassmorphism: 6 matches — all modal overlays/Navbar (allowed per spec)
+- [x] Italic headings: 0 matches — no italic headings anywhere
+- [x] All colors use `var(--)` tokens in UI chrome (inline hex only in data values)
 
 ## Project Status: CI/CD AUTOMATED — FULL .MSI RELEASES ON EVERY PUSH 🚀
 

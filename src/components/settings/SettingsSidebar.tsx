@@ -1,6 +1,6 @@
 'use client';
 
-import { LucideIcon, Sliders, Palette, Bell, Database, Info, Cat } from 'lucide-react';
+import { LucideIcon, Sliders, Palette, Bell, Database, Info, Cat, Trophy } from 'lucide-react';
 
 export interface SettingsNavItem {
   id: string;
@@ -33,6 +33,12 @@ export const SETTINGS_NAV_ITEMS: SettingsNavItem[] = [
     label: 'Data & Backup',
     description: 'Database export, import, storage management',
     icon: Database,
+  },
+  {
+    id: 'gamification',
+    label: 'Gamification & XP',
+    description: 'XP, levels, achievements, skill octagon',
+    icon: Trophy,
   },
   {
     id: 'desktop-pet',
@@ -68,7 +74,7 @@ export function SettingsSidebar({ activeCategory, onSelectCategory }: SettingsSi
             <button
               key={item.id}
               onClick={() => onSelectCategory(item.id)}
-              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all ${
+              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-colors ${
                 isActive
                   ? 'bg-emerald-500/10 text-emerald-500 font-semibold border border-emerald-500/20 shadow-xs'
                   : 'text-[var(--foreground)] hover:bg-[var(--background)] hover:text-emerald-500 border border-transparent'

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowLeft, Sliders, Sparkles } from 'lucide-react';
 import {
   SettingsSidebar,
@@ -14,9 +14,11 @@ import {
   DesktopPetSettings,
   DataManagement,
   AboutSettings,
+  GamificationSettings,
 } from '@/components/settings';
 
 export default function SettingsPage() {
+  const shouldReduceMotion = useReducedMotion()
   const [activeCategory, setActiveCategory] = useState<string>('tracking');
   const [mobileView, setMobileView] = useState<'nav' | 'detail'>('nav');
   const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -52,6 +54,8 @@ export default function SettingsPage() {
         return <AppearanceSettings />;
       case 'notifications':
         return <NotificationsSettings />;
+      case 'gamification':
+        return <GamificationSettings />;
       case 'desktop-pet':
         return <DesktopPetSettings />;
       case 'data':
@@ -65,7 +69,7 @@ export default function SettingsPage() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
       className="space-y-6 max-w-7xl mx-auto pb-16 px-2 sm:px-4"

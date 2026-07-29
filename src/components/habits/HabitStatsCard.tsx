@@ -7,6 +7,7 @@ import { useHabitStore } from '@/stores/habitStore'
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { ErrorBanner } from '@/components/ui/ErrorBanner'
 import { NumberTicker } from '@/components/ui/NumberTicker'
+import { BaseCard } from '@/components/ui/BaseCard'
 
 export function HabitStatsCard() {
   const habits = useHabitStore((s) => s.habits)
@@ -69,7 +70,7 @@ export function HabitStatsCard() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <LoadingSkeleton height={80} />
         <LoadingSkeleton height={80} />
         <LoadingSkeleton height={80} />
@@ -85,12 +86,10 @@ export function HabitStatsCard() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Current Streak */}
-      <motion.div
-        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-        className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
+      <BaseCard
+        elevation="raised"
+        className="card-hover-lift"
+        innerClassName="flex items-center gap-4 p-6"
       >
         <div className="p-3 rounded-xl shrink-0" style={{ backgroundColor: 'var(--accent-amber-muted)', color: 'var(--accent-amber)' }}>
           <Flame className="w-5 h-5" />
@@ -103,15 +102,13 @@ export function HabitStatsCard() {
             <NumberTicker value={stats.currentStreak} /> {stats.currentStreak === 1 ? 'day' : 'days'}
           </div>
         </div>
-      </motion.div>
+      </BaseCard>
 
       {/* Today's Progress */}
-      <motion.div
-        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1], delay: shouldReduceMotion ? 0 : 0.05 }}
-        className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
+      <BaseCard
+        elevation="raised"
+        className="card-hover-lift"
+        innerClassName="flex items-center gap-4 p-6"
       >
         <div className="p-3 rounded-xl shrink-0" style={{ backgroundColor: 'var(--accent-emerald-muted)', color: 'var(--accent-emerald)' }}>
           <CheckCircle2 className="w-5 h-5" />
@@ -124,15 +121,13 @@ export function HabitStatsCard() {
             <NumberTicker value={stats.todayCompletedCount} /> / {habits.length} (<NumberTicker value={stats.todayCompletionRate} />%)
           </div>
         </div>
-      </motion.div>
+      </BaseCard>
 
       {/* Monthly Total */}
-      <motion.div
-        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1], delay: shouldReduceMotion ? 0 : 0.1 }}
-        className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
+      <BaseCard
+        elevation="raised"
+        className="card-hover-lift"
+        innerClassName="flex items-center gap-4 p-6"
       >
         <div className="p-3 rounded-xl shrink-0" style={{ backgroundColor: 'var(--accent-violet-muted)', color: 'var(--accent-violet)' }}>
           <CalendarCheck className="w-5 h-5" />
@@ -145,15 +140,13 @@ export function HabitStatsCard() {
             <NumberTicker value={stats.last30DaysCount} /> check-ins
           </div>
         </div>
-      </motion.div>
+      </BaseCard>
 
       {/* Active Habits Count */}
-      <motion.div
-        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1], delay: shouldReduceMotion ? 0 : 0.15 }}
-        className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 flex items-center gap-3.5 shadow-xs hover:border-[var(--border-default)] transition-all cursor-pointer"
+      <BaseCard
+        elevation="raised"
+        className="card-hover-lift"
+        innerClassName="flex items-center gap-4 p-6"
       >
         <div className="p-3 rounded-xl shrink-0" style={{ backgroundColor: 'var(--accent-teal-muted)', color: 'var(--accent-teal)' }}>
           <Trophy className="w-5 h-5" />
@@ -166,7 +159,7 @@ export function HabitStatsCard() {
             <NumberTicker value={habits.length} /> Habits
           </div>
         </div>
-      </motion.div>
+      </BaseCard>
     </div>
   )
 }

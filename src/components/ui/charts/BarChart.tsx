@@ -51,9 +51,9 @@ export function BarChart({ items, title }: BarChartProps) {
           {/* Bar Progress Track */}
           <div className="h-2 w-full bg-[var(--bg-surface)] rounded-full overflow-hidden p-0.5 border border-[var(--border)]">
             <motion.div
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: item.percentage / 100 }}
-              transition={{ duration: 0.6, delay: i * 0.1, ease: 'easeOut' }}
+              initial={{ scaleX: 0.1, opacity: 0 }}
+              animate={{ scaleX: item.percentage / 100, opacity: 1 }}
+              transition={{ duration: 0.6, delay: i * 0.1, ease: [0.23, 1, 0.32, 1] }}
               className="h-full w-full rounded-full origin-left"
               style={{ backgroundColor: item.color }}
             />

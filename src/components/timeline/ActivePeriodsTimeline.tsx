@@ -2,6 +2,7 @@
 
 import { useTimeEntryStore } from '@/stores/timeEntryStore';
 import { Clock, Zap, Moon, Laptop } from 'lucide-react';
+import { BaseCard } from '@/components/ui/BaseCard';
 
 export function ActivePeriodsTimeline() {
   const selectedDate = useTimeEntryStore((state) => state.selectedDate);
@@ -30,7 +31,7 @@ export function ActivePeriodsTimeline() {
   };
 
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xs">
+    <BaseCard elevation="raised" className="card-hover-lift" innerClassName="p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <div className="flex items-center gap-2">
@@ -110,6 +111,6 @@ export function ActivePeriodsTimeline() {
           })}
         </div>
       )}
-    </div>
+    </BaseCard>
   );
 }

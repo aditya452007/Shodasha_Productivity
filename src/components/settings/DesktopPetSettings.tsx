@@ -195,7 +195,7 @@ export function DesktopPetSettings() {
   const PetCard = ({ pet, isSelected }: { pet: OpenPetsPetInfo; isSelected: boolean }) => (
     <button
       onClick={() => handleSelectPet(pet.id)}
-      className={`relative w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
+      className={`relative w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors ${
         isSelected
           ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-xs'
           : 'border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] hover:bg-[var(--accent)]/5 hover:border-[var(--border-strong)]'
@@ -216,7 +216,7 @@ export function DesktopPetSettings() {
     const installed = isInstalled(entry.id);
     const installing = installingId === entry.id;
     return (
-      <div className="relative flex flex-col rounded-xl border border-[var(--border)] bg-[var(--background)] overflow-hidden hover:border-[var(--border-strong)] transition-all">
+      <div className="relative flex flex-col rounded-xl border border-[var(--border)] bg-[var(--background)] overflow-hidden hover:border-[var(--border-strong)] transition-colors">
         <div className="flex items-center gap-3 p-3 pb-2">
           <img
             src={entry.thumbnail}
@@ -238,11 +238,11 @@ export function DesktopPetSettings() {
           <button
             onClick={() => handleInstall(entry.id, entry.displayName)}
             disabled={installing || installed}
-            className={`w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg transition-all ${
+              className={`w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg ${
               installed
                 ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 cursor-default'
                 : 'bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed'
-            }`}
+              }`}
           >
             {installing ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Installing…</>
             : installed ? <><CheckCircle2 className="w-3.5 h-3.5" /> Installed</>
@@ -251,7 +251,7 @@ export function DesktopPetSettings() {
           {installed && (
             <button
               onClick={() => handleSelectPet(entry.id)}
-              className={`w-full mt-1.5 flex items-center justify-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold rounded-lg transition-all ${
+              className={`w-full mt-1.5 flex items-center justify-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold rounded-lg ${
                 petId === entry.id
                   ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
                   : 'border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--foreground)] hover:bg-[var(--accent)]/5'
@@ -318,7 +318,7 @@ export function DesktopPetSettings() {
         <button
           onClick={refresh}
           disabled={connectionState === 'loading'}
-          className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] hover:bg-[var(--accent)]/5 hover:border-[var(--border-strong)] transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+          className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] hover:bg-[var(--accent)]/5 hover:border-[var(--border-strong)] disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${connectionState === 'loading' ? 'animate-spin' : ''}`} />
           Retry
@@ -338,7 +338,7 @@ export function DesktopPetSettings() {
               </div>
             </div>
             <a href="https://openpets.dev" target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-all">
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600">
               <ExternalLink className="w-3.5 h-3.5" /> Download OpenPets
             </a>
           </div>
@@ -408,7 +408,7 @@ export function DesktopPetSettings() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
               {localPets.map((lp) => (
-                <div key={lp.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all ${
+                <div key={lp.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-colors ${
                   petId === lp.id
                     ? 'border-emerald-500/20 bg-emerald-500/5'
                     : 'border-[var(--border)] bg-[var(--background)] hover:border-[var(--border-strong)]'
@@ -431,7 +431,7 @@ export function DesktopPetSettings() {
                   </div>
                   <button
                     onClick={() => handleSelectPet(lp.id)}
-                    className={`shrink-0 flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold rounded-lg transition-all ${
+                    className={`shrink-0 flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold rounded-lg ${
                       petId === lp.id
                         ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 cursor-default'
                         : 'border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--foreground)] hover:bg-[var(--accent)]/5'
@@ -473,7 +473,7 @@ export function DesktopPetSettings() {
                   className="flex-1 px-3 py-2 text-xs font-mono rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] focus:outline-hidden focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-shadow placeholder:text-[var(--text-muted)]/50"
                   disabled={installingFromUrl} />
                 <button onClick={handleInstallFromUrl} disabled={!installUrl.trim() || installingFromUrl}
-                  className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0">
+                  className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed shrink-0">
                   {installingFromUrl ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Installing</>
                   : <><Download className="w-3.5 h-3.5" /> Install</>}
                 </button>
@@ -494,7 +494,7 @@ export function DesktopPetSettings() {
                   className="flex-1 px-3 py-2 text-xs font-mono rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] focus:outline-hidden focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-shadow placeholder:text-[var(--text-muted)]/50"
                   disabled={installingFromCommand} />
                 <button onClick={handleInstallFromCommand} disabled={!customCommand.trim() || installingFromCommand}
-                  className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0">
+                  className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed shrink-0">
                   {installingFromCommand ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Running</>
                   : <><Terminal className="w-3.5 h-3.5" /> Run</>}
                 </button>
@@ -550,7 +550,7 @@ export function DesktopPetSettings() {
 
               <div className="flex items-center justify-end">
                 <button onClick={handleSendTest} disabled={sending || !status?.available}
-                  className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs">
+                  className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-xs">
                   {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <MessageCircle className="w-3.5 h-3.5" />}
                   {sending ? 'Sending…' : 'Send Test to Pet'}
                 </button>

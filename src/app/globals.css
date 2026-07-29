@@ -9,14 +9,11 @@
     --color-neutral: oklch(58% 0.008 75);
     --color-muted: oklch(48% 0.008 70);
     --color-ink: oklch(22% 0.012 60);
-    --color-accent: oklch(55% 0.19 250);
-    --color-success: oklch(50% 0.15 150);
     --color-warning: oklch(55% 0.15 80);
-    --color-error: oklch(50% 0.18 30);
     --color-rule-strong: oklch(78% 0.012 75);
     --color-ink-secondary: oklch(40% 0.008 70);
-    --color-accent-hover: oklch(45% 0.19 250);
-    --color-accent-muted: oklch(88% 0.04 250);
+    --color-success: var(--success);
+    --color-error: var(--error);
 
     /* Warm Linen / Cream Light Mode Palette (No stark harsh #ffffff) */
     --bg-base: #f4f1eb;
@@ -118,14 +115,11 @@
     --color-neutral: oklch(62% 0.008 50);
     --color-muted: oklch(72% 0.006 50);
     --color-ink: oklch(93% 0.006 70);
-    --color-accent: oklch(65% 0.19 250);
-    --color-success: oklch(50% 0.15 150);
-    --color-warning: oklch(55% 0.15 80);
-    --color-error: oklch(50% 0.18 30);
+    --color-warning: oklch(65% 0.18 80);
     --color-rule-strong: oklch(40% 0.012 50);
     --color-ink-secondary: oklch(78% 0.006 60);
-    --color-accent-hover: oklch(75% 0.19 250);
-    --color-accent-muted: oklch(25% 0.05 250);
+    --color-success: var(--success);
+    --color-error: var(--error);
 
     /* Warm Espresso & Charcoal Dark Palette (No Z-black / pitch black) */
     --bg-base: #171513;
@@ -168,6 +162,12 @@
     --accent-orange-muted: #45220a;
     --accent-indigo: #818cf8;
     --accent-indigo-muted: #1e1b4b;
+
+    /* Habit category colors (dark mode — brighter for contrast) */
+    --habit-health: #34d399;
+    --habit-learning: #a78bfa;
+    --habit-work: #fbbf24;
+    --habit-personal: #fb7185;
 
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.25);
@@ -235,6 +235,38 @@
   }
 }
 
+/* Theme-aware icon background utilities */
+.icon-bg-accent {
+  background-color: color-mix(in oklab, var(--accent) 10%, transparent);
+  color: var(--accent);
+}
+.icon-bg-violet {
+  background-color: color-mix(in oklab, var(--accent-violet) 10%, transparent);
+  color: var(--accent-violet);
+}
+.icon-bg-amber {
+  background-color: color-mix(in oklab, var(--accent-amber) 10%, transparent);
+  color: var(--accent-amber);
+}
+.icon-bg-emerald {
+  background-color: color-mix(in oklab, var(--accent-emerald) 10%, transparent);
+  color: var(--accent-emerald);
+}
+.icon-bg-sky {
+  background-color: color-mix(in oklab, var(--accent-blue) 10%, transparent);
+  color: var(--accent-blue);
+}
+.icon-bg-rose {
+  background-color: color-mix(in oklab, var(--accent-rose) 10%, transparent);
+  color: var(--accent-rose);
+}
+
+/* Legend dot utilities */
+.dot-violet { background-color: var(--accent-violet); }
+.dot-amber { background-color: var(--accent-amber); }
+.dot-rose { background-color: var(--accent-rose); }
+.dot-emerald { background-color: var(--accent-emerald); }
+
 /* Tooltip appearance utility */
 [data-tooltip] {
   position: relative;
@@ -284,10 +316,229 @@
     transform: none !important;
   }
 
+  .card-hover-lift:hover,
+  .card-hover-lift:active,
+  .card-hover-glow:hover,
+  .card-hover-glow:active,
+  .card-hover-border:hover,
+  .card-hover-border:active {
+    transform: none !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+
   [data-tooltip]::after {
     transition-delay: 0ms !important;
     transition-duration: 0ms !important;
   }
+
+  .transition-btn,
+  .transition-lift,
+  .transition-colors,
+  .transition-border,
+  .transition-shadow,
+  .transition-ring,
+  .transition-opacity,
+  .transition-transform,
+  .transition-width,
+  .transition-height {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==============================
+   Transition Utility Classes
+   ============================== */
+.transition-btn {
+  transition: transform var(--dur-micro) var(--ease-out),
+              background-color var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out),
+              box-shadow var(--dur-short) var(--ease-out),
+              color var(--dur-short) var(--ease-out);
+}
+
+.transition-lift {
+  transition: transform var(--dur-micro) var(--ease-out),
+              box-shadow var(--dur-short) var(--ease-out);
+}
+
+.transition-colors {
+  transition: background-color var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out),
+              color var(--dur-short) var(--ease-out);
+}
+
+.transition-border {
+  transition: border-color var(--dur-short) var(--ease-out);
+}
+
+.transition-shadow {
+  transition: box-shadow var(--dur-short) var(--ease-out);
+}
+
+.transition-ring {
+  transition: border-color var(--dur-short) var(--ease-out),
+              box-shadow var(--dur-short) var(--ease-out);
+}
+
+.transition-opacity {
+  transition: opacity var(--dur-short) var(--ease-out);
+}
+
+.transition-transform {
+  transition: transform var(--dur-micro) var(--ease-out);
+}
+
+.transition-width {
+  transition: width var(--dur-long) var(--ease-out);
+}
+
+.transition-height {
+  transition: height var(--dur-short) var(--ease-out);
+}
+
+/* ==============================
+   Bento Grid System
+   ============================== */
+.bento-grid {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+/* 12-column variant */
+.bento-grid-cols-12 {
+  grid-template-columns: repeat(12, 1fr);
+}
+
+/* 8-column variant */
+.bento-grid-cols-8 {
+  grid-template-columns: repeat(8, 1fr);
+}
+
+/* 4-column variant */
+.bento-grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Mobile collapse: single column on small screens */
+@media (max-width: 768px) {
+  .bento-grid-cols-12,
+  .bento-grid-cols-8,
+  .bento-grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Span utilities — 12-col system */
+.bento-col-span-1  { grid-column: span 1 / span 1; }
+.bento-col-span-2  { grid-column: span 2 / span 2; }
+.bento-col-span-3  { grid-column: span 3 / span 3; }
+.bento-col-span-4  { grid-column: span 4 / span 4; }
+.bento-col-span-5  { grid-column: span 5 / span 5; }
+.bento-col-span-6  { grid-column: span 6 / span 6; }
+.bento-col-span-7  { grid-column: span 7 / span 7; }
+.bento-col-span-8  { grid-column: span 8 / span 8; }
+.bento-col-span-9  { grid-column: span 9 / span 9; }
+.bento-col-span-10 { grid-column: span 10 / span 10; }
+.bento-col-span-11 { grid-column: span 11 / span 11; }
+.bento-col-span-12 { grid-column: 1 / -1; }
+
+/* Row span utilities */
+.bento-row-span-1 { grid-row: span 1 / span 1; }
+.bento-row-span-2 { grid-row: span 2 / span 2; }
+.bento-row-span-3 { grid-row: span 3 / span 3; }
+
+/* Reset spans on mobile */
+@media (max-width: 768px) {
+  [class*="bento-col-span-"] {
+    grid-column: 1 / -1;
+  }
+  [class*="bento-row-span-"] {
+    grid-row: span 1 / span 1;
+  }
+}
+
+/* ==============================
+   Card Hover / Lift Micro-interactions
+   ============================== */
+.card-hover-lift {
+  transition: transform var(--dur-micro) var(--ease-out),
+              box-shadow var(--dur-short) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .card-hover-lift:active {
+    transform: translateY(0px) scale(0.98);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.card-hover-glow {
+  transition: box-shadow var(--dur-short) var(--ease-out),
+              transform var(--dur-micro) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-hover-glow:hover {
+    box-shadow: var(--shadow-md), 0 0 0 1px var(--accent-muted);
+    transform: translateY(-1px);
+  }
+
+  .card-hover-glow:active {
+    transform: scale(0.98);
+  }
+}
+
+.card-hover-border {
+  transition: border-color var(--dur-short) var(--ease-out),
+              transform var(--dur-micro) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-hover-border:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+  }
+
+  .card-hover-border:active {
+    transform: scale(0.98);
+  }
+}
+
+/* ==============================
+   BaseCard Elevation Tiers
+   ============================== */
+.card-flat {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.card-raised {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-elevated {
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+/* Dark mode shadow tuning */
+.dark .card-raised {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+.dark .card-elevated {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.25);
 }
 
 /* Custom scrollbars */
@@ -307,5 +558,15 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* Shimmer sweep for AchievementBadge unlock */
+@keyframes shimmer-sweep {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 

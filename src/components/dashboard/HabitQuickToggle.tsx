@@ -72,7 +72,7 @@ export function HabitQuickToggle() {
                 }}
                 onClick={() => toggleHabit(habit.id, todayStr)}
                 aria-label={`Toggle ${habit.name} for ${todayStr}`}
-                className={`flex items-center justify-between rounded-xl border p-3.5 text-left transition-all cursor-pointer select-none ${
+                className={`flex items-center justify-between rounded-xl border p-3.5 text-left transition-colors cursor-pointer select-none ${
                   isDone
                     ? 'border-[var(--accent)]/40 bg-[var(--accent-muted)]/30'
                     : 'border-[var(--border)] bg-[var(--bg-base)] hover:border-[var(--border-strong)]'
@@ -104,7 +104,7 @@ export function HabitQuickToggle() {
                         openExternalUrl(habit.url)
                       }}
                       aria-label={`Open link for ${habit.name} in default browser`}
-                      className="p-1 rounded-md text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition-all"
+                      className="p-1 rounded-md text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white"
                       title={`Open ${habit.url} in browser`}
                     >
                       <ExternalLink className="h-4 w-4" />
@@ -112,7 +112,7 @@ export function HabitQuickToggle() {
                   )}
 
                   <div
-                    className={`flex h-6 w-6 items-center justify-center rounded-lg border transition-all ${
+                    className={`flex h-6 w-6 items-center justify-center rounded-lg border transition-colors ${
                       isDone
                         ? 'border-[var(--accent)] bg-[var(--accent)] text-white'
                         : 'border-[var(--border-strong)] bg-transparent text-transparent'

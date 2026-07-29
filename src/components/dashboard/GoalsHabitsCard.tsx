@@ -5,6 +5,7 @@ import { Target, Check, ChevronRight, ExternalLink } from 'lucide-react'
 import { useHabitStore } from '@/stores/habitStore'
 import { openExternalUrl } from '@/lib/utils/url'
 import Link from 'next/link'
+import { BaseCard } from '@/components/ui/BaseCard'
 
 export function GoalsHabitsCard() {
   const shouldReduceMotion = useReducedMotion()
@@ -15,11 +16,15 @@ export function GoalsHabitsCard() {
   const todayStr = new Date().toISOString().split('T')[0]
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 sm:p-6 shadow-xs h-full justify-between">
+    <BaseCard
+      elevation="raised"
+      className="h-full justify-between card-hover-lift"
+      innerClassName="flex flex-col gap-4 p-5 sm:p-6 h-full justify-between"
+    >
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+          <div className="p-2 rounded-xl icon-bg-emerald">
             <Target className="w-5 h-5" />
           </div>
           <div>
@@ -77,7 +82,7 @@ export function GoalsHabitsCard() {
                   <div className="flex items-center gap-2.5 min-w-0">
                     <span
                       className="w-3 h-3 rounded-full shrink-0 shadow-xs"
-                      style={{ backgroundColor: habit.color || '#059669' }}
+                      style={{ backgroundColor: habit.color || 'var(--accent-emerald)' }}
                     />
                     <span className="text-sm font-semibold text-[var(--text-primary)] truncate">
                       {habit.name}
@@ -98,10 +103,10 @@ export function GoalsHabitsCard() {
                     <button
                       onClick={() => toggleHabit(habit.id, todayStr)}
                       aria-label={`Toggle ${habit.name}`}
-                      className={`flex h-6 w-6 items-center justify-center rounded-lg border transition-all ${
+                      className={`flex h-6 w-6 items-center justify-center rounded-lg border transition-colors ${
                         isDone
-                          ? 'border-emerald-500 bg-emerald-500 text-white'
-                          : 'border-[var(--border-default)] text-transparent hover:border-emerald-500'
+                          ? 'border-[var(--accent-emerald)] bg-[var(--accent-emerald)] text-white'
+                          : 'border-[var(--border-default)] text-transparent hover:border-[var(--accent-emerald)]'
                       }`}
                     >
                       <Check className="h-3.5 w-3.5 stroke-[3]" />
@@ -114,7 +119,7 @@ export function GoalsHabitsCard() {
                   <div className="flex-1 h-2 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
                     <motion.div
                       className="h-full rounded-full"
-                      style={{ backgroundColor: habit.color || '#059669' }}
+                      style={{ backgroundColor: habit.color || 'var(--accent-emerald)' }}
                       initial={{ width: 0 }}
                       animate={{ width: `${pct}%` }}
                       transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
@@ -134,6 +139,6 @@ export function GoalsHabitsCard() {
           })
         )}
       </div>
-    </div>
+    </BaseCard>
   )
 }

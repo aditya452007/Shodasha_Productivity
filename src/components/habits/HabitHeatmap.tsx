@@ -4,6 +4,7 @@ import { useMemo, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Activity, Info } from 'lucide-react'
 import { useHabitStore } from '@/stores/habitStore'
+import { BaseCard } from '@/components/ui/BaseCard'
 
 export function HabitHeatmap() {
   const habits = useHabitStore((s) => s.habits)
@@ -95,7 +96,7 @@ export function HabitHeatmap() {
   }
 
   return (
-    <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-xs">
+    <BaseCard elevation="raised" className="card-hover-lift" innerClassName="p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-[var(--border-subtle)] pb-3">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl" style={{ backgroundColor: 'var(--accent-teal-muted)', color: 'var(--accent-teal)' }}>
@@ -169,6 +170,6 @@ export function HabitHeatmap() {
           Color intensity reflects habit completion volume — teal to indigo. Today is highlighted with a blue ring.
         </span>
       </div>
-    </div>
+    </BaseCard>
   )
 }

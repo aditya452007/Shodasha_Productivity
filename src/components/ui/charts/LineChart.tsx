@@ -148,7 +148,7 @@ export function LineChart({
           <motion.path
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
+            transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
             d={pathD2}
             fill="none"
             stroke={series2Color}
@@ -160,7 +160,7 @@ export function LineChart({
           <motion.path
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 1, ease: 'easeOut' }}
+            transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
             d={pathD1}
             fill="none"
             stroke={series1Color}

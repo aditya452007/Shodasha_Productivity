@@ -55,7 +55,7 @@ export function RingChart({
                 key={i}
                 initial={{ strokeDasharray: `0 ${circumference}` }}
                 animate={{ strokeDasharray }}
-                transition={{ duration: 0.8, delay: i * 0.15, ease: 'easeOut' }}
+                transition={{ duration: 0.8, delay: i * 0.15, ease: [0.23, 1, 0.32, 1] }}
                 cx={size / 2}
                 cy={size / 2}
                 r={radius}

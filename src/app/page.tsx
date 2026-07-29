@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { HeaderGreetingCard } from '@/components/dashboard/HeaderGreetingCard'
 import { TopKPIGrid } from '@/components/dashboard/TopKPIGrid'
 import { ScheduleActivityCard } from '@/components/dashboard/ScheduleActivityCard'
@@ -9,8 +10,19 @@ import { StreakHeroCard } from '@/components/dashboard/StreakHeroCard'
 import { PerformanceOverviewChart } from '@/components/dashboard/PerformanceOverviewChart'
 import { QuickTaskInput } from '@/components/dashboard/QuickTaskInput'
 import { InsightCard } from '@/components/dashboard/InsightCard'
+import { XPProgressBar } from '@/components/gamification/XPProgressBar'
+import { LevelUpCelebration } from '@/components/gamification/LevelUpCelebration'
+import { DailyXPGoal } from '@/components/gamification/DailyXPGoal'
+import { SkillOctagon } from '@/components/gamification/SkillOctagon'
+import { useGamificationStore } from '@/stores/gamificationStore'
 
 export default function DashboardPage() {
+  const initializeGamification = useGamificationStore((s) => s.initializeGamification)
+
+  useEffect(() => {
+    initializeGamification()
+  }, [initializeGamification])
+
   return (
     <div className="flex flex-col gap-6 w-full pb-12">
       {/* 1. Top Greeting Header Bar */}
@@ -19,12 +31,27 @@ export default function DashboardPage() {
       {/* 2. Top Metric Cards Row (4 Columns Grid) */}
       <TopKPIGrid />
 
+      {/* Gamification Row — XP Bar + Daily Goal + Compact SkillOctagon */}
+      <div className="bento-grid bento-grid-cols-12 items-stretch">
+        <div className="bento-col-span-5">
+          <XPProgressBar />
+        </div>
+        <div className="bento-col-span-3">
+          <DailyXPGoal />
+        </div>
+        <div className="bento-col-span-4">
+          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 shadow-xs flex items-center justify-center h-full">
+            <SkillOctagon size={180} className="mx-auto" />
+          </div>
+        </div>
+      </div>
+
       {/* 3. Middle Tier — 60/40 Split Grid (Today's Schedule + Time Distribution Donut Ring) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        <div className="lg:col-span-7">
+      <div className="bento-grid bento-grid-cols-12 items-stretch">
+        <div className="bento-col-span-7">
           <ScheduleActivityCard />
         </div>
-        <div className="lg:col-span-5">
+        <div className="bento-col-span-5">
           <LearningProgressCard />
         </div>
       </div>
@@ -35,20 +62,23 @@ export default function DashboardPage() {
       </div>
 
       {/* 5. Bottom Tier — 3-Column Split Grid (Daily Goals + Current Streak Hero + Performance Overview) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 items-stretch">
-        <div className="lg:col-span-4">
+      <div className="bento-grid bento-grid-cols-12 items-stretch">
+        <div className="bento-col-span-4">
           <GoalsHabitsCard />
         </div>
-        <div className="lg:col-span-3">
+        <div className="bento-col-span-3">
           <StreakHeroCard />
         </div>
-        <div className="md:col-span-2 lg:col-span-5">
+        <div className="bento-col-span-5">
           <PerformanceOverviewChart />
         </div>
       </div>
 
       {/* 6. Insight Reflection Card */}
       <InsightCard />
+
+      {/* Level-up celebration overlay */}
+      <LevelUpCelebration />
     </div>
   )
 }

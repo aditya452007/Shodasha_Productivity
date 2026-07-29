@@ -1,48 +1,17 @@
 'use client'
 
-import { useMemo } from 'react'
-import { motion } from 'framer-motion'
-import {
-  Award,
-  Lock,
-  CheckCircle2,
-  Sparkles,
-  ShieldCheck,
-  Sprout,
-  Zap,
-  Brain,
-  Star,
-  Gem,
-  Flame,
-  Trophy,
-} from 'lucide-react'
+import { useMemo, useEffect } from 'react'
+import { Award, Sparkles, Trophy, Plus } from 'lucide-react'
 import { useHabitStore } from '@/stores/habitStore'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
-import { computeAchievementsProgress, Achievement } from '@/lib/achievements'
-
-function renderAchievementIcon(iconName: Achievement['iconName']) {
-  switch (iconName) {
-    case 'sprout':
-      return <Sprout className="w-5 h-5" style={{ color: 'var(--accent-emerald)' }} />
-    case 'zap':
-      return <Zap className="w-5 h-5" style={{ color: 'var(--accent-amber)' }} />
-    case 'brain':
-      return <Brain className="w-5 h-5" style={{ color: 'var(--accent-violet)' }} />
-    case 'star':
-      return <Star className="w-5 h-5" style={{ color: 'var(--accent-amber)' }} />
-    case 'gem':
-      return <Gem className="w-5 h-5" style={{ color: 'var(--accent-teal)' }} />
-    case 'flame':
-      return <Flame className="w-5 h-5" style={{ color: 'var(--accent-rose)' }} />
-    case 'trophy':
-      return <Trophy className="w-5 h-5" style={{ color: 'var(--accent-orange)' }} />
-    default:
-      return <Award className="w-5 h-5" style={{ color: 'var(--accent-indigo)' }} />
-  }
-}
-
+import { useTaskStore } from '@/stores/taskStore'
+import { useGamificationStore } from '@/stores/gamificationStore'
+import { computeAchievementsProgress } from '@/lib/achievements'
+import { AchievementBadgeGrid } from '@/components/gamification/AchievementBadge'
+import { BaseCard } from '@/components/ui/BaseCard'
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { ErrorBanner } from '@/components/ui/ErrorBanner'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 export function HabitAchievements() {
   const habits = useHabitStore((s) => s.habits)
@@ -50,19 +19,19 @@ export function HabitAchievements() {
   const isLoading = useHabitStore((s) => s.isLoading)
   const error = useHabitStore((s) => s.error)
   const getTotalFocusSeconds = useTimeEntryStore((s) => s.getTotalFocusSecondsToday)
+  const tasks = useTaskStore((s) => s.tasks)
+  const unlockedAchievements = useGamificationStore((s) => s.unlockedAchievements)
 
   const totalFocusHours = Math.round((getTotalFocusSeconds() / 3600) * 10) / 10
+  const totalTasksDone = tasks.filter((t) => t.status === 'done').length
 
-  // Compute total unique check-in days and active streak
   const { currentStreak, totalCheckInDays } = useMemo(() => {
     const today = new Date()
     const todayStr = today.toISOString().split('T')[0]
 
-    // Find earliest habit creation date for streak boundary
     const creationDates = habits.map((h) => h.createdAt.split('T')[0]).sort()
     const globalStartBoundary = creationDates.length > 0 ? creationDates[0] : todayStr
 
-    // Unique dates where at least 1 habit was completed
     const uniqueDates = new Set<string>()
     Object.entries(records).forEach(([key, done]) => {
       if (done) {
@@ -71,7 +40,6 @@ export function HabitAchievements() {
       }
     })
 
-    // Active streak
     let streak = 0
     let checkDate = new Date(today)
     const anyDoneToday = habits.some((h) => !!records[`${h.id}_${todayStr}`])
@@ -94,17 +62,34 @@ export function HabitAchievements() {
       }
     }
 
-    return {
-      currentStreak: streak,
-      totalCheckInDays: uniqueDates.size,
-    }
+    return { currentStreak: streak, totalCheckInDays: uniqueDates.size }
   }, [habits, records])
 
   const achievementProgresses = useMemo(() => {
-    return computeAchievementsProgress(currentStreak, totalCheckInDays, totalFocusHours)
-  }, [currentStreak, totalCheckInDays, totalFocusHours])
+    return computeAchievementsProgress(currentStreak, totalCheckInDays, totalFocusHours, totalTasksDone, habits.length)
+  }, [currentStreak, totalCheckInDays, totalFocusHours, totalTasksDone, habits.length])
 
   const unlockedCount = achievementProgresses.filter((a) => a.unlocked).length
+
+  const grouped = useMemo(() => {
+    const groups: Record<string, typeof achievementProgresses> = {}
+    achievementProgresses.forEach((item) => {
+      const cat = item.achievement.category
+      if (!groups[cat]) groups[cat] = []
+      groups[cat].push(item)
+    })
+    return groups
+  }, [achievementProgresses])
+
+  // Check achievements for unlock
+  const checkUnlocks = useGamificationStore((s) => s.checkAndAwardAchievement)
+  useEffect(() => {
+    achievementProgresses.forEach(({ achievement, unlocked }) => {
+      if (unlocked && !unlockedAchievements.includes(achievement.id)) {
+        checkUnlocks(achievement.id)
+      }
+    })
+  }, [achievementProgresses, unlockedAchievements, checkUnlocks])
 
   if (isLoading) {
     return (
@@ -124,9 +109,22 @@ export function HabitAchievements() {
     return <ErrorBanner title="Failed to load achievements" message={error} />
   }
 
+  if (achievementProgresses.length === 0) {
+    return (
+      <BaseCard elevation="raised" innerClassName="p-6">
+        <EmptyState
+          icon={Trophy}
+          title="No achievements yet"
+          description="Start tracking habits and focus time to earn your first badge."
+          actionLabel="Create a habit"
+          onAction={() => document.querySelector<HTMLButtonElement>('[aria-label="Add new habit"]')?.click()}
+        />
+      </BaseCard>
+    )
+  }
+
   return (
-    <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-xs">
-      {/* Header */}
+    <BaseCard elevation="raised" className="card-hover-lift" innerClassName="p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 border-b border-[var(--border-subtle)] pb-4">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl" style={{ backgroundColor: 'var(--accent-amber-muted)', color: 'var(--accent-amber)' }}>
@@ -134,10 +132,10 @@ export function HabitAchievements() {
           </div>
           <div>
             <h3 className="text-base font-bold font-display text-[var(--text-primary)]">
-              Consistency Achievements & Milestones
+              Achievements & Milestones
             </h3>
             <p className="text-xs text-[var(--text-secondary)]">
-              Unlock badges by maintaining continuous streaks and total check-in milestones
+              Unlock badges by maintaining streaks, completing tasks, and reaching milestones
             </p>
           </div>
         </div>
@@ -150,89 +148,7 @@ export function HabitAchievements() {
         </div>
       </div>
 
-      {/* Achievements Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {achievementProgresses.map(({ achievement, currentProgress, unlocked, progressPercentage }) => {
-          return (
-            <motion.div
-              key={achievement.id}
-              whileHover={{ y: -3 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-              className={`relative rounded-xl border p-4 transition-all overflow-hidden group ${
-                unlocked
-                  ? 'shadow-xs'
-                  : 'border-[var(--border-subtle)] bg-[var(--bg-primary)] opacity-85'
-              }`}
-              style={unlocked ? { borderColor: 'color-mix(in srgb, var(--accent-amber) 30%, transparent)', background: `linear-gradient(to bottom, color-mix(in srgb, var(--accent-amber) 5%, transparent), transparent)` } : undefined}
-            >
-              {/* Category Ribbon / Badge */}
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <div className="p-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] shadow-xs">
-                  {renderAchievementIcon(achievement.iconName)}
-                </div>
-                <span
-                  className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${
-                    unlocked
-                      ? 'border'
-                      : 'bg-[var(--bg-tertiary)] text-[var(--text-tertiary)] border-[var(--border-subtle)]'
-                  }`}
-                  style={unlocked ? { backgroundColor: 'var(--accent-amber-muted)', color: 'var(--accent-amber)', borderColor: 'color-mix(in srgb, var(--accent-amber) 30%, transparent)' } : undefined}
-                >
-                  {achievement.category}
-                </span>
-              </div>
-
-              {/* Title & Description */}
-              <h4 className="text-sm font-bold font-display text-[var(--text-primary)] mb-1 flex items-center gap-1.5">
-                {achievement.title}
-                {unlocked ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 inline shrink-0" style={{ color: 'var(--accent-emerald)' }} />
-                ) : (
-                  <Lock className="w-3 h-3 text-[var(--text-tertiary)] inline shrink-0" />
-                )}
-              </h4>
-              <p className="text-xs text-[var(--text-secondary)] line-clamp-2 mb-3 min-h-[32px]">
-                {achievement.description}
-              </p>
-
-              {/* Progress Bar & Counter */}
-              <div>
-                <div className="flex justify-between text-[11px] font-semibold text-[var(--text-tertiary)] mb-1">
-                  <span>
-                    {currentProgress} / {achievement.targetCount} {achievement.type === 'streak' ? 'days streak' : 'days'}
-                  </span>
-                  <span>{progressPercentage}%</span>
-                </div>
-                <div className="h-1.5 w-full rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{ width: `${progressPercentage}%`, backgroundColor: unlocked ? 'var(--accent-amber)' : 'var(--accent-indigo)' }}
-                  />
-                </div>
-              </div>
-
-              {/* Dynamic Hover Tooltip Card */}
-              <div className="absolute inset-0 bg-gray-950/95 p-4 text-white flex flex-col justify-between opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none rounded-xl">
-                <div>
-                  <div className="flex items-center gap-1.5 text-xs font-bold font-display mb-1" style={{ color: 'var(--accent-amber)' }}>
-                    <ShieldCheck className="w-4 h-4" /> {achievement.title}
-                  </div>
-                  <p className="text-[11px] text-gray-300 leading-relaxed">
-                    {achievement.description}
-                  </p>
-                </div>
-                <div className="text-[10px] font-semibold border-t border-gray-800 pt-2" style={{ color: 'var(--accent-emerald)' }}>
-                  {unlocked
-                    ? 'Achievement Unlocked'
-                    : `Requires ${achievement.targetCount - currentProgress} more ${
-                        achievement.type === 'streak' ? 'consecutive streak days' : 'total check-in days'
-                      }.`}
-                </div>
-              </div>
-            </motion.div>
-          )
-        })}
-      </div>
-    </div>
+      <AchievementBadgeGrid groupedAchievements={grouped as any} />
+    </BaseCard>
   )
 }

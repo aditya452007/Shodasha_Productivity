@@ -133,7 +133,7 @@ export function TimelineStream() {
                 />
 
                 {/* Doppelrand Double-Bezel Stream Card */}
-                <div className="p-1.5 rounded-[2rem] bg-stone-900/5 dark:bg-white/5 ring-1 ring-stone-900/5 dark:ring-white/10 group-hover:ring-stone-900/15 dark:group-hover:ring-white/20 transition-all">
+                <div className="p-1.5 rounded-[2rem] bg-stone-900/5 dark:bg-white/5 ring-1 ring-stone-900/5 dark:ring-white/10 group-hover:ring-stone-900/15 dark:group-hover:ring-white/20 transition-shadow">
                   <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[calc(2rem-0.375rem)] p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] flex flex-col md:flex-row md:items-center justify-between gap-4 group-hover:scale-[1.005] active:scale-[0.995] transition-transform">
                     <div className="flex items-start gap-4 flex-1 min-w-0">
                       {/* Nested App Icon Core */}

@@ -3,10 +3,12 @@
 import { useState, useMemo } from 'react'
 import { KanbanBoard } from '@/components/board/KanbanBoard'
 import { useTaskStore } from '@/stores/taskStore'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Calendar, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { BaseCard } from '@/components/ui/BaseCard'
 
 export default function BoardPage() {
+  const shouldReduceMotion = useReducedMotion()
   const tasks = useTaskStore((state) => state.tasks)
   const [viewHistory, setViewHistory] = useState(false)
   const [historyDate, setHistoryDate] = useState(() => new Date())
@@ -49,7 +51,7 @@ export default function BoardPage() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
       className="space-y-6 max-w-7xl mx-auto pb-16"
@@ -57,7 +59,7 @@ export default function BoardPage() {
       <KanbanBoard />
 
       {/* Task History Section */}
-      <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] shadow-xs overflow-hidden">
+      <BaseCard elevation="raised" className="card-hover-lift overflow-hidden" innerClassName="p-0">
         <button
           onClick={() => setViewHistory(!viewHistory)}
           className="w-full flex items-center justify-between p-4 hover:bg-[var(--bg-tertiary)]/20 transition-colors"
@@ -147,7 +149,7 @@ export default function BoardPage() {
             </div>
           </div>
         )}
-      </div>
+      </BaseCard>
     </motion.div>
   )
 }

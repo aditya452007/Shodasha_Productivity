@@ -19,6 +19,7 @@ import { useTaskStore } from '@/stores/taskStore'
 import { openExternalUrl } from '@/lib/utils/url'
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { ErrorBanner } from '@/components/ui/ErrorBanner'
+import { BaseCard } from '@/components/ui/BaseCard'
 import { useReducedMotion } from 'framer-motion'
 
 interface HabitCalendarProps {
@@ -112,7 +113,7 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
   }
 
   return (
-    <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] shadow-xs overflow-hidden">
+    <BaseCard elevation="raised" className="card-hover-lift overflow-hidden" innerClassName="p-0">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-[var(--border-subtle)]">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg" style={{ backgroundColor: 'var(--accent-rose-muted)', color: 'var(--accent-rose)' }}>
@@ -222,7 +223,6 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                     return (
                       <motion.tr
                         key={habit.id}
-                        layout
                         initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
@@ -322,7 +322,7 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                                     }
                                     toggleHabit(habit.id, day.dateStr)
                                   }}
-                                  className={`w-6 h-6 mx-auto rounded-md flex items-center justify-center transition-all focus:outline-hidden ${
+                                  className={`w-6 h-6 mx-auto rounded-md flex items-center justify-center transition-colors focus:outline-hidden ${
                                     !editable
                                       ? 'opacity-30 cursor-not-allowed border border-[var(--border)] bg-[var(--bg-tertiary)]/40'
                                       : isDone
@@ -343,8 +343,8 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                                 >
                                   {isDone && editable && (
                                     <motion.div
-                                      initial={{ scale: 0 }}
-                                      animate={{ scale: 1 }}
+                                      initial={{ opacity: 0, scale: 0.9 }}
+                                      animate={{ opacity: 1, scale: 1 }}
                                       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                                     >
                                       <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
@@ -370,6 +370,6 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
           </table>
         </div>
       </div>
-    </div>
+    </BaseCard>
   )
 }

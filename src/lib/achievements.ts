@@ -3,9 +3,10 @@ export interface Achievement {
   title: string
   description: string
   iconName: 'sprout' | 'zap' | 'brain' | 'star' | 'gem' | 'flame' | 'trophy'
-  targetCount: number // days streak, total check-in days, or focus hours needed
-  type: 'streak' | 'total_checkins' | 'focus_hours'
-  category: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'legendary'
+  targetCount: number
+  type: 'streak' | 'total_checkins' | 'focus_hours' | 'tasks_done' | 'habits_created'
+  category: 'streaks' | 'focus' | 'tasks' | 'habits' | 'milestones'
+  tier: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'master' | 'legendary'
 }
 
 export interface UserAchievementProgress {
@@ -17,6 +18,7 @@ export interface UserAchievementProgress {
 }
 
 export const ACHIEVEMENTS_LIST: Achievement[] = [
+  // Streaks category (amber)
   {
     id: 'streak-7',
     title: 'Seedling Routine',
@@ -24,16 +26,8 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     iconName: 'sprout',
     targetCount: 7,
     type: 'streak',
-    category: 'bronze',
-  },
-  {
-    id: 'focus-30',
-    title: '30-Hour Focus Week',
-    description: 'Log 30 hours of total desktop focus time.',
-    iconName: 'zap',
-    targetCount: 30,
-    type: 'focus_hours',
-    category: 'silver',
+    category: 'streaks',
+    tier: 'bronze',
   },
   {
     id: 'streak-15',
@@ -42,7 +36,8 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     iconName: 'zap',
     targetCount: 15,
     type: 'streak',
-    category: 'silver',
+    category: 'streaks',
+    tier: 'silver',
   },
   {
     id: 'streak-21',
@@ -51,16 +46,8 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     iconName: 'brain',
     targetCount: 21,
     type: 'streak',
-    category: 'gold',
-  },
-  {
-    id: 'focus-100',
-    title: '100 Deep Work Hours',
-    description: 'Cross 100 hours of active focus tracking.',
-    iconName: 'star',
-    targetCount: 100,
-    type: 'focus_hours',
-    category: 'gold',
+    category: 'streaks',
+    tier: 'gold',
   },
   {
     id: 'streak-30',
@@ -69,8 +56,107 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     iconName: 'star',
     targetCount: 30,
     type: 'streak',
-    category: 'gold',
+    category: 'streaks',
+    tier: 'gold',
   },
+
+  // Focus category (blue)
+  {
+    id: 'focus-30',
+    title: '30-Hour Focus Week',
+    description: 'Log 30 hours of total desktop focus time.',
+    iconName: 'zap',
+    targetCount: 30,
+    type: 'focus_hours',
+    category: 'focus',
+    tier: 'silver',
+  },
+  {
+    id: 'focus-100',
+    title: '100 Deep Work Hours',
+    description: 'Cross 100 hours of active focus tracking.',
+    iconName: 'star',
+    targetCount: 100,
+    type: 'focus_hours',
+    category: 'focus',
+    tier: 'gold',
+  },
+  {
+    id: 'focus-500',
+    title: 'Deep Work Adept',
+    description: 'Log 500 focus hours.',
+    iconName: 'brain',
+    targetCount: 500,
+    type: 'focus_hours',
+    category: 'focus',
+    tier: 'platinum',
+  },
+  {
+    id: 'focus-1000',
+    title: 'Focus Grandmaster',
+    description: 'Log 1000 focus hours.',
+    iconName: 'gem',
+    targetCount: 1000,
+    type: 'focus_hours',
+    category: 'focus',
+    tier: 'master',
+  },
+
+  // Tasks category (green)
+  {
+    id: 'tasks-50',
+    title: 'Task Terminator',
+    description: 'Complete 50 tasks.',
+    iconName: 'zap',
+    targetCount: 50,
+    type: 'tasks_done',
+    category: 'tasks',
+    tier: 'silver',
+  },
+  {
+    id: 'tasks-200',
+    title: 'Execution Engine',
+    description: 'Complete 200 tasks.',
+    iconName: 'flame',
+    targetCount: 200,
+    type: 'tasks_done',
+    category: 'tasks',
+    tier: 'gold',
+  },
+  {
+    id: 'tasks-1000',
+    title: 'Centurion of Action',
+    description: 'Complete 1000 tasks.',
+    iconName: 'trophy',
+    targetCount: 1000,
+    type: 'tasks_done',
+    category: 'tasks',
+    tier: 'legendary',
+  },
+
+  // Habits category (violet)
+  {
+    id: 'habits-5',
+    title: 'Habit Collector',
+    description: 'Create 5 active habits.',
+    iconName: 'sprout',
+    targetCount: 5,
+    type: 'habits_created',
+    category: 'habits',
+    tier: 'bronze',
+  },
+  {
+    id: 'habits-15',
+    title: 'Ritual Architect',
+    description: 'Create 15 active habits.',
+    iconName: 'star',
+    targetCount: 15,
+    type: 'habits_created',
+    category: 'habits',
+    tier: 'gold',
+  },
+
+  // Milestones category (teal)
   {
     id: 'total-90',
     title: 'Quarterly Sentinel',
@@ -78,7 +164,8 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     iconName: 'gem',
     targetCount: 90,
     type: 'total_checkins',
-    category: 'platinum',
+    category: 'milestones',
+    tier: 'platinum',
   },
   {
     id: 'total-180',
@@ -87,7 +174,8 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     iconName: 'flame',
     targetCount: 180,
     type: 'total_checkins',
-    category: 'diamond',
+    category: 'milestones',
+    tier: 'diamond',
   },
   {
     id: 'total-365',
@@ -96,26 +184,28 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     iconName: 'trophy',
     targetCount: 365,
     type: 'total_checkins',
-    category: 'legendary',
+    category: 'milestones',
+    tier: 'legendary',
   },
 ]
 
 export function computeAchievementsProgress(
   streakDays: number,
   totalCheckInDays: number,
-  totalFocusHours: number = 0
+  totalFocusHours: number = 0,
+  totalTasksDone: number = 0,
+  totalHabitsCreated: number = 0
 ): UserAchievementProgress[] {
   return ACHIEVEMENTS_LIST.map((achievement) => {
     let currentProgress = 0
     if (achievement.type === 'streak') currentProgress = streakDays
     else if (achievement.type === 'total_checkins') currentProgress = totalCheckInDays
     else if (achievement.type === 'focus_hours') currentProgress = totalFocusHours
+    else if (achievement.type === 'tasks_done') currentProgress = totalTasksDone
+    else if (achievement.type === 'habits_created') currentProgress = totalHabitsCreated
 
     const unlocked = currentProgress >= achievement.targetCount
-    const progressPercentage = Math.min(
-      100,
-      Math.round((currentProgress / achievement.targetCount) * 100)
-    )
+    const progressPercentage = Math.min(100, Math.round((currentProgress / achievement.targetCount) * 100))
 
     return {
       achievement,

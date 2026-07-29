@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useTimeEntryStore, DailyUsageBar } from '@/stores/timeEntryStore';
 import { BarChart2, Calendar, ArrowUpRight, ArrowDownRight, Layers, TrendingUp } from 'lucide-react';
+import { BaseCard } from '@/components/ui/BaseCard';
 
 interface DailyUsageBarChartProps {
   onSelectDate?: (dateStr: string) => void;
@@ -11,6 +13,7 @@ interface DailyUsageBarChartProps {
 export function DailyUsageBarChart({ onSelectDate }: DailyUsageBarChartProps) {
   const [rangeDays, setRangeDays] = useState<number>(7);
   const [showComparison, setShowComparison] = useState<boolean>(false);
+  const [hoveredBar, setHoveredBar] = useState<DailyUsageBar | null>(null);
   const getDailyUsageHours = useTimeEntryStore((state) => state.getDailyUsageHours);
   const selectedDate = useTimeEntryStore((state) => state.selectedDate);
   const setSelectedDate = useTimeEntryStore((state) => state.setSelectedDate);
@@ -50,7 +53,7 @@ export function DailyUsageBarChart({ onSelectDate }: DailyUsageBarChartProps) {
   const yesterdayHours = Math.round((yesterdaySeconds / 3600) * 10) / 10;
 
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xs transition-all">
+    <BaseCard elevation="raised" className="card-hover-lift" innerClassName="p-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2">
@@ -170,8 +173,9 @@ export function DailyUsageBarChart({ onSelectDate }: DailyUsageBarChartProps) {
               <button
                 key={bar.date}
                 onClick={() => handleBarClick(bar.date)}
-                className="group flex-1 flex flex-col items-center h-full justify-end focus:outline-hidden cursor-pointer"
-                title={`${bar.dayLabel} (${bar.date}): ${bar.totalHours} hours`}
+                onMouseEnter={() => setHoveredBar(bar)}
+                onMouseLeave={() => setHoveredBar(null)}
+                className="group flex-1 flex flex-col items-center h-full justify-end focus:outline-hidden cursor-pointer relative"
               >
                 <span className={`text-[10px] font-semibold mb-1 transition-opacity ${
                   isSelected ? 'text-emerald-500 opacity-100' : bar.totalHours > 0 ? 'text-[var(--muted-foreground)] opacity-70 group-hover:opacity-100' : 'text-[var(--muted-foreground)] opacity-30'
@@ -205,11 +209,23 @@ export function DailyUsageBarChart({ onSelectDate }: DailyUsageBarChartProps) {
                 }`}>
                   {bar.dayLabel.includes('Today') ? 'Today' : bar.dayLabel.split(',')[0]}
                 </span>
+
+                {/* Hover tooltip */}
+                {hoveredBar === bar && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="absolute bottom-full mb-8 z-50 bg-[var(--bg-primary)] text-[var(--text-primary)] text-xs py-2 px-3 rounded-xl shadow-2xl border border-[var(--border)] whitespace-nowrap pointer-events-none"
+                  >
+                    <div className="font-bold">{bar.dayLabel}</div>
+                    <div className="text-[var(--text-secondary)]">{bar.date} &middot; {bar.totalHours}h active</div>
+                  </motion.div>
+                )}
               </button>
             );
           })}
         </div>
       </div>
-    </div>
+    </BaseCard>
   );
 }

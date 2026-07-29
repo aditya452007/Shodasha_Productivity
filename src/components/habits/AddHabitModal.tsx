@@ -32,19 +32,19 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
   const shouldReduceMotion = useReducedMotion()
 
   const [name, setName] = useState('')
-  const [color, setColor] = useState('#059669')
+  const [color, setColor] = useState('var(--accent-emerald)')
   const [linkedTaskId, setLinkedTaskId] = useState('')
   const [url, setUrl] = useState('')
 
   useEffect(() => {
     if (editingHabit) {
       setName(editingHabit.name)
-      setColor(editingHabit.color || '#059669')
+      setColor(editingHabit.color || 'var(--accent-emerald)')
       setLinkedTaskId(editingHabit.linkedTaskId || '')
       setUrl(editingHabit.url || '')
     } else {
       setName('')
-      setColor('#059669')
+      setColor('var(--accent-emerald)')
       setLinkedTaskId('')
       setUrl('')
     }
@@ -134,7 +134,7 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
                   placeholder="e.g. 30m Daily Deep Reading"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent)] focus:outline-hidden focus:ring-2 focus:ring-[var(--accent)]/20 transition-all"
+                  className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent)] focus:outline-hidden focus:ring-2 focus:ring-[var(--accent)]/20 transition-ring"
                 />
               </div>
 
@@ -161,7 +161,7 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
                     placeholder="https://example.com/habit"
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
-                    className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] pl-10 pr-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent)] focus:outline-hidden focus:ring-2 focus:ring-[var(--accent)]/20 transition-all"
+                    className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] pl-10 pr-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent)] focus:outline-hidden focus:ring-2 focus:ring-[var(--accent)]/20 transition-ring"
                   />
                 </div>
               </div>
@@ -206,7 +206,7 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
                 <select
                   value={linkedTaskId}
                   onChange={(e) => setLinkedTaskId(e.target.value)}
-                  className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] focus:border-[var(--accent)] focus:outline-hidden focus:ring-2 focus:ring-[var(--accent)]/20 transition-all"
+                  className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] focus:border-[var(--accent)] focus:outline-hidden focus:ring-2 focus:ring-[var(--accent)]/20 transition-ring"
                 >
                   <option value="">-- No Linked Task --</option>
                   {tasks.map((task) => (

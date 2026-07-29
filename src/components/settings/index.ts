@@ -6,4 +6,5 @@ export { SettingsSidebar, SETTINGS_NAV_ITEMS, type SettingsNavItem } from './Set
 export { NotificationsSettings } from './NotificationsSettings'
 export { DesktopPetSettings } from './DesktopPetSettings'
 export { AboutSettings } from './AboutSettings'
+export { GamificationSettings } from '@/components/gamification/GamificationSettings'
 

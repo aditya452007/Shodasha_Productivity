@@ -75,7 +75,7 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
       layout
       ref={setNodeRef}
       style={style}
-      className={`group relative flex flex-col gap-2.5 rounded-xl border p-4 shadow-sm transition-all ${
+      className={`group relative flex flex-col gap-2.5 rounded-xl border p-4 shadow-sm transition-lift ${
         isDragging
           ? 'z-50 opacity-80 border-[var(--accent)] scale-[1.02] shadow-xl'
           : isDone
@@ -103,7 +103,7 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
                 openExternalUrl(task.url)
               }}
               aria-label={`Open link for ${task.title} in default browser`}
-              className="flex h-6 w-6 items-center justify-center rounded-lg border border-[var(--accent)]/30 bg-[var(--accent-muted)]/30 text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition-all"
+              className="flex h-6 w-6 items-center justify-center rounded-lg border border-[var(--accent)]/30 bg-[var(--accent-muted)]/30 text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white"
               title={`Open ${task.url} in browser`}
             >
               <ExternalLink className="h-3.5 w-3.5" />
@@ -117,7 +117,7 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
               toggleTaskStatus(task.id)
             }}
             aria-label={`Toggle ${task.title} status`}
-            className={`flex h-6 w-6 items-center justify-center rounded-lg border transition-all ${
+            className={`flex h-6 w-6 items-center justify-center rounded-lg border transition-colors ${
               isDone
                 ? 'border-[var(--accent)] bg-[var(--accent)] text-white'
                 : 'border-[var(--border-strong)] text-transparent hover:border-[var(--accent)]'
@@ -172,7 +172,7 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
                 e.stopPropagation()
                 openExternalUrl(task.url)
               }}
-              className="flex items-center gap-1 rounded-md bg-[var(--accent-muted)]/40 px-2 py-0.5 text-[10px] font-semibold text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white border border-[var(--accent)]/30 transition-all cursor-pointer"
+              className="flex items-center gap-1 rounded-md bg-[var(--accent-muted)]/40 px-2 py-0.5 text-[10px] font-semibold text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white border border-[var(--accent)]/30 cursor-pointer"
               title={`Open ${task.url} in default browser`}
             >
               <ExternalLink className="h-3 w-3" />

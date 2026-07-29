@@ -29,7 +29,7 @@ export function QuickTaskInput() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-2 shadow-xs transition-all focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)]"
+      className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-2 shadow-xs transition-ring focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)]"
     >
       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--bg-base)] p-1.5 shrink-0">
         <img src="/logo.png" alt="Shodasha Logo" className="h-full w-full object-contain" />

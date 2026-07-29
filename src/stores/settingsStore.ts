@@ -4,7 +4,7 @@ import { setAutoStartInDb, fetchSettingsFromDb, saveSettingsToDb, setPollingInte
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 export type DataRetentionPeriod = '1_month' | '3_months' | '6_months' | 'indefinite'
-export type AccentColor = '#059669' | '#7c3aed' | '#d97706' | '#e11d48'
+export type AccentColor = 'var(--accent-emerald)' | 'var(--accent-violet)' | 'var(--accent-amber)' | 'var(--accent-rose)'
 
 interface SettingsState extends AsyncState {
   pollingInterval: number
@@ -36,7 +36,7 @@ function persistAllSettings(state: Partial<SettingsState>) {
     dailyGoalHours: String(state.dailyGoalHours ?? 6.0),
     dataRetentionPeriod: state.dataRetentionPeriod || '6_months',
     themeMode: state.themeMode || 'dark',
-    accentColor: state.accentColor || '#059669',
+    accentColor: state.accentColor || 'var(--accent-emerald)',
   })
 }
 
@@ -48,7 +48,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   dailyGoalHours: 6.0,
   dataRetentionPeriod: '6_months',
   themeMode: 'dark',
-  accentColor: '#059669',
+  accentColor: 'var(--accent-emerald)',
   isLoading: false,
   error: null,
   isInitialized: false,

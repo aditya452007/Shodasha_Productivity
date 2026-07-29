@@ -46,7 +46,7 @@ export function HeaderGreetingCard() {
           onClick={() => refreshAllData()}
           disabled={isRefreshing}
           aria-label="Refresh live data"
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--bg-tertiary)] transition-all shadow-xs disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--bg-tertiary)] shadow-xs disabled:opacity-50"
           title="Refresh active tracking data"
         >
           <RotateCw className={`w-3.5 h-3.5 text-[var(--accent)] ${isRefreshing ? 'animate-spin' : ''}`} />

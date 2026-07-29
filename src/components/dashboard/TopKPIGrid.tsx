@@ -1,16 +1,14 @@
 'use client'
 
-import { motion, useReducedMotion } from 'framer-motion'
-import { Clock, Zap, CheckCircle2, Target, BookOpen, Calendar, ClipboardList } from 'lucide-react'
+import { Clock, Zap, Target, ClipboardList } from 'lucide-react'
 import { useTaskStore } from '@/stores/taskStore'
 import { useHabitStore } from '@/stores/habitStore'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { NumberTicker } from '@/components/ui/NumberTicker'
+import { BaseCard } from '@/components/ui/BaseCard'
 
 export function TopKPIGrid() {
-  const shouldReduceMotion = useReducedMotion()
-
   const tasks = useTaskStore((s) => s.tasks)
   const habits = useHabitStore((s) => s.habits)
   const records = useHabitStore((s) => s.records)
@@ -47,8 +45,8 @@ export function TopKPIGrid() {
       numericVal: focusHours,
       subtitle: `Target: ${goalHours}h Daily`,
       icon: Clock,
-      color: '#0284c7', // Sky Blue
-      bgColor: 'bg-sky-500/10 text-sky-600 dark:text-sky-400',
+      color: 'var(--accent-blue)', // Blue
+      bgColor: 'icon-bg-sky',
     },
     {
       id: 'focus-score',
@@ -57,8 +55,8 @@ export function TopKPIGrid() {
       numericVal: focusScore,
       subtitle: 'Productivity Index',
       icon: Zap,
-      color: '#7c3aed', // Violet / Purple
-      bgColor: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
+      color: 'var(--accent-violet)', // Violet
+      bgColor: 'icon-bg-violet',
     },
     {
       id: 'active-tasks',
@@ -67,8 +65,8 @@ export function TopKPIGrid() {
       numericVal: pendingTasks,
       subtitle: `${completedTasks} Completed Today`,
       icon: ClipboardList,
-      color: '#d97706', // Amber
-      bgColor: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+      color: 'var(--accent-amber)', // Amber
+      bgColor: 'icon-bg-amber',
     },
     {
       id: 'habit-rate',
@@ -77,26 +75,21 @@ export function TopKPIGrid() {
       numericVal: habitRate,
       subtitle: `${completedHabits} of ${totalHabits} Done Today`,
       icon: Target,
-      color: '#059669', // Emerald
-      bgColor: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+      color: 'var(--accent-emerald)', // Emerald
+      bgColor: 'icon-bg-emerald',
     },
   ]
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-      {cards.map((card, index) => {
+      {cards.map((card) => {
         const IconComponent = card.icon
         return (
-          <motion.div
+          <BaseCard
             key={card.id}
-            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.35,
-              ease: [0.23, 1, 0.32, 1],
-              delay: shouldReduceMotion ? 0 : index * 0.06,
-            }}
-            className="flex items-center justify-between p-4 sm:p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] shadow-xs hover:border-[var(--border-default)] transition-all group"
+            elevation="raised"
+            className="card-hover-lift group"
+            innerClassName="flex items-center justify-between p-4 sm:p-5"
           >
             <div className="flex flex-col gap-1 min-w-0">
               <span className="text-xs font-semibold text-[var(--text-secondary)] truncate">
@@ -119,7 +112,7 @@ export function TopKPIGrid() {
             <div className={`p-3 rounded-2xl ${card.bgColor} shrink-0 transition-transform group-hover:scale-105`}>
               <IconComponent className="w-5 h-5 stroke-[2]" />
             </div>
-          </motion.div>
+          </BaseCard>
         )
       })}
     </div>

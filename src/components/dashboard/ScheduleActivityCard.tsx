@@ -1,11 +1,12 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { Calendar, Clock, CheckCircle2, Play, ChevronRight, ExternalLink } from 'lucide-react'
+import { Calendar, CheckCircle2, ChevronRight, ExternalLink } from 'lucide-react'
 import { useTaskStore } from '@/stores/taskStore'
 import { useTimeEntryStore, TimeEntry } from '@/stores/timeEntryStore'
 import { openExternalUrl } from '@/lib/utils/url'
 import Link from 'next/link'
+import { BaseCard } from '@/components/ui/BaseCard'
 
 export function ScheduleActivityCard() {
   const shouldReduceMotion = useReducedMotion()
@@ -48,7 +49,11 @@ export function ScheduleActivityCard() {
   })
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 sm:p-6 shadow-xs h-full justify-between">
+    <BaseCard
+      elevation="raised"
+      className="h-full justify-between card-hover-lift"
+      innerClassName="flex flex-col gap-4 p-5 sm:p-6 h-full justify-between"
+    >
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
         <div className="flex items-center gap-2.5">
@@ -142,7 +147,7 @@ export function ScheduleActivityCard() {
                 <button
                   onClick={() => toggleTaskStatus(item.id)}
                   aria-label={`Toggle status for ${item.title}`}
-                  className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1 cursor-pointer ${item.statusColor}`}
+                  className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer ${item.statusColor}`}
                   title={item.isDone ? 'Mark as incomplete' : 'Mark as done'}
                 >
                   <CheckCircle2 className={`w-3 h-3 ${item.isDone ? 'text-emerald-500' : 'opacity-60'}`} />
@@ -153,6 +158,6 @@ export function ScheduleActivityCard() {
           ))
         )}
       </div>
-    </div>
+    </BaseCard>
   )
 }

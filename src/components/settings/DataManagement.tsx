@@ -155,7 +155,7 @@ export function DataManagement() {
               type="button"
               onClick={handleExportCSV}
               aria-label="Export data as CSV"
-              className="group inline-flex items-center justify-between gap-3 pl-4 pr-1.5 py-1.5 text-xs font-semibold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] rounded-full shadow-md shadow-[var(--accent)]/20 transition-all duration-300 active:scale-[0.98]"
+              className="group inline-flex items-center justify-between gap-3 pl-4 pr-1.5 py-1.5 text-xs font-semibold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] rounded-full shadow-md shadow-[var(--accent)]/20 active:scale-[0.98]"
             >
               <span>{exportSuccess ? 'Exported!' : 'Export Activity CSV'}</span>
               <span className="w-7 h-7 rounded-full bg-black/10 dark:bg-white/15 flex items-center justify-center transition-transform duration-300 group-hover:scale-105 group-hover:translate-x-0.5">
@@ -187,7 +187,7 @@ export function DataManagement() {
                 setIsConfirmOpen(true)
               }}
               aria-label="Clear all database data"
-              className="group inline-flex items-center justify-between gap-3 pl-4 pr-1.5 py-1.5 text-xs font-semibold text-white bg-[var(--error)] hover:brightness-90 rounded-full shadow-md shadow-[var(--error)]/20 transition-all duration-300 active:scale-[0.98]"
+              className="group inline-flex items-center justify-between gap-3 pl-4 pr-1.5 py-1.5 text-xs font-semibold text-white bg-[var(--error)] hover:brightness-90 rounded-full shadow-md shadow-[var(--error)]/20 active:scale-[0.98]"
             >
               <span>Clear Database</span>
               <span className="w-7 h-7 rounded-full bg-black/10 dark:bg-white/15 flex items-center justify-center transition-transform duration-300 group-hover:scale-105 group-hover:translate-x-0.5">

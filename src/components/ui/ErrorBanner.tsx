@@ -29,7 +29,7 @@ export function ErrorBanner({
       {onRetry && (
         <button
           onClick={onRetry}
-          className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] transition-all active:scale-[0.97] shrink-0"
+          className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] active:scale-[0.97] shrink-0"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           <span>Retry</span>

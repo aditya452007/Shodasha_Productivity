@@ -43,7 +43,7 @@ export function KPICard({
   const colors = accentStyles[accent]
 
   return (
-    <div className="p-1.5 rounded-[2rem] bg-stone-900/5 dark:bg-white/5 ring-1 ring-stone-900/5 dark:ring-white/10 shadow-xs group hover:ring-stone-900/15 dark:hover:ring-white/20 transition-all">
+    <div className="p-1.5 rounded-[2rem] bg-stone-900/5 dark:bg-white/5 ring-1 ring-stone-900/5 dark:ring-white/10 shadow-xs group hover:ring-stone-900/15 dark:hover:ring-white/20 transition-shadow">
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[calc(2rem-0.375rem)] p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] flex flex-col justify-between gap-3 h-full">
         <div className="flex items-start justify-between gap-3">
           <div>

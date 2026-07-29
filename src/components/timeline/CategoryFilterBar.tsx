@@ -55,7 +55,7 @@ export function CategoryFilterBar() {
                 <button
                   key={opt.value}
                   onClick={() => setTimeframe(opt.value)}
-                  className={`relative px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all active:scale-[0.97] ${
+                  className={`relative px-3.5 py-1.5 rounded-xl text-xs font-medium active:scale-[0.97] ${
                     active
                       ? 'text-[var(--text-primary)] font-semibold'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -85,7 +85,7 @@ export function CategoryFilterBar() {
                   key={cat.value}
                   onClick={() => setSelectedCategory(cat.value)}
                   aria-pressed={active}
-                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl text-xs font-medium transition-all active:scale-[0.97] border ${
+                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl text-xs font-medium active:scale-[0.97] border ${
                     active
                       ? 'bg-[var(--accent-muted)] border-[var(--accent)] text-[var(--accent)] font-semibold shadow-xs'
                       : 'bg-[var(--bg-surface-hover)] border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -110,7 +110,7 @@ export function CategoryFilterBar() {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter by app or window..."
               aria-label="Filter by app name or window title"
-              className="w-full pl-9 pr-8 py-2 text-xs rounded-2xl bg-[var(--bg-surface-hover)] border border-[var(--border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]"
+              className="w-full pl-9 pr-8 py-2 text-xs rounded-2xl bg-[var(--bg-surface-hover)] border border-[var(--border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-ring shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]"
             />
             {searchQuery && (
               <button

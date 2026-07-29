@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { useNotificationStore } from './notificationStore'
+import { useGamificationStore } from './gamificationStore'
 import { sendWebNotification, deliverNotification } from '@/lib/notifications'
 import { toast } from 'sonner'
 import type { DeliveryChannel } from '@/lib/openpets'
@@ -158,6 +159,12 @@ async function fireTimerNotification() {
   const msg = state.customMessage.trim() || `Timer finished — ${formatTimerTime(state.totalSeconds)}`
   const opts = { title: 'Shodasha Timer', body: msg, tag: `timer-${Date.now()}` }
   const notifStore = useNotificationStore.getState()
+
+  // Award XP for focus session
+  const intervalsCompleted = Math.floor(state.totalSeconds / 1800)
+  if (intervalsCompleted >= 1) {
+    useGamificationStore.getState().awardXP(5 * intervalsCompleted, `focus_session_${Date.now()}`)
+  }
 
   if (state.channel === 'silent') {
     toast('Timer done (silent mode)', { icon: '🔇' })

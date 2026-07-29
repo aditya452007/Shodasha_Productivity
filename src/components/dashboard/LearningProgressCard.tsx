@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { PieChart, Filter } from 'lucide-react'
+import { PieChart } from 'lucide-react'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
+import { BaseCard } from '@/components/ui/BaseCard'
 
 export function LearningProgressCard() {
   const shouldReduceMotion = useReducedMotion()
@@ -25,11 +26,15 @@ export function LearningProgressCard() {
   const strokeDashoffset = circumference - (focusScore / 100) * circumference
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 sm:p-6 shadow-xs h-full justify-between">
+    <BaseCard
+      elevation="raised"
+      className="h-full justify-between card-hover-lift"
+      innerClassName="flex flex-col gap-4 p-5 sm:p-6 h-full justify-between"
+    >
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400">
+          <div className="p-2 rounded-xl icon-bg-violet">
             <PieChart className="w-5 h-5" />
           </div>
           <div>
@@ -83,8 +88,8 @@ export function LearningProgressCard() {
             />
             <defs>
               <linearGradient id="donutGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#7c3aed" />
-                <stop offset="100%" stopColor="#0284c7" />
+                <stop offset="0%" stopColor="var(--accent-violet)" />
+                <stop offset="100%" stopColor="var(--accent-blue)" />
               </linearGradient>
             </defs>
           </svg>
@@ -105,7 +110,7 @@ export function LearningProgressCard() {
           {/* Deep Work */}
           <div className="flex items-center justify-between gap-4 text-xs">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-violet-600 shrink-0" />
+              <span className="w-2.5 h-2.5 rounded-full dot-violet shrink-0" />
               <span className="font-medium text-[var(--text-primary)]">Deep Work</span>
             </div>
             <span className="font-mono font-bold text-[var(--text-primary)]">{deepWorkPct}%</span>
@@ -114,7 +119,7 @@ export function LearningProgressCard() {
           {/* Neutral / Admin */}
           <div className="flex items-center justify-between gap-4 text-xs">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
+              <span className="w-2.5 h-2.5 rounded-full dot-amber shrink-0" />
               <span className="font-medium text-[var(--text-primary)]">In Progress / Neutral</span>
             </div>
             <span className="font-mono font-bold text-[var(--text-primary)]">{neutralPct}%</span>
@@ -123,13 +128,13 @@ export function LearningProgressCard() {
           {/* Distraction */}
           <div className="flex items-center justify-between gap-4 text-xs">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0" />
+              <span className="w-2.5 h-2.5 rounded-full dot-rose shrink-0" />
               <span className="font-medium text-[var(--text-primary)]">Distraction</span>
             </div>
             <span className="font-mono font-bold text-[var(--text-primary)]">{distractionPct}%</span>
           </div>
         </div>
       </div>
-    </div>
+    </BaseCard>
   )
 }

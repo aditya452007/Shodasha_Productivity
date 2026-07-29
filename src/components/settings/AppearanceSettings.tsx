@@ -6,10 +6,10 @@ import { Sun, Moon, Monitor, Palette, Check } from 'lucide-react'
 import { useSettingsStore, ThemeMode, AccentColor } from '@/stores/settingsStore'
 
 const accentOptions: { color: AccentColor; name: string; bg: string }[] = [
-  { color: '#059669', name: 'Emerald', bg: 'bg-[#059669]' },
-  { color: '#7c3aed', name: 'Violet', bg: 'bg-[#7c3aed]' },
-  { color: '#d97706', name: 'Amber', bg: 'bg-[#d97706]' },
-  { color: '#e11d48', name: 'Rose', bg: 'bg-[#e11d48]' },
+  { color: 'var(--accent-emerald)', name: 'Emerald', bg: 'bg-[var(--accent-emerald)]' },
+  { color: 'var(--accent-violet)', name: 'Violet', bg: 'bg-[var(--accent-violet)]' },
+  { color: 'var(--accent-amber)', name: 'Amber', bg: 'bg-[var(--accent-amber)]' },
+  { color: 'var(--accent-rose)', name: 'Rose', bg: 'bg-[var(--accent-rose)]' },
 ]
 
 const themeModes: { mode: ThemeMode; label: string; icon: React.ReactNode }[] = [
@@ -110,7 +110,7 @@ export function AppearanceSettings() {
                     onClick={() => setAccentColor(color)}
                     aria-label={`Select ${name} accent color`}
                     title={name}
-                    className={`relative w-8 h-8 rounded-full ${bg} flex items-center justify-center transition-all duration-300 active:scale-90 ${
+                    className={`relative w-8 h-8 rounded-full ${bg} flex items-center justify-center transition-transform active:scale-90 ${
                       isSelected ? 'ring-2 ring-offset-2 ring-[var(--text-primary)] scale-110 shadow-md' : 'hover:scale-105 opacity-80 hover:opacity-100'
                     }`}
                   >

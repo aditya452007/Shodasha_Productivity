@@ -111,7 +111,7 @@ export default function TimelinePage() {
           {selectedDate !== todayStr && (
             <button
               onClick={handleToday}
-              className="px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] text-xs font-semibold text-[var(--accent)] hover:bg-[var(--accent-muted)] transition-all shadow-xs"
+              className="px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] text-xs font-semibold text-[var(--accent)] hover:bg-[var(--accent-muted)] shadow-xs"
             >
               Back to Today
             </button>
@@ -120,7 +120,7 @@ export default function TimelinePage() {
           <button
             onClick={() => refreshAllData()}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] transition-all shadow-xs active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] shadow-xs active:scale-95 disabled:opacity-50"
             title="Refresh time entries from database"
           >
             <RotateCw className={`size-3.5 ${isRefreshing ? 'animate-spin text-[var(--accent)]' : ''}`} />

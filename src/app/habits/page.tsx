@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Plus, Flame } from 'lucide-react'
 import { HabitStatsCard } from '@/components/habits/HabitStatsCard'
 import { HabitAnalyticsDashboard } from '@/components/habits/HabitAnalyticsDashboard'
@@ -9,14 +9,25 @@ import { HabitAchievements } from '@/components/habits/HabitAchievements'
 import { HabitCalendar } from '@/components/habits/HabitCalendar'
 import { HabitHeatmap } from '@/components/habits/HabitHeatmap'
 import { AddHabitModal } from '@/components/habits/AddHabitModal'
+import { StreakDisplay } from '@/components/gamification/StreakDisplay'
+import { SkillOctagon } from '@/components/gamification/SkillOctagon'
+import { XPProgressBar } from '@/components/gamification/XPProgressBar'
+import { LevelUpCelebration } from '@/components/gamification/LevelUpCelebration'
 import { useHabitStore, Habit } from '@/stores/habitStore'
+import { useGamificationStore } from '@/stores/gamificationStore'
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 
 export default function HabitsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null)
+  const initializeGamification = useGamificationStore((s) => s.initializeGamification)
 
+  const shouldReduceMotion = useReducedMotion()
   const isLoading = useHabitStore((s) => s.isLoading)
+
+  useEffect(() => {
+    initializeGamification()
+  }, [initializeGamification])
 
   const handleOpenAddModal = () => {
     setEditingHabit(null)
@@ -50,7 +61,7 @@ export default function HabitsPage() {
         <>
       {/* Top Header */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-5"
@@ -72,30 +83,37 @@ export default function HabitsPage() {
         <button
           onClick={handleOpenAddModal}
           aria-label="Add new habit"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--accent)] text-white text-xs font-semibold hover:opacity-90 transition-all shadow-xs self-start sm:self-auto active:scale-95"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--accent)] text-white text-xs font-semibold hover:opacity-90 shadow-xs self-start sm:self-auto active:scale-95"
         >
           <Plus className="w-4 h-4" />
           New Habit
         </button>
       </motion.div>
 
-      {/* 1. Top Section — Quick Summary Metrics Cards */}
-      <HabitStatsCard />
+      {/* 1. Top Section — Quick Summary Metrics Cards + Streak + SkillOctagon */}
+      <div className="bento-grid bento-grid-cols-12 items-stretch">
+        <div className="bento-col-span-8">
+          <HabitStatsCard />
+        </div>
+        <div className="bento-col-span-4">
+          <StreakDisplay />
+        </div>
+      </div>
 
       {/* 2. Reorderable Analytics Dashboard (Line Chart, Completion Rings, Weekday Bar Chart) */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, delay: 0.05 }}
+        transition={{ duration: 0.25, delay: shouldReduceMotion ? 0 : 0.05 }}
       >
         <HabitAnalyticsDashboard />
       </motion.div>
 
       {/* 3. Habits Tracker — Monthly Calendar Matrix Grid */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, delay: 0.1 }}
+        transition={{ duration: 0.25, delay: shouldReduceMotion ? 0 : 0.1 }}
       >
         <HabitCalendar
           onOpenAddModal={handleOpenAddModal}
@@ -103,20 +121,26 @@ export default function HabitsPage() {
         />
       </motion.div>
 
-      {/* 4. Milestone Achievements System & Unlocks Log */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, delay: 0.15 }}
-      >
-        <HabitAchievements />
-      </motion.div>
+      {/* 4. Skill Octagon + Quick Level Stats + Achievements */}
+      <div className="bento-grid bento-grid-cols-12 items-stretch">
+        <div className="bento-col-span-4 space-y-4">
+          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 shadow-xs flex items-center justify-center">
+            <SkillOctagon size={220} />
+          </div>
+          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4 shadow-xs">
+            <XPProgressBar />
+          </div>
+        </div>
+        <div className="bento-col-span-8">
+          <HabitAchievements />
+        </div>
+      </div>
 
       {/* 5. 24-Week Consistency Heatmap */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, delay: 0.2 }}
+        transition={{ duration: 0.25, delay: shouldReduceMotion ? 0 : 0.2 }}
       >
         <HabitHeatmap />
       </motion.div>
@@ -127,6 +151,8 @@ export default function HabitsPage() {
         onClose={() => setIsModalOpen(false)}
         editingHabit={editingHabit}
       />
+
+      <LevelUpCelebration />
         </>
       )}
     </div>

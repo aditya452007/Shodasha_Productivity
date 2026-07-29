@@ -393,7 +393,7 @@ export function NotificationsSettings() {
               </div>
               <button
                 onClick={handleStartTimer}
-                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-all shadow-xs"
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 shadow-xs"
               >
                 <Play className="w-3.5 h-3.5" /> Start Timer
               </button>
@@ -412,7 +412,7 @@ export function NotificationsSettings() {
               )}
               <button
                 onClick={handleStopTimer}
-                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-red-500 text-white hover:bg-red-600 transition-all"
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-red-500 text-white hover:bg-red-600"
               >
                 <Square className="w-3.5 h-3.5" /> Cancel Timer
               </button>

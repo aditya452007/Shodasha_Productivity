@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Timer, Play, Square, RotateCcw, Coffee, Bell, Smartphone, Settings2 } from 'lucide-react'
 import { useTimerStore } from '@/stores/timerStore'
 
@@ -21,6 +21,8 @@ export function TimerPage() {
     setTotalSeconds, setCustomMessage, setChannel,
     start, stop, reset, setPresetMinutes,
   } = useTimerStore()
+
+  const shouldReduceMotion = useReducedMotion()
 
   const [customMinutes, setCustomMinutes] = useState(27)
   const [showCustom, setShowCustom] = useState(false)
@@ -42,14 +44,14 @@ export function TimerPage() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
       className="max-w-2xl mx-auto space-y-8 pb-16"
     >
       <div className="border-b border-[var(--border-subtle)] pb-5">
         <div className="flex items-center gap-2.5 mb-1">
-          <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500">
+          <div className="p-2 rounded-xl bg-[var(--accent)]/10 text-[var(--accent)]">
             <Timer className="w-5 h-5" />
           </div>
           <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--text-primary)]">
@@ -60,8 +62,8 @@ export function TimerPage() {
           Timer runs even when you switch pages. It stops when finished or you stop it.
         </p>
         {isRunning && (
-          <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-500 text-[10px] font-semibold uppercase tracking-wider">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+          <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--accent)]/10 text-[var(--accent)] text-[10px] font-semibold uppercase tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse motion-reduce:animate-none" />
             Running in background
           </div>
         )}
@@ -85,7 +87,8 @@ export function TimerPage() {
               strokeDasharray={2 * Math.PI * 110}
               strokeDashoffset={2 * Math.PI * 110 * (1 - progress / 100)}
               initial={false}
-              className="transition-all duration-1000 ease-linear"
+              className="duration-1000"
+              style={{ transition: 'stroke-dashoffset 1000ms cubic-bezier(0.23, 1, 0.32, 1)' }}
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
@@ -100,28 +103,28 @@ export function TimerPage() {
             <button
               onClick={start}
               disabled={remaining <= 0}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent)] text-white text-sm font-semibold hover:opacity-90 transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent)] text-white text-sm font-semibold hover:opacity-90 shadow-xs disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
             >
               <Play className="w-5 h-5" /> Start
             </button>
           ) : (
             <button
               onClick={stop}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-all shadow-xs active:scale-95"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--error)] text-white text-sm font-semibold hover:brightness-90 shadow-xs active:scale-95"
             >
               <Square className="w-5 h-5" /> Stop
             </button>
           )}
           <button
             onClick={reset}
-            className="flex items-center gap-2 px-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95"
+              className="flex items-center gap-2 px-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95"
           >
             <RotateCcw className="w-4 h-4" /> Reset
           </button>
         </div>
 
         {status === 'completed' && (
-          <div className="px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-500 text-xs font-semibold">
+          <div className="px-4 py-2 rounded-xl bg-[var(--accent)]/10 text-[var(--accent)] text-xs font-semibold">
             Timer completed! Check your notifications.
           </div>
         )}
@@ -138,11 +141,11 @@ export function TimerPage() {
               key={preset.minutes}
               onClick={() => { if (!isRunning) setPresetMinutes(preset.minutes) }}
               disabled={isRunning}
-              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all border ${
+               className={`px-4 py-2 rounded-lg text-xs font-semibold border ${
                 !showCustom && presetMinutes === preset.minutes && totalSeconds === preset.minutes * 60
                   ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-xs'
                   : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--border-default)]'
-              } disabled:opacity-40 disabled:cursor-not-allowed`}
+               } disabled:opacity-40 disabled:cursor-not-allowed`}
             >
               {preset.label}
             </button>
@@ -150,7 +153,7 @@ export function TimerPage() {
           <button
             onClick={() => { if (!isRunning) setShowCustom(!showCustom) }}
             disabled={isRunning}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all border ${
+            className={`px-4 py-2 rounded-lg text-xs font-semibold border ${
               showCustom
                 ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-xs'
                 : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--border-default)]'
@@ -196,7 +199,7 @@ export function TimerPage() {
             value={customMessage}
             onChange={(e) => setCustomMessage(e.target.value)}
             placeholder="e.g. Time to take a break!"
-            className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-hidden focus:border-[var(--accent)] transition-all"
+            className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-hidden focus:border-[var(--accent)] transition-ring"
           />
         </div>
 

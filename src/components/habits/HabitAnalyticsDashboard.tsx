@@ -32,6 +32,7 @@ import { useHabitStore } from '@/stores/habitStore'
 import { useTaskStore } from '@/stores/taskStore'
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { ErrorBanner } from '@/components/ui/ErrorBanner'
+import { BaseCard } from '@/components/ui/BaseCard'
 
 // Sortable Wrapper Component for Analytics Widgets
 function SortableWidgetCard({
@@ -56,7 +57,7 @@ function SortableWidgetCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-xs relative transition-all ${
+      className={`rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-xs relative transition-shadow ${
         isDragging ? 'shadow-2xl ring-2 ring-[var(--accent)] opacity-95 scale-[1.01]' : ''
       } ${className}`}
     >
@@ -369,7 +370,7 @@ export function HabitAnalyticsDashboard() {
               <motion.path
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
-                transition={{ duration: 0.9, ease: 'easeOut' }}
+                transition={{ duration: 0.9, ease: [0.23, 1, 0.32, 1] }}
                 d={linePathD}
                 fill="none"
                 stroke="var(--widget-accent)"
@@ -497,7 +498,7 @@ export function HabitAnalyticsDashboard() {
                           strokeDasharray={circumference}
                           strokeDashoffset={strokeDashoffset}
                           strokeLinecap="round"
-                          className="transition-all duration-700 ease-out"
+                          className="transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]"
                         />
                       </svg>
                       <span className="absolute text-[11px] font-extrabold font-display text-[var(--text-primary)]">

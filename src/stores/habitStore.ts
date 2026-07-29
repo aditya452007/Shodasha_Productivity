@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { useTaskStore, AsyncState } from './taskStore'
+import { useGamificationStore } from './gamificationStore'
 import {
   fetchHabitsFromDb,
   fetchHabitRecordsFromDb,
@@ -124,9 +125,21 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       if (targetHabit?.linkedTaskId) {
         useTaskStore.getState().moveTask(targetHabit.linkedTaskId, 'done')
       }
+      useGamificationStore.getState().awardXP(10, `habit_checkin_${habitId}_${date}`)
+
+      // Check if all habits done today
+      const habits = get().habits
+      const records = get().records
+      const todayStr = new Date().toISOString().split('T')[0]
+      if (date === todayStr || date === todayStr) {
+        const allDone = habits.every((h) => !!records[`${h.id}_${todayStr}`])
+        if (allDone) {
+          useGamificationStore.getState().awardXP(25, `all_done_bonus_${todayStr}`)
+        }
+      }
     }
   },
-  addHabit: (name, color = '#059669', linkedTaskId, url) => {
+  addHabit: (name, color = 'var(--accent-emerald)', linkedTaskId, url) => {
     const newHabit: Habit = {
       id: `h-${Date.now()}`,
       name,

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTimeEntryStore, AppStatItem, CategoryType } from '@/stores/timeEntryStore';
 import { Award, AppWindow, Layers, PieChart } from 'lucide-react';
+import { BaseCard } from '@/components/ui/BaseCard';
 
 export function AppRankingChart() {
   const [viewMode, setViewMode] = useState<'apps' | 'categories'>('apps');
@@ -56,7 +57,7 @@ export function AppRankingChart() {
   ];
 
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xs">
+    <BaseCard elevation="raised" className="card-hover-lift" innerClassName="p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <div className="flex items-center gap-2">
@@ -195,6 +196,6 @@ export function AppRankingChart() {
           })}
         </div>
       )}
-    </div>
+    </BaseCard>
   );
 }

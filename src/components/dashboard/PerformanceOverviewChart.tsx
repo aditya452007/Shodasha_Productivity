@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
-import { TrendingUp, BarChart2 } from 'lucide-react'
+import { TrendingUp } from 'lucide-react'
+import { BaseCard } from '@/components/ui/BaseCard'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -14,7 +14,6 @@ import {
 import { useTimeEntryStore, TimeEntry } from '@/stores/timeEntryStore'
 
 export function PerformanceOverviewChart() {
-  const shouldReduceMotion = useReducedMotion()
   const [range, setRange] = useState<'month' | 'week'>('month')
   const entries = useTimeEntryStore((s) => s.entries)
 
@@ -45,11 +44,15 @@ export function PerformanceOverviewChart() {
   }, [entries, range])
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 sm:p-6 shadow-xs h-full justify-between">
+    <BaseCard
+      elevation="raised"
+      className="h-full justify-between card-hover-lift"
+      innerClassName="flex flex-col gap-4 p-5 sm:p-6 h-full justify-between"
+    >
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400">
+          <div className="p-2 rounded-xl icon-bg-sky">
             <TrendingUp className="w-5 h-5" />
           </div>
           <div>
@@ -78,8 +81,8 @@ export function PerformanceOverviewChart() {
           <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="performanceGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="#7c3aed" stopOpacity={0.0} />
+                <stop offset="5%" stopColor="var(--accent-violet)" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="var(--accent-violet)" stopOpacity={0.0} />
               </linearGradient>
             </defs>
             <XAxis
@@ -100,7 +103,7 @@ export function PerformanceOverviewChart() {
                   return (
                     <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5 shadow-md text-xs">
                       <div className="font-semibold text-[var(--text-primary)]">{item.displayDate}</div>
-                      <div className="font-mono text-violet-600 dark:text-violet-400 font-bold">
+                      <div className="font-mono text-[var(--accent-violet)] font-bold">
                         {item.hours} hrs focus
                       </div>
                     </div>
@@ -112,7 +115,7 @@ export function PerformanceOverviewChart() {
             <Area
               type="monotone"
               dataKey="hours"
-              stroke="#7c3aed"
+              stroke="var(--accent-violet)"
               strokeWidth={3}
               fillOpacity={1}
               fill="url(#performanceGradient)"
@@ -120,6 +123,6 @@ export function PerformanceOverviewChart() {
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </BaseCard>
   )
 }

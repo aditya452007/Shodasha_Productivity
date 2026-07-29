@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { useGamificationStore } from './gamificationStore'
 import {
   fetchTasksFromDb,
   createTaskInDb,
@@ -215,6 +216,8 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     }
   },
   toggleTaskStatus: (id) => {
+    const prevTask = get().tasks.find((t) => t.id === id)
+    const prevStatus = prevTask?.status
     set((state) => ({
       tasks: state.tasks.map((task) => {
         if (task.id !== id) return task
@@ -226,8 +229,15 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     if (updated) {
       reorderTaskInDb(updated.id, updated.status, updated.order)
     }
+    if (prevStatus !== 'done' && updated?.status === 'done') {
+      useGamificationStore.getState().awardXP(15, `task_done_${id}`)
+      if (prevTask?.dueDate && new Date(prevTask.dueDate) >= new Date()) {
+        useGamificationStore.getState().awardXP(10, `early_task_${id}`)
+      }
+    }
   },
   moveTask: (id, targetStatus) => {
+    const prevTask = get().tasks.find((t) => t.id === id)
     set((state) => ({
       tasks: state.tasks.map((task) =>
         task.id === id ? { ...task, status: targetStatus, updatedAt: new Date().toISOString() } : task
@@ -236,6 +246,12 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     const updated = get().tasks.find((t) => t.id === id)
     if (updated) {
       reorderTaskInDb(updated.id, updated.status, updated.order)
+    }
+    if (prevTask?.status !== 'done' && targetStatus === 'done') {
+      useGamificationStore.getState().awardXP(15, `task_done_${id}`)
+      if (prevTask?.dueDate && new Date(prevTask.dueDate) >= new Date()) {
+        useGamificationStore.getState().awardXP(10, `early_task_${id}`)
+      }
     }
   },
   reorderTasks: (activeId, overId, newStatus) => {

@@ -151,7 +151,7 @@ export function Navbar() {
           <button
             onClick={() => setCommandPaletteOpen(true)}
             aria-label="Open command palette"
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)] shadow-xs"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)] shadow-xs"
           >
             <Search className="h-3.5 w-3.5" />
           </button>
@@ -160,7 +160,7 @@ export function Navbar() {
           <button
             onClick={toggleTheme}
             aria-label="Switch to light/dark mode"
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)] shadow-xs"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)] shadow-xs"
           >
             {themeMode === 'dark' ? <Sun className="h-3.5 w-3.5 text-amber-400" /> : <Moon className="h-3.5 w-3.5" />}
           </button>

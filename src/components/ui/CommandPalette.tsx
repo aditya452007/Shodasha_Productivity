@@ -10,6 +10,7 @@ const PAGES = [
   { id: 'habits', label: 'Habits', shortcut: '3', path: '/habits' },
   { id: 'timeline', label: 'Timeline', shortcut: '4', path: '/timeline' },
   { id: 'settings', label: 'Settings', shortcut: '5', path: '/settings' },
+  { id: 'timer', label: 'Timer', shortcut: '6', path: '/timer' },
 ]
 
 export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
@@ -31,7 +32,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
         onOpenChange(!open)
         return
       }
-      if (mod && ['1', '2', '3', '4', '5'].includes(e.key)) {
+      if (mod && ['1', '2', '3', '4', '5', '6'].includes(e.key)) {
         e.preventDefault()
         const page = PAGES[parseInt(e.key) - 1]
         if (page) {

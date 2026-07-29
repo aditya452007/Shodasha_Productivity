@@ -97,7 +97,7 @@ export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanCol
       layout
       ref={setNodeRef}
       style={style}
-      className={`flex flex-col w-80 shrink-0 rounded-2xl border bg-[var(--bg-base)]/80 p-4 transition-all ${
+      className={`flex flex-col w-80 shrink-0 rounded-2xl border bg-[var(--bg-base)]/80 p-4 transition-lift ${
         isDragging || isOverlay
           ? 'opacity-80 z-50 shadow-2xl scale-[1.01] border-[var(--accent)]'
           : isOver
