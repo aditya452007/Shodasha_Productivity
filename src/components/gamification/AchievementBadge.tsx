@@ -74,31 +74,35 @@ export function AchievementBadge({
       animate={
         isNew && !shouldReduceMotion
           ? { opacity: 1, scale: [1, 1.05, 1] }
+          : unlocked && !shouldReduceMotion
+          ? { y: [-2, 2, -2] }
           : { opacity: 1, scale: 1 }
       }
       transition={
         isNew && !shouldReduceMotion
           ? { type: 'spring', stiffness: 300, damping: 20 }
+          : unlocked && !shouldReduceMotion
+          ? { duration: 3.5, repeat: Infinity, ease: 'easeInOut' }
           : { duration: 0.3 }
       }
-      className={`relative rounded-xl border p-4 transition-lift ${
+      className={`relative rounded-2xl border p-4 transition-all duration-200 card-hover-lift ${
         unlocked
-          ? 'shadow-xs'
+          ? 'shadow-sm hover:shadow-md'
           : 'border-dashed border-[var(--border-subtle)] opacity-60'
       }`}
       style={{
         borderColor: unlocked
-          ? `color-mix(in srgb, ${catColor} 30%, transparent)`
+          ? `color-mix(in srgb, ${catColor} 40%, transparent)`
           : undefined,
         background: unlocked
-          ? `linear-gradient(135deg, color-mix(in srgb, ${catColor} 5%, transparent), transparent)`
+          ? `linear-gradient(135deg, color-mix(in srgb, ${catColor} 12%, transparent), transparent)`
           : undefined,
       }}
     >
       {/* NEW badge */}
       {showNewBadge && !shouldReduceMotion && (
         <motion.div
-          className="absolute -top-1 -right-1 z-10 px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider"
+          className="absolute -top-1.5 -right-1.5 z-10 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider shadow-sm"
           style={{
             background: 'linear-gradient(135deg, var(--accent-amber), var(--accent-orange))',
             color: 'white',
@@ -114,31 +118,31 @@ export function AchievementBadge({
       {/* Unlocked shimmer sweep */}
       {unlocked && !shouldReduceMotion && (
         <div
-          className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none"
+          className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none"
           style={{
-            background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%)',
+            background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%)',
             backgroundSize: '200% 100%',
-            animation: 'shimmer-sweep 0.8s ease-out forwards',
+            animation: 'shimmer-sweep 1s ease-out forwards',
           }}
         />
       )}
 
       <div className="flex items-center justify-between gap-2 mb-2.5">
         <div
-          className="p-2 rounded-lg border shadow-xs"
+          className="p-2.5 rounded-xl border shadow-xs transition-transform group-hover:scale-110"
           style={{
-            backgroundColor: `color-mix(in srgb, ${catColor} 10%, transparent)`,
-            borderColor: `color-mix(in srgb, ${catColor} 20%, transparent)`,
+            backgroundColor: `color-mix(in srgb, ${catColor} 15%, transparent)`,
+            borderColor: `color-mix(in srgb, ${catColor} 30%, transparent)`,
           }}
         >
           {renderIcon(achievement.iconName, catColor, !unlocked)}
         </div>
         <span
-          className="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border"
+          className="text-[9px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border shadow-2xs"
           style={{
             color: unlocked ? catColor : 'var(--text-tertiary)',
-            borderColor: unlocked ? `color-mix(in srgb, ${catColor} 30%, transparent)` : 'var(--border-subtle)',
-            backgroundColor: unlocked ? `color-mix(in srgb, ${catColor} 10%, transparent)` : undefined,
+            borderColor: unlocked ? `color-mix(in srgb, ${catColor} 40%, transparent)` : 'var(--border-subtle)',
+            backgroundColor: unlocked ? `color-mix(in srgb, ${catColor} 12%, transparent)` : undefined,
           }}
         >
           {achievement.tier}

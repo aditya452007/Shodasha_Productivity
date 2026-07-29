@@ -207,22 +207,22 @@ export function SkillOctagon({ size = 260, className = '' }: SkillOctagonProps) 
       >
         <title>Skill Octagon</title>
 
-        {/* Grid rings */}
+        {/* Grid rings with high clarity */}
         {rings.map((pts, i) => (
           <motion.polygon
             key={`ring-${i}`}
             points={pts}
             fill="none"
-            stroke="var(--border)"
-            strokeWidth={i === levels - 1 ? 2 : 1}
-            strokeOpacity={i === levels - 1 ? 0.5 : 0.35}
+            stroke="var(--border-strong)"
+            strokeWidth={i === levels - 1 ? 2.5 : 1.5}
+            strokeOpacity={i === levels - 1 ? 0.8 : 0.45}
             initial={shouldReduceMotion ? undefined : { opacity: 0 }}
-            animate={{ opacity: i === levels - 1 ? 0.5 : 0.35 }}
+            animate={{ opacity: i === levels - 1 ? 0.8 : 0.45 }}
             transition={{ duration: 0.3, delay: i * 0.05 }}
           />
         ))}
 
-        {/* Spoke lines */}
+        {/* Crisp Spoke lines */}
         {Array.from({ length: axes.length }).map((_, i) => {
           const angle = (Math.PI * 2 * i) / axes.length - Math.PI / 2
           const x = cx + r * Math.cos(angle)
@@ -234,11 +234,11 @@ export function SkillOctagon({ size = 260, className = '' }: SkillOctagonProps) 
               y1={cy}
               x2={x}
               y2={y}
-              stroke="var(--border)"
-              strokeWidth={0.8}
-              strokeOpacity={0.25}
+              stroke="var(--border-strong)"
+              strokeWidth={1.5}
+              strokeOpacity={0.5}
               initial={shouldReduceMotion ? undefined : { opacity: 0 }}
-              animate={{ opacity: 0.25 }}
+              animate={{ opacity: 0.5 }}
               transition={{ duration: 0.3, delay: 0.15 }}
             />
           )

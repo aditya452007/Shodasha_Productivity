@@ -3,11 +3,15 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { useUIStore } from '@/stores/uiStore'
 import { useSettingsStore } from '@/stores/settingsStore'
+import { useGamificationStore } from '@/stores/gamificationStore'
+import { useHabitStore } from '@/stores/habitStore'
 import { isTauri } from '@/lib/db'
 import { CommandPalette } from '@/components/ui/CommandPalette'
 import GooeyTabs from '@/components/ui/gooey-tabs'
+import { LivingFlameIcon } from '@/components/gamification/LivingFlameIcon'
 import {
   Sun,
   Moon,
@@ -22,6 +26,7 @@ import {
   Minus,
   Square,
   X,
+  Award,
 } from 'lucide-react'
 
 const navItems = [
@@ -40,6 +45,30 @@ export function Navbar() {
   const themeMode = useSettingsStore((state) => state.themeMode)
   const setThemeMode = useSettingsStore((state) => state.setThemeMode)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+
+  const level = useGamificationStore((s) => s.level)
+
+  // Compute active habit streak for navbar badge
+  const habits = useHabitStore((s) => s.habits)
+  const records = useHabitStore((s) => s.records)
+  const todayStr = new Date().toISOString().split('T')[0]
+
+  const streak = habits.length === 0 ? 0 : (() => {
+    let count = 0
+    let checkDate = new Date()
+    const anyDoneToday = habits.some((h) => !!records[`${h.id}_${todayStr}`])
+    if (!anyDoneToday) checkDate.setDate(checkDate.getDate() - 1)
+    while (true) {
+      const dateStr = checkDate.toISOString().split('T')[0]
+      if (habits.some((h) => !!records[`${h.id}_${dateStr}`])) {
+        count++
+        checkDate.setDate(checkDate.getDate() - 1)
+      } else {
+        break
+      }
+    }
+    return count
+  })()
 
   const toggleTheme = () => {
     setThemeMode(themeMode === 'dark' ? 'light' : 'dark')
@@ -127,8 +156,28 @@ export function Navbar() {
           </GooeyTabs>
         </div>
 
-        {/* Right Status Indicator & Actions & Frameless Window Controls */}
+        {/* Right Gamification Pills & Actions & Frameless Window Controls */}
         <div className="flex items-center gap-3">
+          {/* Levitating Level Badge */}
+          <motion.div
+            animate={{ y: [-1.5, 1.5, -1.5] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-600 dark:text-violet-400 text-xs font-bold shadow-2xs"
+          >
+            <Award className="w-3.5 h-3.5" />
+            <span>Lvl {level}</span>
+          </motion.div>
+
+          {/* Living Streak Badge */}
+          <motion.div
+            animate={{ y: [1.5, -1.5, 1.5] }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold shadow-2xs"
+          >
+            <LivingFlameIcon size={16} intensity="active" />
+            <span>{streak}d Streak</span>
+          </motion.div>
+
           {/* Tracking Pulse Badge */}
           <div className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-base)] px-3 py-1.5 text-xs text-[var(--text-secondary)] shadow-xs">
             <span className="relative flex h-2 w-2">
@@ -142,7 +191,7 @@ export function Navbar() {
               ></span>
             </span>
             <Activity className="h-3.5 w-3.5 text-[var(--text-muted)]" />
-            <span className="font-mono text-[11px] font-medium">
+            <span className="font-mono text-[11px] font-medium hidden lg:inline">
               {isTracking ? 'Tracker Active' : 'Tracker Offline'}
             </span>
           </div>
@@ -201,3 +250,4 @@ export function Navbar() {
     </>
   )
 }
+

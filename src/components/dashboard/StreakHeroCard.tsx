@@ -2,9 +2,10 @@
 
 import { useMemo } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Flame } from 'lucide-react'
+import { Zap } from 'lucide-react'
 import { useHabitStore } from '@/stores/habitStore'
 import { BaseCard } from '@/components/ui/BaseCard'
+import { LivingFlameIcon } from '@/components/gamification/LivingFlameIcon'
 
 export function StreakHeroCard() {
   const shouldReduceMotion = useReducedMotion()
@@ -40,42 +41,52 @@ export function StreakHeroCard() {
   return (
     <BaseCard
       elevation="flat"
-      className="relative flex flex-col justify-between p-6 rounded-3xl bg-gradient-to-br from-[var(--accent-violet)] via-[var(--accent-indigo)] to-[var(--accent-blue)] text-white shadow-xl overflow-hidden h-full min-h-[220px] border-0 card-hover-lift"
+      className="relative flex flex-col justify-between p-6 rounded-3xl bg-gradient-to-br from-amber-600 via-orange-600 to-red-600 text-white shadow-xl overflow-hidden h-full min-h-[240px] border border-amber-400/30 card-hover-lift"
       innerClassName="p-0"
     >
-      {/* Decorative Background Rays / Blur */}
-      <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-      <div className="absolute -bottom-12 -left-12 w-40 h-40 rounded-full bg-[color-mix(in_oklab,var(--accent-amber)_20%,transparent)] blur-2xl pointer-events-none" />
+      {/* Radiant Background Blur Halos */}
+      <div className="absolute -top-10 -right-10 w-44 h-44 rounded-full bg-amber-400/25 blur-3xl pointer-events-none animate-pulse-glow" />
+      <div className="absolute -bottom-10 -left-10 w-44 h-44 rounded-full bg-red-600/30 blur-3xl pointer-events-none" />
 
-      {/* Top Header */}
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white/70 z-10">
-        <Flame className="w-4 h-4 text-[var(--accent-amber)] fill-[var(--accent-amber)]" />
-        <span>Current Streak</span>
+      {/* Top Header Row with Levitating Badge */}
+      <div className="flex items-center justify-between z-10">
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-100">
+          <LivingFlameIcon size={20} intensity="blazing" />
+          <span>Active Streak</span>
+        </div>
+        <motion.div
+          animate={shouldReduceMotion ? {} : { y: [-2, 2, -2] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-amber-100 shadow-xs"
+        >
+          <Zap className="w-3 h-3 text-amber-300 fill-amber-300" />
+          <span>{streak > 3 ? 'On Fire!' : 'Multiplier Active'}</span>
+        </motion.div>
       </div>
 
-      {/* Center Flame & Big Counter */}
-      <div className="flex flex-col items-center justify-center text-center my-4 z-10">
-        {/* Animated Flame Icon Container */}
+      {/* Center Living Flame & Big Counter */}
+      <div className="flex flex-col items-center justify-center text-center my-3 z-10">
         <motion.div
-          animate={shouldReduceMotion ? {} : { scale: [1, 1.08, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: [0.65, 0, 0.35, 1] }}
-          className="p-3.5 rounded-2xl bg-[color-mix(in_oklab,var(--accent-amber)_20%,transparent)] border border-[var(--accent-amber)]/30 text-[var(--accent-amber)] mb-2 shadow-inner"
+          animate={shouldReduceMotion ? {} : { y: [-3, 3, -3], scale: [1, 1.04, 1] }}
+          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+          className="p-3 rounded-2xl bg-amber-500/20 backdrop-blur-md border border-amber-300/40 mb-2 shadow-inner"
         >
-          <Flame className="w-8 h-8 fill-[var(--accent-amber)] stroke-[var(--accent-amber)]/80" />
+          <LivingFlameIcon size={44} intensity="blazing" />
         </motion.div>
 
-        <div className="font-display text-4xl sm:text-5xl font-black tracking-tight drop-shadow-md">
+        <div className="font-display text-5xl sm:text-6xl font-black tracking-tight drop-shadow-lg text-white">
           {streak > 0 ? streak : 0}
         </div>
-        <span className="text-xs font-semibold uppercase tracking-widest text-white/70 mt-0.5">
-          {streak === 1 ? 'Day' : 'Days'}
+        <span className="text-xs font-bold uppercase tracking-widest text-amber-200 mt-1">
+          {streak === 1 ? 'Day Streak' : 'Days Streak'}
         </span>
       </div>
 
       {/* Footer Subtext */}
-      <div className="text-center text-xs text-white/80 font-medium z-10 border-t border-white/15 pt-3">
-        Keep it up! You're doing great.
+      <div className="text-center text-xs text-amber-100/90 font-medium z-10 border-t border-white/15 pt-3">
+        {streak > 0 ? 'Consistent progress builds habits!' : 'Complete a habit today to start your fire!'}
       </div>
     </BaseCard>
   )
 }
+

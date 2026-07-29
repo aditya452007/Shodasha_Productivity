@@ -40,43 +40,51 @@ export function TopKPIGrid() {
   const cards = [
     {
       id: 'focus-time',
-      title: 'Focus Time Today',
+      title: 'Active Focus Time',
       value: `${focusHours}h ${focusMins}m`,
       numericVal: focusHours,
-      subtitle: `Target: ${goalHours}h Daily`,
+      subtitle: `Goal: ${goalHours}h Daily`,
       icon: Clock,
-      color: 'var(--accent-blue)', // Blue
-      bgColor: 'icon-bg-sky',
+      cardClass: 'card-color-emerald',
+      iconBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30',
+      badge: 'Tracking',
+      dotColor: 'bg-emerald-500',
     },
     {
       id: 'focus-score',
-      title: 'Focus Score',
+      title: 'Productivity Index',
       value: `${focusScore}%`,
       numericVal: focusScore,
-      subtitle: 'Productivity Index',
+      subtitle: 'Focus Quality Score',
       icon: Zap,
-      color: 'var(--accent-violet)', // Violet
-      bgColor: 'icon-bg-violet',
+      cardClass: 'card-color-violet',
+      iconBg: 'bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/30',
+      badge: 'Live',
+      dotColor: 'bg-violet-500',
     },
     {
       id: 'active-tasks',
-      title: 'Tasks Pending',
-      value: `${pendingTasks}`,
+      title: 'Kanban Tasks',
+      value: `${pendingTasks} Pending`,
       numericVal: pendingTasks,
-      subtitle: `${completedTasks} Completed Today`,
+      subtitle: `${completedTasks} Finished Today`,
       icon: ClipboardList,
-      color: 'var(--accent-amber)', // Amber
-      bgColor: 'icon-bg-amber',
+      cardClass: 'card-color-indigo',
+      iconBg: 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30',
+      badge: `${completedTasks} Done`,
+      dotColor: 'bg-indigo-500',
     },
     {
       id: 'habit-rate',
       title: 'Habit Consistency',
       value: `${habitRate}%`,
       numericVal: habitRate,
-      subtitle: `${completedHabits} of ${totalHabits} Done Today`,
+      subtitle: `${completedHabits} of ${totalHabits} Completed`,
       icon: Target,
-      color: 'var(--accent-emerald)', // Emerald
-      bgColor: 'icon-bg-emerald',
+      cardClass: 'card-color-amber',
+      iconBg: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30',
+      badge: 'Daily',
+      dotColor: 'bg-amber-500',
     },
   ]
 
@@ -88,14 +96,17 @@ export function TopKPIGrid() {
           <BaseCard
             key={card.id}
             elevation="raised"
-            className="card-hover-lift group"
-            innerClassName="flex items-center justify-between p-4 sm:p-5"
+            className={`card-hover-lift group ${card.cardClass} relative overflow-hidden rounded-2xl`}
+            innerClassName="flex items-center justify-between p-5"
           >
-            <div className="flex flex-col gap-1 min-w-0">
-              <span className="text-xs font-semibold text-[var(--text-secondary)] truncate">
-                {card.title}
-              </span>
-              <div className="font-display text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+            <div className="flex flex-col gap-1 min-w-0 z-10">
+              <div className="flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${card.dotColor} animate-pulse-glow`} />
+                <span className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider truncate">
+                  {card.title}
+                </span>
+              </div>
+              <div className="font-display text-2xl font-bold tracking-tight text-[var(--text-primary)] mt-1">
                 {card.id === 'focus-score' || card.id === 'habit-rate' ? (
                   <span>
                     <NumberTicker value={card.numericVal} />%
@@ -104,12 +115,12 @@ export function TopKPIGrid() {
                   card.value
                 )}
               </div>
-              <span className="text-[11px] text-[var(--text-tertiary)] truncate">
+              <span className="text-[11px] font-medium text-[var(--text-tertiary)] truncate mt-0.5">
                 {card.subtitle}
               </span>
             </div>
 
-            <div className={`p-3 rounded-2xl ${card.bgColor} shrink-0 transition-transform group-hover:scale-105`}>
+            <div className={`p-3.5 rounded-2xl ${card.iconBg} shrink-0 transition-all duration-300 group-hover:scale-110 shadow-xs z-10`}>
               <IconComponent className="w-5 h-5 stroke-[2]" />
             </div>
           </BaseCard>
@@ -118,3 +129,4 @@ export function TopKPIGrid() {
     </div>
   )
 }
+

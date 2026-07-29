@@ -570,3 +570,114 @@
   }
 }
 
+/* Living Flame Wave & Flicker Animations */
+@keyframes flame-flicker {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.6));
+  }
+  25% {
+    transform: scale(1.04) rotate(-1.5deg);
+    filter: drop-shadow(0 0 14px rgba(239, 68, 68, 0.8));
+  }
+  50% {
+    transform: scale(0.98) rotate(1deg);
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.5));
+  }
+  75% {
+    transform: scale(1.06) rotate(-0.5deg);
+    filter: drop-shadow(0 0 16px rgba(249, 115, 22, 0.85));
+  }
+}
+
+@keyframes flame-wave {
+  0% {
+    d: path("M12 2C12 2 7 6.5 7 11.5C7 14.5 9.2 17 12 17C14.8 17 17 14.5 17 11.5C17 6.5 12 2 12 2Z");
+  }
+  50% {
+    d: path("M12 2C12 2 6.5 6 6.5 11.5C6.5 14.8 9 17.2 12 17.2C15 17.2 17.5 14.8 17.5 11.5C17.5 6 12 2 12 2Z");
+  }
+  100% {
+    d: path("M12 2C12 2 7 6.5 7 11.5C7 14.5 9.2 17 12 17C14.8 17 17 14.5 17 11.5C17 6.5 12 2 12 2Z");
+  }
+}
+
+@keyframes float-levitate {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+}
+
+.animate-flame-flicker {
+  animation: flame-flicker 2.5s infinite ease-in-out;
+}
+
+.animate-levitate {
+  animation: float-levitate 3s infinite ease-in-out;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+/* Custom Domain Color Cards */
+.card-color-ember {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.08) 0%, rgba(239, 68, 68, 0.04) 100%);
+  border: 1px solid rgba(249, 115, 22, 0.25);
+}
+.dark .card-color-ember {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(239, 68, 68, 0.08) 100%);
+  border: 1px solid rgba(249, 115, 22, 0.35);
+}
+
+.card-color-emerald {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(20, 184, 166, 0.04) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+.dark .card-color-emerald {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(20, 184, 166, 0.08) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.card-color-indigo {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(59, 130, 246, 0.04) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+.dark .card-color-indigo {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(59, 130, 246, 0.08) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+}
+
+.card-color-violet {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(236, 72, 153, 0.04) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}
+.dark .card-color-violet {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(236, 72, 153, 0.08) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+}
+
+.card-color-amber {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.04) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+.dark .card-color-amber {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.08) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+

@@ -9,6 +9,7 @@ import { HabitAchievements } from '@/components/habits/HabitAchievements'
 import { HabitCalendar } from '@/components/habits/HabitCalendar'
 import { HabitHeatmap } from '@/components/habits/HabitHeatmap'
 import { AddHabitModal } from '@/components/habits/AddHabitModal'
+import { HabitCategoryMetricsCard } from '@/components/habits/HabitCategoryMetricsCard'
 import { StreakDisplay } from '@/components/gamification/StreakDisplay'
 import { SkillOctagon } from '@/components/gamification/SkillOctagon'
 import { XPProgressBar } from '@/components/gamification/XPProgressBar'
@@ -121,20 +122,37 @@ export default function HabitsPage() {
         />
       </motion.div>
 
-      {/* 4. Skill Octagon + Quick Level Stats + Achievements */}
+      {/* 4. Skill Octagon (Square Card) + Category Balance Metrics + Level XP Progression */}
       <div className="bento-grid bento-grid-cols-12 items-stretch">
-        <div className="bento-col-span-4 space-y-4">
-          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 shadow-xs flex items-center justify-center">
-            <SkillOctagon size={220} />
-          </div>
-          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4 shadow-xs">
-            <XPProgressBar />
+        <div className="bento-col-span-4">
+          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-xs flex flex-col items-center justify-between aspect-square h-full card-hover-lift">
+            <div className="flex items-center justify-between w-full mb-2">
+              <h3 className="font-display text-sm font-bold text-[var(--text-primary)]">Skill Radar</h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20">8 Axes</span>
+            </div>
+            <div className="flex items-center justify-center flex-1 w-full">
+              <SkillOctagon size={240} />
+            </div>
           </div>
         </div>
-        <div className="bento-col-span-8">
-          <HabitAchievements />
+
+        <div className="bento-col-span-4">
+          <HabitCategoryMetricsCard />
+        </div>
+
+        <div className="bento-col-span-4">
+          <XPProgressBar className="h-full" />
         </div>
       </div>
+
+      {/* 5. Milestones & Achievement Badges Grid */}
+      <motion.div
+        initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, delay: shouldReduceMotion ? 0 : 0.15 }}
+      >
+        <HabitAchievements />
+      </motion.div>
 
       {/* 5. 24-Week Consistency Heatmap */}
       <motion.div

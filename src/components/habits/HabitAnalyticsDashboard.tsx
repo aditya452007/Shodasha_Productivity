@@ -440,8 +440,8 @@ export function HabitAnalyticsDashboard() {
             </div>
           </div>
 
-          {/* List of Habit Ring Cards with Hover Tooltips */}
-          <div className="space-y-3">
+          {/* List of Habit Ring Cards with Scrollable Fixed Height */}
+          <div className="space-y-3 max-h-72 overflow-y-auto pr-1.5">
             {habits.map((habit) => {
               const today = new Date()
               const startDate = habit.createdAt.split('T')[0]
