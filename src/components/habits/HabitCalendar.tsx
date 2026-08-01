@@ -13,14 +13,31 @@ import {
   Edit2,
   Calendar as CalendarIcon,
   ExternalLink,
+  Bell,
 } from 'lucide-react'
-import { useHabitStore, Habit } from '@/stores/habitStore'
+import { useHabitStore, Habit, HabitPriority, GENERAL_CATEGORY } from '@/stores/habitStore'
 import { useTaskStore } from '@/stores/taskStore'
 import { openExternalUrl } from '@/lib/utils/url'
+import { getHabitHp, HP_HEAL_BY_PRIORITY, HpBand } from '@/lib/utils/habitHealth'
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { ErrorBanner } from '@/components/ui/ErrorBanner'
 import { BaseCard } from '@/components/ui/BaseCard'
 import { useReducedMotion } from 'framer-motion'
+
+const PRIORITY_LABEL: Record<HabitPriority, string> = { high: 'High', medium: 'Med', low: 'Low' }
+
+const PRIORITY_BADGE_STYLE: Record<HabitPriority, string> = {
+  high: 'text-[var(--error)] border-[var(--error)]/30 bg-[var(--error)]/10',
+  medium: 'text-[var(--accent-amber)] border-[var(--accent-amber)]/30 bg-[var(--accent-amber)]/10',
+  low: 'text-[var(--success)] border-[var(--success)]/30 bg-[var(--success)]/10',
+}
+
+const HP_BAR_COLOR: Record<HpBand, string> = {
+  healthy: 'var(--success)',
+  low: 'var(--accent-amber)',
+  critical: 'var(--error)',
+  depleted: 'var(--error)',
+}
 
 interface HabitCalendarProps {
   onOpenAddModal: () => void
@@ -34,8 +51,14 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
   const deleteHabit = useHabitStore((s) => s.deleteHabit)
   const isLoading = useHabitStore((s) => s.isLoading)
   const error = useHabitStore((s) => s.error)
+  const categories = useHabitStore((s) => s.habitCategories)
   const tasks = useTaskStore((s) => s.tasks)
   const shouldReduceMotion = useReducedMotion()
+
+  const categoryById = useMemo(
+    () => Object.fromEntries(categories.map((c) => [c.id, c])),
+    [categories]
+  )
 
   const [currentDate, setCurrentDate] = useState(() => new Date())
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -165,17 +188,17 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
       </div>
 
       <div className="relative overflow-hidden">
-        <div ref={scrollContainerRef} className="overflow-x-auto pb-2">
+        <div ref={scrollContainerRef} className="overflow-auto max-h-[540px] overscroll-contain pb-2">
           <table className="w-full text-left border-collapse" style={{ minWidth: `${daysInMonth.length * 36 + 240}px` }}>
-            <thead>
-              <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/30 text-xs font-medium text-[var(--text-secondary)]">
-                <th className="sticky left-0 z-20 py-3 px-4 w-64 min-w-[220px] font-semibold text-[var(--text-primary)] bg-[var(--bg-secondary)] border-r border-[var(--border-subtle)] shadow-[2px_0_8px_-4px_rgba(0,0,0,0.08)]">
+            <thead className="sticky top-0 z-30">
+              <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-xs font-medium text-[var(--text-secondary)]">
+                <th className="sticky left-0 z-40 py-3 px-4 w-64 min-w-[220px] font-semibold text-[var(--text-primary)] bg-[var(--bg-secondary)] border-r border-[var(--border-subtle)] shadow-[2px_0_8px_-4px_rgba(0,0,0,0.08)]">
                   Habit
                 </th>
                 {daysInMonth.map((day) => (
                   <th
                     key={day.dateStr}
-                    className={`py-2 px-1 text-center min-w-[32px] ${
+                    className={`py-2 px-1 text-center min-w-[32px] bg-[var(--bg-secondary)] ${
                       day.isToday ? 'bg-[var(--accent)]/10 font-bold text-[var(--accent)]' : ''
                     }`}
                   >
@@ -187,7 +210,7 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                     </div>
                   </th>
                 ))}
-                <th className="sticky right-0 z-20 py-3 px-3 text-right font-medium text-[var(--text-tertiary)] w-24 bg-[var(--bg-secondary)] border-l border-[var(--border-subtle)] shadow-[-2px_0_8px_-4px_rgba(0,0,0,0.08)]">
+                <th className="sticky right-0 z-40 py-3 px-3 text-right font-medium text-[var(--text-tertiary)] w-24 bg-[var(--bg-secondary)] border-l border-[var(--border-subtle)] shadow-[-2px_0_8px_-4px_rgba(0,0,0,0.08)]">
                   Rate
                 </th>
               </tr>
@@ -220,6 +243,14 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                       ? Math.round((doneCountInMonth / eligibleDaysInMonth.length) * 100)
                       : 0
 
+                    const habitHp = getHabitHp(habit, records)
+                    const habitCategory =
+                      habit.category && habit.category !== GENERAL_CATEGORY
+                        ? categoryById[habit.category]
+                        : null
+                    const categoryColor = habitCategory?.color ?? 'var(--text-tertiary)'
+                    const categoryLabel = habitCategory?.name ?? 'General'
+
                     return (
                       <motion.tr
                         key={habit.id}
@@ -245,6 +276,12 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                                   <span className="text-sm font-medium text-[var(--text-primary)] truncate">
                                     {habit.name}
                                   </span>
+                                  <span
+                                    className={`inline-flex items-center px-1.5 py-px rounded-md border text-[10px] font-semibold shrink-0 ${PRIORITY_BADGE_STYLE[habit.priority]}`}
+                                    title={`Priority: ${PRIORITY_LABEL[habit.priority]}`}
+                                  >
+                                    {PRIORITY_LABEL[habit.priority]}
+                                  </span>
                                   {habit.url && (
                                     <button
                                       onClick={(e) => {
@@ -259,12 +296,53 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
                                     </button>
                                   )}
                                 </div>
+                                <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                                  <span
+                                    className="inline-flex items-center gap-1 px-1.5 py-px rounded-md border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/50 text-[10px] font-medium text-[var(--text-secondary)]"
+                                    title={`Category: ${categoryLabel}`}
+                                  >
+                                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: categoryColor }} />
+                                    <span className="truncate max-w-[96px]">{categoryLabel}</span>
+                                  </span>
+                                  {habit.reminderTime && (
+                                    <span
+                                      className="inline-flex items-center gap-1 px-1.5 py-px rounded-md border border-[var(--accent-amber)]/30 bg-[var(--accent-amber)]/10 text-[10px] font-medium text-[var(--accent-amber)]"
+                                      title={`Daily reminder at ${habit.reminderTime} — Shodasha will nudge you (and catch up if missed)`}
+                                    >
+                                      <Bell className="w-2.5 h-2.5" />
+                                      {habit.reminderTime}
+                                    </span>
+                                  )}
+                                </div>
                                 {linkedTask && (
                                   <div className="flex items-center gap-1 text-[11px] text-[var(--text-tertiary)] truncate mt-0.5">
                                     <LinkIcon className="w-3 h-3 shrink-0" />
                                     <span className="truncate">{linkedTask.title}</span>
                                   </div>
                                 )}
+                                <div
+                                  className="flex items-center gap-1.5 mt-1"
+                                  title={`HP: ${habitHp.hp}/100 — check in to heal ${HP_HEAL_BY_PRIORITY[habit.priority]} HP`}
+                                >
+                                  <div className="h-1 w-16 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
+                                    <div
+                                      className="h-full rounded-full transition-width"
+                                      style={{
+                                        width: `${habitHp.hp}%`,
+                                        backgroundColor: HP_BAR_COLOR[habitHp.band],
+                                      }}
+                                    />
+                                  </div>
+                                  {habitHp.band === 'depleted' ? (
+                                    <span className="text-[10px] font-semibold text-[var(--error)] leading-none">
+                                      Depleted
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] font-mono text-[var(--text-tertiary)] leading-none">
+                                      {habitHp.hp}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 

@@ -6,10 +6,10 @@ import { Sun, Moon, Monitor, Palette, Check } from 'lucide-react'
 import { useSettingsStore, ThemeMode, AccentColor } from '@/stores/settingsStore'
 
 const accentOptions: { color: AccentColor; name: string; bg: string }[] = [
-  { color: 'var(--accent-emerald)', name: 'Emerald', bg: 'bg-[var(--accent-emerald)]' },
-  { color: 'var(--accent-violet)', name: 'Violet', bg: 'bg-[var(--accent-violet)]' },
-  { color: 'var(--accent-amber)', name: 'Amber', bg: 'bg-[var(--accent-amber)]' },
-  { color: 'var(--accent-rose)', name: 'Rose', bg: 'bg-[var(--accent-rose)]' },
+  { color: 'emerald', name: 'Emerald', bg: 'bg-[var(--accent-emerald)]' },
+  { color: 'violet', name: 'Violet', bg: 'bg-[var(--accent-violet)]' },
+  { color: 'amber', name: 'Amber', bg: 'bg-[var(--accent-amber)]' },
+  { color: 'rose', name: 'Rose', bg: 'bg-[var(--accent-rose)]' },
 ]
 
 const themeModes: { mode: ThemeMode; label: string; icon: React.ReactNode }[] = [

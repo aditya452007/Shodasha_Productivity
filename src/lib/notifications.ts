@@ -152,6 +152,20 @@ export async function sendHabitReminderNotification(habitName: string): Promise<
   });
 }
 
+export async function sendHabitScheduledReminder(
+  habitName: string,
+  body: string,
+  tag: string,
+  requireInteraction = true
+): Promise<boolean> {
+  return sendWebNotification({
+    title: 'Habit Reminder',
+    body,
+    tag,
+    requireInteraction,
+  });
+}
+
 export async function sendIdleAlertNotification(idleMinutes: number): Promise<boolean> {
   return sendWebNotification({
     title: 'Heads up!',

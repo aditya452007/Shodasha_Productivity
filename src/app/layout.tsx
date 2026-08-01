@@ -6,6 +6,8 @@ import { Navbar } from '@/components/layout/Navbar'
 import { AgentationWrapper } from '@/components/common/AgentationWrapper'
 import { AppInitializer } from '@/components/common/AppInitializer'
 import { PageTransition } from '@/components/ui/PageTransition'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
+import { LevelUpCelebration } from '@/components/gamification/LevelUpCelebration'
 import { NotificationScheduler } from '@/components/common/NotificationScheduler'
 
 const inter = Inter({
@@ -43,11 +45,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AppInitializer />
         <Navbar />
         <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-8 overflow-y-auto">
-          <PageTransition>{children}</PageTransition>
+          <ErrorBoundary>
+            <PageTransition>{children}</PageTransition>
+          </ErrorBoundary>
         </main>
         <Toaster position="bottom-right" richColors />
         <AgentationWrapper />
         <NotificationScheduler />
+        <LevelUpCelebration />
       </body>
     </html>
   )

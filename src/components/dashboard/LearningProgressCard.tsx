@@ -2,16 +2,21 @@
 
 import { useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { PieChart } from 'lucide-react'
+import { PieChart, Timer, GitCommitHorizontal, MonitorUp } from 'lucide-react'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { BaseCard } from '@/components/ui/BaseCard'
+
+function formatDuration(seconds: number): string {
+  if (!seconds || seconds <= 0) return '0m'
+  const h = Math.floor(seconds / 3600)
+  const m = Math.round((seconds % 3600) / 60)
+  return h > 0 ? `${h}h ${m}m` : `${m}m`
+}
 
 export function LearningProgressCard() {
   const shouldReduceMotion = useReducedMotion()
   const [filterRange, setFilterRange] = useState<'today' | 'week'>('today')
-  const getKPIsFiltered = useTimeEntryStore((s) => s.getKPIsFiltered)
-
-  const kpis = getKPIsFiltered()
+  const kpis = useTimeEntryStore((s) => s.filteredKPIs)
   const focusScore = kpis.focusScore || 72
 
   // Category percentages
@@ -132,6 +137,49 @@ export function LearningProgressCard() {
               <span className="font-medium text-[var(--text-primary)]">Distraction</span>
             </div>
             <span className="font-mono font-bold text-[var(--text-primary)]">{distractionPct}%</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Stats Row */}
+      <div className="grid grid-cols-3 gap-2 pt-4 border-t border-[var(--border-subtle)]">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="p-1.5 rounded-lg bg-[var(--accent-violet)]/10 text-[var(--accent-violet)] shrink-0">
+            <Timer className="w-3.5 h-3.5" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)] truncate">
+              Active Focus
+            </p>
+            <p className="font-mono text-xs font-bold text-[var(--text-primary)] truncate">
+              {formatDuration(kpis.activeFocusSeconds)}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="p-1.5 rounded-lg bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] shrink-0">
+            <GitCommitHorizontal className="w-3.5 h-3.5" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)] truncate">
+              Switches
+            </p>
+            <p className="font-mono text-xs font-bold text-[var(--text-primary)] truncate">
+              {kpis.contextSwitches ?? 0}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="p-1.5 rounded-lg bg-[var(--accent-amber)]/10 text-[var(--accent-amber)] shrink-0">
+            <MonitorUp className="w-3.5 h-3.5" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)] truncate">
+              Top App
+            </p>
+            <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+              {kpis.topAppName || '—'}
+            </p>
           </div>
         </div>
       </div>

@@ -3,8 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { useUIStore } from '@/stores/uiStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { useGamificationStore } from '@/stores/gamificationStore'
 import { useHabitStore } from '@/stores/habitStore'
@@ -15,13 +13,11 @@ import { LivingFlameIcon } from '@/components/gamification/LivingFlameIcon'
 import {
   Sun,
   Moon,
-  Activity,
   Search,
   LayoutDashboard,
   Kanban,
   CalendarCheck,
   LineChart,
-  Timer,
   Settings,
   Minus,
   Square,
@@ -30,18 +26,16 @@ import {
 } from 'lucide-react'
 
 const navItems = [
-  { label: 'Dashboard', href: '/', icon: LayoutDashboard, color: 'bg-emerald-600 hover:bg-emerald-700' },
-  { label: 'Board', href: '/board', icon: Kanban, color: 'bg-teal-600 hover:bg-teal-700' },
-  { label: 'Habits', href: '/habits', icon: CalendarCheck, color: 'bg-violet-600 hover:bg-violet-700' },
-  { label: 'Timeline', href: '/timeline', icon: LineChart, color: 'bg-amber-600 hover:bg-amber-700' },
-  { label: 'Timer', href: '/timer', icon: Timer, color: 'bg-blue-600 hover:bg-blue-700' },
-  { label: 'Settings', href: '/settings', icon: Settings, color: 'bg-stone-700 hover:bg-stone-800' },
+  { label: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { label: 'Board', href: '/board', icon: Kanban },
+  { label: 'Habits', href: '/habits', icon: CalendarCheck },
+  { label: 'Timeline', href: '/timeline', icon: LineChart },
+  { label: 'Settings', href: '/settings', icon: Settings },
 ]
 
 export function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
-  const isTracking = useUIStore((state) => state.isTracking)
   const themeMode = useSettingsStore((state) => state.themeMode)
   const setThemeMode = useSettingsStore((state) => state.setThemeMode)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
@@ -144,7 +138,7 @@ export function Navbar() {
               {navItems.map((item) => {
                 const Icon = item.icon
                 return (
-                  <GooeyTabs.Tab key={item.href} color={item.color} label={item.label}>
+                  <GooeyTabs.Tab key={item.href} color="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" label={item.label}>
                     <GooeyTabs.Icon>
                       <Icon className="h-4 w-4" />
                     </GooeyTabs.Icon>
@@ -158,42 +152,16 @@ export function Navbar() {
 
         {/* Right Gamification Pills & Actions & Frameless Window Controls */}
         <div className="flex items-center gap-3">
-          {/* Levitating Level Badge */}
-          <motion.div
-            animate={{ y: [-1.5, 1.5, -1.5] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-600 dark:text-violet-400 text-xs font-bold shadow-2xs"
-          >
+          {/* Level Badge */}
+          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-600 dark:text-violet-400 text-xs font-bold shadow-2xs">
             <Award className="w-3.5 h-3.5" />
             <span>Lvl {level}</span>
-          </motion.div>
+          </div>
 
-          {/* Living Streak Badge */}
-          <motion.div
-            animate={{ y: [1.5, -1.5, 1.5] }}
-            transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold shadow-2xs"
-          >
+          {/* Streak Badge */}
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold shadow-2xs">
             <LivingFlameIcon size={16} intensity="active" />
             <span>{streak}d Streak</span>
-          </motion.div>
-
-          {/* Tracking Pulse Badge */}
-          <div className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-base)] px-3 py-1.5 text-xs text-[var(--text-secondary)] shadow-xs">
-            <span className="relative flex h-2 w-2">
-              {isTracking && (
-                <span className="absolute inline-flex h-full w-full animate-ping motion-reduce:animate-none rounded-full bg-[var(--accent)] opacity-75"></span>
-              )}
-              <span
-                className={`relative inline-flex h-2 w-2 rounded-full ${
-                  isTracking ? 'bg-[var(--accent)]' : 'bg-stone-400'
-                }`}
-              ></span>
-            </span>
-            <Activity className="h-3.5 w-3.5 text-[var(--text-muted)]" />
-            <span className="font-mono text-[11px] font-medium hidden lg:inline">
-              {isTracking ? 'Tracker Active' : 'Tracker Offline'}
-            </span>
           </div>
 
           {/* Command Palette Trigger */}

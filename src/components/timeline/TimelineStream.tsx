@@ -46,11 +46,14 @@ const formatDuration = (seconds?: number) => {
 }
 
 export function TimelineStream() {
-  const { getFilteredEntries, categories, linkTaskToTimeEntry, isLoading, error, refreshAllData } = useTimeEntryStore()
+  const entries = useTimeEntryStore((s) => s.filteredEntries)
+  const categories = useTimeEntryStore((s) => s.categories)
+  const linkTaskToTimeEntry = useTimeEntryStore((s) => s.linkTaskToTimeEntry)
+  const isLoading = useTimeEntryStore((s) => s.isLoading)
+  const error = useTimeEntryStore((s) => s.error)
+  const refreshAllData = useTimeEntryStore((s) => s.refreshAllData)
   const { tasks } = useTaskStore()
   const shouldReduceMotion = useReducedMotion()
-
-  const entries = getFilteredEntries()
 
   if (isLoading) {
     return (
@@ -90,8 +93,8 @@ export function TimelineStream() {
       </div>
 
       {entries.length === 0 ? (
-        <div className="p-2 rounded-[2.25rem] bg-stone-900/5 dark:bg-white/5 ring-1 ring-stone-900/5 dark:ring-white/10">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[calc(2.25rem-0.5rem)] p-12 text-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
+        <div className="p-1 rounded-[2.25rem] bg-stone-900/5 dark:bg-white/5 ring-1 ring-stone-900/5 dark:ring-white/10">
+          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[calc(2.25rem-0.25rem)] p-8 text-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
             <Clock className="size-8 mx-auto text-[var(--text-muted)] mb-3" />
             <p className="text-sm font-semibold text-[var(--text-primary)]">No matching window activity logs</p>
             <p className="text-xs text-[var(--text-secondary)] mt-1">
@@ -133,8 +136,8 @@ export function TimelineStream() {
                 />
 
                 {/* Doppelrand Double-Bezel Stream Card */}
-                <div className="p-1.5 rounded-[2rem] bg-stone-900/5 dark:bg-white/5 ring-1 ring-stone-900/5 dark:ring-white/10 group-hover:ring-stone-900/15 dark:group-hover:ring-white/20 transition-shadow">
-                  <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[calc(2rem-0.375rem)] p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] flex flex-col md:flex-row md:items-center justify-between gap-4 group-hover:scale-[1.005] active:scale-[0.995] transition-transform">
+                <div className="p-1 rounded-[2rem] bg-stone-900/5 dark:bg-white/5 ring-1 ring-stone-900/5 dark:ring-white/10 group-hover:ring-stone-900/15 dark:group-hover:ring-white/20 transition-shadow">
+                  <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[calc(2rem-0.25rem)] p-3 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] flex flex-col md:flex-row md:items-center justify-between gap-4 group-hover:scale-[1.005] active:scale-[0.995] transition-transform">
                     <div className="flex items-start gap-4 flex-1 min-w-0">
                       {/* Nested App Icon Core */}
                       <div className="p-3 rounded-2xl bg-[var(--bg-surface-hover)] text-[var(--text-secondary)] ring-1 ring-stone-900/5 dark:ring-white/10 shrink-0 group-hover:text-[var(--accent)] transition-colors">

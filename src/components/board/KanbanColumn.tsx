@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { KanbanColumn as ColumnType, Task, useTaskStore, TaskDuration } from '@/stores/taskStore'
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable'
 import { KanbanCard } from './KanbanCard'
@@ -23,7 +23,7 @@ const DURATION_OPTIONS: { label: string; value: TaskDuration }[] = [
   { label: 'None', value: 'none' },
 ]
 
-export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanColumnProps) {
+const KanbanColumn = memo(function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanColumnProps) {
   const addTask = useTaskStore((state) => state.addTask)
   const renameColumn = useTaskStore((state) => state.renameColumn)
   const deleteColumn = useTaskStore((state) => state.deleteColumn)
@@ -292,4 +292,8 @@ export function KanbanColumn({ column, tasks, onEditTask, isOverlay }: KanbanCol
       )}
     </motion.div>
   )
-}
+})
+
+KanbanColumn.displayName = 'KanbanColumn'
+
+export { KanbanColumn }

@@ -116,8 +116,7 @@ export function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
     onClose()
   }
 
-  const getTaskLoggedSeconds = useTimeEntryStore.getState().getTaskLoggedSeconds
-  const totalSecs = getTaskLoggedSeconds(task.id)
+  const totalSecs = useTimeEntryStore.getState().taskLoggedSecondsMap[task.id] ?? 0
   const hrs = Math.floor(totalSecs / 3600)
   const mins = Math.floor((totalSecs % 3600) / 60)
   const timeDisplay = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`

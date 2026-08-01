@@ -15,6 +15,8 @@ import {
   DataManagement,
   AboutSettings,
   GamificationSettings,
+  SpotifyIntegrationWidget,
+  MoreIntegrationsWidget,
 } from '@/components/settings';
 
 export default function SettingsPage() {
@@ -47,6 +49,7 @@ export default function SettingsPage() {
         return (
           <div className="space-y-8">
             <TrackingPreferences />
+            <SpotifyIntegrationWidget />
             <AppCategoryManager />
           </div>
         );
@@ -59,7 +62,12 @@ export default function SettingsPage() {
       case 'desktop-pet':
         return <DesktopPetSettings />;
       case 'data':
-        return <DataManagement />;
+        return (
+          <div className="space-y-8">
+            <DataManagement />
+            <MoreIntegrationsWidget />
+          </div>
+        );
       case 'about':
         return <AboutSettings />;
       default:
@@ -79,13 +87,13 @@ export default function SettingsPage() {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--accent)] bg-[var(--accent-muted)] border border-[var(--accent)]/20 mb-2">
             <Sparkles className="size-3" />
-            <span>Preferences & Control Center</span>
+            <span>Preferences & Integration Ecosystem</span>
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--foreground)]">
-            Settings
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-primary)]">
+            Settings & Integrations
           </h1>
-          <p className="text-sm text-[var(--muted-foreground)] mt-1 max-w-2xl">
-            Configure desktop activity tracking, notifications, appearance themes, and database backups.
+          <p className="text-sm text-[var(--text-secondary)] mt-1 max-w-2xl">
+            Configure weather API, Spotify/Windows SMTC media controller, desktop activity tracking, notifications, appearance themes, and database backups.
           </p>
         </div>
       </div>
@@ -95,12 +103,12 @@ export default function SettingsPage() {
         <div className="flex items-center gap-3 pb-3 border-b border-[var(--border)] mb-4">
           <button
             onClick={() => setMobileView('nav')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs font-semibold text-[var(--foreground)] hover:bg-[var(--background)] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Settings Menu
           </button>
-          <span className="text-xs font-bold text-[var(--muted-foreground)]">•</span>
+          <span className="text-xs font-bold text-[var(--text-secondary)]">•</span>
           <span className="text-xs font-bold text-emerald-500">{activeItem.label}</span>
         </div>
       )}
@@ -109,7 +117,7 @@ export default function SettingsPage() {
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
         {/* Sidebar Nav Column */}
         {(!isMobile || mobileView === 'nav') && (
-          <div className="md:col-span-4 lg:col-span-3 border border-[var(--border)] bg-[var(--card)] rounded-2xl p-3 shadow-xs">
+          <div className="md:col-span-4 lg:col-span-3 border border-[var(--border)] bg-[var(--bg-surface)] rounded-2xl p-3 shadow-xs">
             <SettingsSidebar
               activeCategory={activeCategory}
               onSelectCategory={handleSelectCategory}
@@ -119,7 +127,7 @@ export default function SettingsPage() {
 
         {/* Content Column */}
         {(!isMobile || mobileView === 'detail') && (
-          <div className="md:col-span-8 lg:col-span-9 border border-[var(--border)] bg-[var(--card)] rounded-2xl p-6 shadow-xs min-h-[500px]">
+          <div className="md:col-span-8 lg:col-span-9 border border-[var(--border)] bg-[var(--bg-surface)] rounded-2xl p-6 shadow-xs min-h-[500px]">
             {renderContent()}
           </div>
         )}

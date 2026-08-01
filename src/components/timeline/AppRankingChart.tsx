@@ -100,7 +100,7 @@ export function AppRankingChart() {
           <p className="text-xs text-[var(--muted-foreground)]">No application usage data for {selectedDate}</p>
         </div>
       ) : viewMode === 'apps' ? (
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1 overscroll-contain">
           {appRankings.map((app, index) => {
             const catColors = getCategoryColor(app.category).split(' ');
             const barBg = catColors[0];
@@ -150,7 +150,7 @@ export function AppRankingChart() {
         </div>
       ) : (
         /* Grouped by Category View */
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1 overscroll-contain">
           {categoryList.map((catItem) => {
             const catColors = getCategoryColor(catItem.category).split(' ');
             const barBg = catColors[0];

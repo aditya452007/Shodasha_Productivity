@@ -1,58 +1,62 @@
-# Shodasha — Product Expansion & Premium UX Polish Prompt
+# Shodasha — Dashboard & Component Redesign Kickoff Prompt
 
-Copy and paste the following prompt to instruct the AI agent in the next session:
+Copy and paste the markdown block below into your next AI agent session to start implementing the redesigned Shodasha Dashboard and multi-tab component architecture:
 
 ```markdown
-You are taking over Shodasha — a Tauri v2 desktop productivity tracker built with Next.js 16, React 19, TypeScript, Tailwind CSS, Zustand, Rust (rusqlite + windows-sys), and Web Notifications API.
+You are taking over the Shodasha codebase — a single-user, local-first Windows desktop productivity application built with Next.js 16, React 19, TypeScript, Tailwind CSS, Zustand, SQLite, and Tauri v2 (Rust backend).
 
-## Mandatory Skill Initialization
-At the start of your turn, load and initialize these skills in order:
-1. `impeccable` — for UX critique, design audit, and editorial polish
-2. `gpt-taste` / `design-taste-frontend` — for anti-slop typography, balanced whitespace, and editorial visual hierarchy
-3. `emil-design-eng` — for fluid interaction details, micro-animations, and reduced-motion compliance
-4. `ui-checklist` — for component completeness checking
-5. `full-output-enforcement` — for unabridged code generation
-
----
-
-## Phase 0: Business & Product Ideation (Think Like a Product Owner)
-Before writing any code, evaluate Shodasha strictly from a **business logic, user utility, and product value perspective** (not just code refactoring):
-
-### 1. Identify Missing Business Capabilities & High-Value Features:
-- **Productivity Goal Target Engine**: Allow users to set daily target focus hours (e.g., "Goal: 6h deep work/day") and display progress towards target on Dashboard & Timeline.
-- **Deep Work vs. Distraction Ratio & Focus Score**: Compute a dynamic 0-100 "Productivity Index" score based on app category weighting (Work vs. Neutral vs. Distraction) with daily trend comparison.
-- **Interactive Chart System Upgrade**:
-  - Add interactive date-range comparison tool (e.g. "Compare This Week vs. Last Week").
-  - Add interactive app hover inspection (click a day bar in the Daily Usage chart to auto-filter the Active Periods timeline and App Rankings for that specific day).
-  - Add category distribution toggle (view screen time grouped by App Name OR grouped by Category).
-- **Habit Streak & Milestone Rewards**: Add visual streak badges (e.g., "7-Day Focus Streak", "30-Hour Work Week") and habit completion heatmaps.
-- **Kanban Board Time-Tracking Link**: Show cumulative desktop time spent per linked task directly on Kanban cards.
+## Mandatory Skill Loading Order
+Initialize and load these skills in exact order before planning or writing code:
+1. `design-taste-frontend` — set anti-slop design direction, Three Dials (VARIANCE/MOTION/DENSITY)
+2. `high-end-visual-design` — enforce Doppelrand (Double-Bezel) nested card architecture & button-in-button patterns
+3. `emil-design-eng` — micro-animations, spring physics, and reduced-motion compliance
+4. `hallmark` — anti-AI-slop design recipes and component standards
+5. `ui-checklist` — component & layout completeness check
+6. `full-output-enforcement` — ensure exhaustive, unabridged code generation
 
 ---
 
-## Phase 1: Planning & Architecture Spec
-1. Create a detailed implementation plan in `implementation_plan.md` covering the proposed features.
-2. Outline specific business logic rules, Zustand store extensions, DB persistence needs, and component additions.
-3. Keep the UI/UX **medium-density, minimalistic, and editorial**:
-   - Palette: Clean editorial backgrounds, emerald accent (`#10b981`), high-contrast typography (`Inter` + `Cabinet Grotesk`).
-   - Surfaces: Solid card boundaries (`border border-[var(--border)]`), subtle shadows (`shadow-xs`), NO heavy gradients or glassmorphism slop.
-   - Motion: Micro-interactions via `motion` package with `prefers-reduced-motion` guards.
+## Authoritative Documentation to Read First
+Before taking any action, view and inspect these specifications:
+1. `Feature_docs/DASHBOARD_FULL_WIDGET_SPECIFICATION.md` — Complete 34-widget UI, math formula, and backend IPC specification
+2. `Feature_docs/DASHBOARD_REFERENCE_ANALYSIS.md` — 5-Tab Multi-Section Feature Distribution Blueprint
+3. `CONTEXT.md` — Domain glossary, 8 entities, and 8 core domain rules (especially Domain Rule 1: Habit -> Task auto-completion)
+4. `context/architecture.md` — SQLite WAL mode schema, passive Windows activity tracking pipeline, and Tauri IPC commands
+5. `context/progress-tracker.md` — Project implementation tracker and current phase status
 
 ---
 
-## Phase 2: Step-by-Step Implementation
-Execute the plan in small, verifiable increments:
-1. **Increment 1 — Goal Target & Productivity Score Engine**: Update stores and add KPI widgets to Dashboard & Timeline.
-2. **Increment 2 — Interactive Chart Inspection & Comparison**: Upgrade `DailyUsageBarChart.tsx`, `AppRankingChart.tsx`, and `ActivePeriodsTimeline.tsx` with date-click cross-filtering and category view toggles.
-3. **Increment 3 — Habit Streaks & Kanban Time Linking**: Enhance Habit dashboard and Kanban card badges with linked time entries.
+## Core Design Principles & Aesthetic Rules
+- **Top Navigation Bar Protection**: ALWAYS keep Shodasha's native top navigation bar (`/` Dashboard, `/board` Board, `/habits` Habits, `/timeline` Timeline, `/settings` Settings). NEVER convert the primary app navigation into a left sidebar.
+- **Doppelrand (Double-Bezel) Machined Enclosure Architecture**:
+  - Outer Shell: `bg-slate-900/5 dark:bg-white/5 ring-1 ring-black/5 dark:ring-white/10 rounded-[24px] p-1.5`
+  - Inner Core: `bg-white dark:bg-zinc-900 rounded-[18px] shadow-sm p-5`
+  - NO generic blur-heavy glassmorphism or low-contrast text. High readability, ultra-clean vector icons (Lucide / Phosphor Light).
+- **Prevent Dashboard Overcrowding**: Strictly observe the **5-Tab Multi-Section Feature Distribution**:
+  - **Dashboard (`/`)**: Daily command center ONLY. Focus Score Ring, 4 Top KPIs, Local Weather 3D Widget (Open-Meteo), Today's Urgent Todos Floating Checklist, Quiet Time Countdown Timer & Ambient Media Controls.
+  - **Board (`/board`)**: 4-Column Kanban (`To do`, `In Progress`, `Need Review`, `Done`), `@dnd-kit` drag-and-drop, PDF/file attachment pills, task progress bars, Board vs List view toggles.
+  - **Habits (`/habits`)**: Horizontal day streak matrix (12-31 status rings), habit duration vertical bar chart with popovers (`Meditation 45m ^4%`), positive habit growth badge (`+58.2%`), Habits Wrapped card.
+  - **Timeline (`/timeline`)**: Multi-series category analytics chart (Work vs Neutral vs Distraction), horizontal time-slot schedule stream (10:00 - 13:30 visual app blocks), active app category distribution.
+  - **Settings (`/settings`)**: Integrations manager (Weather API config, Spotify / Windows SMTC media controller toggle, local SQLite backup/export status).
 
 ---
 
-## Phase 3: Verification
-After EACH step, verify that all builds pass cleanly:
-- `npm run lint`
-- `npm run typecheck`
-- `npm run build`
-- `cd src-tauri && cargo check`
-- Update `context/progress-tracker.md` and `Feature_docs/final-verification-checklist.md`.
+## Technical & Backend Data Wiring Rules
+- **Store Integrations**:
+  - `useTaskStore.ts` $\rightarrow$ Kanban tasks, column ordering, task completion status, linked habit auto-completion.
+  - `useHabitStore.ts` $\rightarrow$ Habits list, daily check-in records, streak math, month filter navigation.
+  - `useTimeEntryStore.ts` $\rightarrow$ Passive window activity tracking, category focus scores, duration formatting.
+  - `useSettingsStore.ts` $\rightarrow$ Appearance, work mode, local weather settings, integration toggles.
+  - `useUIStore.ts` $\rightarrow$ Board view modes (`board` | `list`), modal visibility, active focus session state.
+- **IPC & Rust Commands**:
+  - Weather Widget: `invoke('get_local_weather')`
+  - Media Widget: `invoke('get_active_media_session')` (Windows SMTC listener)
+  - Tasks & Habits: `invoke('get_tasks')`, `invoke('get_habits')`, `invoke('update_task_status')`
+
+---
+
+## Execution Instructions
+1. Create a step-by-step implementation plan in `implementation_plan.md`.
+2. Build components in `src/components/dashboard/`, `src/components/board/`, `src/components/habits/`, `src/components/timeline/`, and `src/components/settings/`.
+3. Verify that `npm run typecheck`, `npm run lint`, and `npm run build` pass cleanly without errors after every step.
 ```

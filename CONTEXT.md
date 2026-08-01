@@ -30,6 +30,19 @@ A recurring behavior tracked once per day (binary: done or not done).
 - **name** — display name
 - **color** — for calendar heatmap and visual distinction
 - **linkedTaskId** — optional reference to a Task that auto-completes when this habit is done
+- **url** — optional external link opened from the calendar row
+- **priority** — `high` / `medium` / `low`; determines list order, XP per check-in (20/10/5) and HP heal/drain amounts
+- **category** — id of a HabitCategory (default `general`); deleting a category moves its habits back to `general`
+- **reminderTime** — optional daily reminder time (`HH:MM`); Shodasha notifies at this time and sends one overdue catch-up nudge if the app was off when the time passed (once per habit per day, skipped if already done that day)
+- **createdAt** — timestamp
+
+### HabitCategory
+
+A user-created grouping for Habits (seeded with Health & Vitality, Learning & Skill, Work & Projects, Personal & Mind on first run).
+
+- **id** — unique identifier (seeded ids: `cat_health`, `cat_learning`, `cat_work`, `cat_personal`)
+- **name** — unique display name
+- **color** — used for the category chip and balance meter
 - **createdAt** — timestamp
 
 ### HabitRecord

@@ -4,7 +4,8 @@ import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Sparkles, Calendar as CalendarIcon, ChevronLeft, ChevronRight, RotateCw } from 'lucide-react'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
-import { CategoryFilterBar } from '@/components/timeline/CategoryFilterBar'
+import { TotalTaskMultiLineChartWidget } from '@/components/timeline/TotalTaskMultiLineChartWidget'
+import { TimeSlotScheduleStripWidget } from '@/components/timeline/TimeSlotScheduleStripWidget'
 import { AnalyticsKPIGrid } from '@/components/timeline/ActivityDistributionChart'
 import { DailyUsageBarChart } from '@/components/timeline/DailyUsageBarChart'
 import { ActivePeriodsTimeline } from '@/components/timeline/ActivePeriodsTimeline'
@@ -54,21 +55,21 @@ export default function TimelinePage() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
-      className="space-y-6 max-w-7xl mx-auto pb-16 px-2 sm:px-4"
+      className="space-y-6 pb-16 max-w-7xl mx-auto"
     >
-      {/* Header */}
+      {/* Header Bar */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[var(--border)] pb-6">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--accent)] bg-[var(--accent-muted)] border border-[var(--accent)]/20 mb-2">
             <Sparkles className="size-3" />
-            <span>Time Analytics & Glanceable Usage</span>
+            <span>Time Analytics & Event Stream</span>
           </div>
 
           <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-primary)]">
-            Activity & Time Overview
+            Activity & Schedule Stream
           </h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1 max-w-2xl">
-            Glanceable desktop usage metrics: total daily hours, active periods with compacted idle gaps, and app ranking by total time.
+            Passive Windows activity tracking, multi-series category analytics, time-slot schedule streams, and app ranking logs.
           </p>
         </div>
 
@@ -129,8 +130,15 @@ export default function TimelinePage() {
         </div>
       </div>
 
-      {/* Category Filter Bar */}
-      <CategoryFilterBar />
+      {/* 1. Multi-Series Line Chart (7 cols) + Time-Slot Schedule Stream (5 cols) */}
+      <div className="bento-grid bento-grid-cols-12 items-stretch">
+        <div className="bento-col-span-7">
+          <TotalTaskMultiLineChartWidget />
+        </div>
+        <div className="bento-col-span-5">
+          <TimeSlotScheduleStripWidget />
+        </div>
+      </div>
 
       {/* KPI Overview Grid */}
       <AnalyticsKPIGrid />
@@ -146,4 +154,3 @@ export default function TimelinePage() {
     </motion.div>
   )
 }
-

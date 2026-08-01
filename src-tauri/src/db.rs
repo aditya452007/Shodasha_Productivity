@@ -55,6 +55,16 @@ fn run_migrations(conn: &Connection) -> Result<()> {
             color TEXT NOT NULL DEFAULT '#059669',
             linked_task_id TEXT,
             url TEXT,
+            priority TEXT NOT NULL DEFAULT 'medium',
+            category TEXT NOT NULL DEFAULT 'general',
+            reminder_time TEXT,
+            created_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS habit_categories (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL UNIQUE,
+            color TEXT NOT NULL DEFAULT '#059669',
             created_at TEXT NOT NULL
         );
 
@@ -102,9 +112,35 @@ fn run_migrations(conn: &Connection) -> Result<()> {
     // Safe migrations: add columns if missing
     conn.execute("ALTER TABLE tasks ADD COLUMN url TEXT", []).ok();
     conn.execute("ALTER TABLE habits ADD COLUMN url TEXT", []).ok();
+    conn.execute("ALTER TABLE habits ADD COLUMN priority TEXT NOT NULL DEFAULT 'medium'", []).ok();
+    conn.execute("ALTER TABLE habits ADD COLUMN category TEXT NOT NULL DEFAULT 'general'", []).ok();
+    conn.execute("ALTER TABLE habits ADD COLUMN reminder_time TEXT", []).ok();
     conn.execute("ALTER TABLE tasks ADD COLUMN parent_id TEXT", []).ok();
     conn.execute("ALTER TABLE tasks ADD COLUMN duration TEXT NOT NULL DEFAULT '24h'", []).ok();
     conn.execute("ALTER TABLE tasks ADD COLUMN expires_at TEXT", []).ok();
+
+    // Seed default habit categories on first run
+    let category_count: i32 = conn.query_row(
+        "SELECT COUNT(*) FROM habit_categories",
+        [],
+        |row| row.get(0),
+    ).unwrap_or(0);
+
+    if category_count == 0 {
+        let now = chrono::Utc::now().to_rfc3339();
+        let defaults: [(&str, &str, &str); 4] = [
+            ("cat_health", "Health & Vitality", "#059669"),
+            ("cat_learning", "Learning & Skill", "#7c3aed"),
+            ("cat_work", "Work & Projects", "#d97706"),
+            ("cat_personal", "Personal & Mind", "#e11d48"),
+        ];
+        for (id, name, color) in defaults.iter() {
+            conn.execute(
+                "INSERT OR IGNORE INTO habit_categories (id, name, color, created_at) VALUES (?1, ?2, ?3, ?4)",
+                rusqlite::params![id, name, color, now],
+            ).ok();
+        }
+    }
 
     // Check schema_version
     let version: i32 = conn.query_row(

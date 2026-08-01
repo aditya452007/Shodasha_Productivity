@@ -1,6 +1,6 @@
 use crate::db::init_db;
 use crate::repositories::task_repo::{self, TaskDb};
-use crate::repositories::habit_repo::{self, HabitDb, HabitRecordDb};
+use crate::repositories::habit_repo::{self, HabitDb, HabitRecordDb, HabitCategoryDb};
 use crate::repositories::time_entry_repo::{self, TimeEntryDb};
 use crate::repositories::app_category_repo::{self, AppCategoryDb};
 use crate::repositories::kanban_repo::{self, KanbanColumnDb};
@@ -81,6 +81,30 @@ pub fn delete_habit(id: String) -> Result<(), String> {
 pub fn toggle_habit_record(id: String, habit_id: String, date: String, done: bool) -> Result<(), String> {
     let conn = init_db().map_err(|e| e.to_string())?;
     habit_repo::toggle_habit_record(&conn, &id, &habit_id, &date, done).map_err(|e| e.to_string())
+}
+
+#[command]
+pub fn get_habit_categories() -> Result<Vec<HabitCategoryDb>, String> {
+    let conn = init_db().map_err(|e| e.to_string())?;
+    habit_repo::get_habit_categories(&conn).map_err(|e| e.to_string())
+}
+
+#[command]
+pub fn create_habit_category(category: HabitCategoryDb) -> Result<(), String> {
+    let conn = init_db().map_err(|e| e.to_string())?;
+    habit_repo::create_habit_category(&conn, &category).map_err(|e| e.to_string())
+}
+
+#[command]
+pub fn update_habit_category(category: HabitCategoryDb) -> Result<(), String> {
+    let conn = init_db().map_err(|e| e.to_string())?;
+    habit_repo::update_habit_category(&conn, &category).map_err(|e| e.to_string())
+}
+
+#[command]
+pub fn delete_habit_category(id: String) -> Result<(), String> {
+    let conn = init_db().map_err(|e| e.to_string())?;
+    habit_repo::delete_habit_category(&conn, &id).map_err(|e| e.to_string())
 }
 
 #[command]

@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { motion, type TargetAndTransition, type Transition } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -33,24 +32,12 @@ interface BaseCardProps {
   hasError?: boolean | string
   errorTitle?: string
   onRetry?: () => void
-
-  /* Animation overrides */
-  initial?: TargetAndTransition
-  animate?: TargetAndTransition
-  transition?: Transition
 }
 
 const elevationClass: Record<ElevationTier, string> = {
   flat: 'card-flat',
   raised: 'card-raised',
   elevated: 'card-elevated',
-}
-
-const defaultInitial = { opacity: 0, y: 12 }
-const defaultAnimate = { opacity: 1, y: 0 }
-const defaultTransition = {
-  duration: 0.35,
-  ease: [0.23, 1, 0.32, 1] as [number, number, number, number],
 }
 
 export function BaseCard({
@@ -70,11 +57,13 @@ export function BaseCard({
   hasError,
   errorTitle = 'Something went wrong',
   onRetry,
-  initial,
-  animate,
-  transition,
 }: BaseCardProps) {
   const errorMessage = typeof hasError === 'string' ? hasError : undefined
+
+  // Prevent parent .card-raised / var(--bg-surface) CSS overrides when custom background or border is supplied in innerClassName or className
+  const isCustomStyled = innerClassName?.includes('bg-') || innerClassName?.includes('border-') || className?.includes('bg-') || className?.includes('border-')
+
+  const outerElevationClass = isCustomStyled ? 'shadow-xs' : elevationClass[elevation]
 
   const content = (() => {
     if (isLoading) {
@@ -125,13 +114,8 @@ export function BaseCard({
   })()
 
   return (
-    <motion.div
-      initial={initial ?? defaultInitial}
-      animate={animate ?? defaultAnimate}
-      transition={transition ?? defaultTransition}
-      className={cn(elevationClass[elevation], className)}
-    >
+    <div className={cn('animate-card-enter', outerElevationClass, className)}>
       {content}
-    </motion.div>
+    </div>
   )
 }

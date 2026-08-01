@@ -117,7 +117,7 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
       const isFirstToday = !state.trackedXPKeys.some(
         (k) => k.startsWith('habit_checkin_') && k.endsWith(`_${todayStr}`) && k !== key
       )
-      if (isFirstToday && amount >= 10) {
+      if (isFirstToday && amount >= 5) {
         setTimeout(() => get().awardXP(5, `first_checkin_${todayStr}`), 100)
       }
     }
@@ -173,7 +173,7 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
       const unlocked = loadLocal<string[]>(STORAGE_KEYS.unlockedAchievements, [])
 
       if (xp > 0 || level > 1 || unlocked.length > 0) {
-        set({ xp, level, unlockedAchievements: unlocked, isInitialized: true })
+        set({ xp, level, lastLevelUpNotified: level, unlockedAchievements: unlocked, isInitialized: true })
         return
       }
 
@@ -188,6 +188,7 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
         set({
           xp: dbXP,
           level: dbLevel,
+          lastLevelUpNotified: dbLevel,
           unlockedAchievements: dbAchievements,
           isInitialized: true,
         })

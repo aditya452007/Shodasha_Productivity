@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Timer, Play, Square, RotateCcw, Coffee, Bell, Smartphone, Settings2 } from 'lucide-react'
-import { useTimerStore } from '@/stores/timerStore'
+import { useTimerStore, cleanupTimerStore } from '@/stores/timerStore'
 
 const PRESETS = [
   { label: '5 min', minutes: 5 },
@@ -23,6 +23,12 @@ export function TimerPage() {
   } = useTimerStore()
 
   const shouldReduceMotion = useReducedMotion()
+
+  useEffect(() => {
+    return () => {
+      cleanupTimerStore()
+    }
+  }, [])
 
   const [customMinutes, setCustomMinutes] = useState(27)
   const [showCustom, setShowCustom] = useState(false)
@@ -59,12 +65,12 @@ export function TimerPage() {
           </h1>
         </div>
         <p className="text-sm text-[var(--text-secondary)]">
-          Timer runs even when you switch pages. It stops when finished or you stop it.
+          Timer stops when you leave this page.
         </p>
         {isRunning && (
           <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--accent)]/10 text-[var(--accent)] text-[10px] font-semibold uppercase tracking-wider">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse motion-reduce:animate-none" />
-            Running in background
+            Running
           </div>
         )}
       </div>

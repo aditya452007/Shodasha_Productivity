@@ -88,9 +88,10 @@ function isExpired(task: Task): boolean {
 const initialTasks: Task[] = []
 
 const initialColumns: KanbanColumn[] = [
-  { id: 'todo', name: 'To Do', order: 0 },
+  { id: 'todo', name: 'To do', order: 0 },
   { id: 'in_progress', name: 'In Progress', order: 1 },
-  { id: 'done', name: 'Done', order: 2 },
+  { id: 'need_review', name: 'Need Review', order: 2 },
+  { id: 'done', name: 'Done', order: 3 },
 ]
 
 export const useTaskStore = create<TaskState>((set, get) => ({

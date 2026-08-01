@@ -4,14 +4,79 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-**Phase 0 — Color System Unification 100% Completed**
+**Habits `/habits` review feedback round 5 — AddHabitModal wizard (Aug 2026)**
 
 ## Current Goal
 
-Proceed to Phase 1 — Premium UI Patterns (bento grid, BaseCard, micro-interactions).
+Make habit creation a guided one-step-at-a-time wizard (Ant Design Steps + Cult UI Intro Disclosure design language) so users are never confronted with a wall of fields at once.
+
+## Completed (Review Feedback Round 5 — habit wizard)
+
+- [x] **Component fetch**: `Feature_docs/habit-wizard/steps-reference.md` — visited Ant Design Steps (canonical numbered-circle/connector stepper; finish=check, process=number, wait=muted; `current`/`status` API + design tokens) and Cult UI (no standalone Steps — 404; closest free pattern is Intro Disclosure: multi-step dialog with progress step indicators + animated transitions). Decision: no antd dependency (1MB+ in a Tauri desktop app) — bespoke stepper in the modal following both design languages with `motion`
+- [x] **4-step wizard**: `AddHabitModal` rebuilt as a step-by-step flow — (1) Basics: title + accent color; (2) Category: pick or create new (inline name + color swatches); (3) Priority: High/Med/Low with XP hints + linked task; (4) Schedule: reminder time + URL — one concern per screen instead of a 7-field wall
+- [x] **Ant-style stepper**: numbered circles with connector lines; completed steps fill accent + spring pop-in checkmark; current step highlighted ring; wait steps muted with icons; connectors animate to full width as steps complete; "Step X of 4" label above each body
+- [x] **Step transitions**: direction-aware slide/fade (AnimatePresence `mode="wait"`, custom direction), full `prefers-reduced-motion` guards (zero-motion variants)
+- [x] **Validation per step**: Next disabled until title entered (step 1) / category name entered when creating (step 2) with error toasts; Back disabled on first step; Enter advances or submits
+- [x] **Step completion messages**: filled circle + connector animation + short toast ("Basics complete — on to Category", 1.5s); final create/update → in-modal success screen with spring check, floating sparkle burst, "Habit created/updated successfully!" + habit name, and a Done CTA that closes the modal
+- [x] **Verification**: `npm run lint` 0 errors (4 pre-existing `<img>` warnings); `npm run typecheck` 0 errors; `npm run build` success (7 static routes)
+
+## Completed (Review Feedback Round 4 — habits categories, scroll, reminders)
+
+- [x] **HabitCalendar scroll (feedback 1)**: table container now `overflow-auto max-h-[540px]` so adding unlimited habits never grows the page; header row is sticky (`sticky top-0`, solid bg, z-30, sticky left/right cells raised to z-40) so month labels stay visible while scrolling rows
+- [x] **Habit categories (feedback 2)**: new `habit_categories` table + `habits.category` column (`general` default) with safe ALTER migration; seeded 4 defaults (Health & Vitality, Learning & Skill, Work & Projects, Personal & Mind) on first run; new Rust repo `HabitCategoryDb` + CRUD commands (`get/create/update/delete_habit_category`) registered in lib.rs; deleting a category reassigns its habits to `general` (single transaction); `habitStore` gains `habitCategories` + `addCategory`/`updateCategory`/`deleteCategory` and `Habit.category`
+- [x] **Category Balance card (feedback 3)**: rebuilt from color-inference to real store-driven categories — meters list is scrollable (`max-h-[320px]`), shows every user category + a General group (hidden when empty), per-row category color/icon (seeded icons Heart/BookOpen/Briefcase/User, user categories get Layers), hover trash button to delete a category, and an inline "+ New Category" form (name + color swatches) with toast feedback
+- [x] **Calendar row badges**: each habit row shows a category chip (colored dot + name) and a bell chip with its reminder time
+- [x] **AddHabitModal**: category dropdown (General + user categories + "+ New Category…" inline creator with color swatches, created on save) and an optional `time` input for the daily reminder; both prefill in edit mode; `addHabit`/`updateHabit` persist `category` + `reminder_time`
+- [x] **Per-habit reminders + overdue catch-up (feedback 4)**: `habits.reminder_time` column; `NotificationScheduler`'s `checkAndTriggerNotifications` now scans every habit with a reminder — on-time nudge at the exact minute, otherwise an overdue message ("scheduled for HH:MM and it's now HH:MM — do it now or mark it complete"); once per habit per day via persisted `habitReminderNotified` map (survives restarts, so an overnight-close window is caught on next launch); skipped if the habit is already done today; stale entries pruned when habits are deleted; routes through existing pet/web delivery channels
+- [x] **Verification**: `cargo check --workspace` 0 errors (2 pre-existing `pet_store.rs` dead-code warnings); `npm run lint` 0 errors (4 pre-existing `<img>` warnings); `npm run typecheck` 0 errors; `npm run build` success (7 static routes)
+
+## Completed (Review Feedback Round 3 — hotfixes)
+
+- [x] **QuietTimeTimerWidget card fit (feedback 1)**: duration presets + custom stepper moved out of the cramped header row into their own full-width centered row; header slimmed to doodle + title + compact "+10 XP" chip; footer XP hint line removed (saves vertical space) — card content now fits cleanly at all widths
+- [x] **Navbar Timer tab (feedback 2)**: removed `Timer` nav item + unused icon import
+- [x] **Hydration mismatch (console error)**: clock tick coordinates were computed with raw float trig and differed in the last ulp between server/client — now rounded to 3 decimals so SSR and client render identical SVG attributes
+- [x] **Verification**: `npm run lint` 0 errors (4 pre-existing `<img>` warnings); `npm run typecheck` 0 errors; `npm run build` success (7 static routes)
+
+## Completed (Review Feedback Round 2)
+
+- [x] **Navbar badge (feedback 1)**: removed the tracking pulse badge ("Tracker Active/Offline" pill — the only badge element at the reported location); dropped `isTracking` + `Activity` icon + `useUIStore` import
+- [x] **AppRankingChart (feedback 2)**: app/category lists now capped at `max-h-[400px]` with `overflow-y-auto` + `overscroll-contain` — no more indefinite card stretching
+- [x] **ActivePeriodsTimeline (feedback 3)**: same internal-scroll treatment as AppRankingChart
+- [x] **CategoryFilterBar (feedback 4)**: removed from `/timeline` — its state (`selectedTimeframe`, `selectedCategory`, `searchQuery`) was consumed by nothing else on the page; deleted `CategoryFilterBar.tsx`
+- [x] **QuietTimeTimerWidget (feedback 5)**: rebuilt as a proper animated component — phase machine (`ready/running/paused/complete`); custom duration stepper (5–90 min in 5m steps) beside 25m/50m presets; gradient progress ring with smooth 500ms linear retargeting; minute hand continuous sweep + springy per-second second-hand tick; per-second digital time pop; animated status text crossfade (AnimatePresence); breathing aura while running; completion celebration (check + "+10 XP" pop, ring glow) with auto-return to ready; staggered card entry; XP hint footer; full `prefers-reduced-motion` guards
+- [x] **Verification**: `npm run lint` 0 errors (4 pre-existing `<img>` warnings); `npm run typecheck` 0 errors; `npm run build` success (7 static routes)
+
+## Completed (Dashboard `/` Review Feedback)
+
+- [x] **TodaysTodosChecklistWidget (feedback 1)**: added per-task expiry countdown badges (`Xh left` amber when ≤24h, `Xd left` otherwise) for tasks with `expiresAt`; added amber "expires within 24h — auto-removed" notice banner; upgraded empty state to icon + "No todo tasks yet / Add a todo task above" CTA copy
+- [x] **GoalsHabitsCard (feedback 2)**: now surfaces only **high-priority** habits (top 3); header shows "High Priority" flame pill + subtitle "High-priority habits & target dates"; empty states guide user to set a habit to High priority on `/habits`
+- [x] **MusicPlayerWidget (feedback 3)**: removed from dashboard tier 5; tier is now `LearningProgressCard` (7) + `GoalsHabitsCard` (5); `LearningProgressCard` gained a bottom 3-stat row (Active Focus, Context Switches, Top App) so the taller card fills the space. Component file kept for potential reuse elsewhere
+- [x] **WeatherIntegrationWidget (feedback 4)**: added a 3-day forecast strip (Today + 2 weekdays, icon, high/low) fetched from Open-Meteo daily API — always fetched regardless of current-conditions source so the card no longer has dead space
+- [x] **Verification**: `npm run lint` 0 errors (4 pre-existing `<img>` warnings); `npm run typecheck` 0 errors; `npm run build` success (7 static routes)
+
+## Completed (Habit Priority Feature)
+
+- [x] **Habits page declutter (review feedback)**: removed `FavouriteHabitChartWidget`, `PositiveHabitsScoreWidget`, `HabitsWrappedCard` (deleted files); summary tier now two equal-width cards — `HabitStatsCard` (6) + `StreakDisplay` (6). Verified lint/typecheck/build.
+- [x] **Habits page round 2 (review feedback)**: removed `StreakDisplay` from /habits (dashboard-only per review); summary tier is now a single full-width `HabitStatsCard` (span-12). Fixed duplicate `+` icon in "New Habits" button (removed text `+`; also cleaned the 5 AM button label for consistency). Verified lint/typecheck/build.
+
+## Completed (Habit Priority Feature)
+
+- [x] **Spec**: `Feature_docs/habit-priority/spec.md` — user stories, R1–R6 requirements, non-goals, success criteria (approved by user)
+- [x] **Schema**: `priority TEXT NOT NULL DEFAULT 'medium'` column on `habits` in `src-tauri/src/db.rs` (CREATE TABLE + safe ALTER migration); old rows default to `medium`
+- [x] **Rust repo**: `HabitDb.priority` field; `get_habits` selects priority and orders `CASE priority high→0, medium→1, else 2, created_at ASC`; `create_habit`/`update_habit` persist priority
+- [x] **Store**: `HabitPriority` type + `Habit.priority` (default `medium`); `PRIORITY_ORDER`, `HABIT_XP_BY_PRIORITY` (high 20 / med 10 / low 5); `sortHabitsByPriority()` applied on fetch/add/update so every widget inherits High→Med→Low order; `addHabit`/`updateHabit` accept priority
+- [x] **XP scaling**: `toggleHabit` awards 20/10/5 by priority (was flat 10); dedup key unchanged
+- [x] **Gamification fix**: `gamificationStore.awardXP` first-check-in bonus threshold `>= 10` → `>= 5` so Low-priority habits still trigger the +5 bonus
+- [x] **HP system**: NEW `src/lib/utils/habitHealth.ts` — `getHabitHp()` computes per-habit HP over a trailing 30-day window (heal +20/+10/+5 on check-in, drain -20/-10/-5 per missed day after first check-in, clamped 0–100, bands healthy/low/critical/depleted). Derived from existing records — no new table
+- [x] **Modal**: segmented High/Medium/Low selector in `AddHabitModal` (create + edit) with per-option XP hints and priority dots
+- [x] **Calendar**: `HabitCalendar` rows show a priority badge (High red / Med amber / Low green) next to the name, plus an HP micro-bar with value, and a "Depleted" label at 0 HP (only when the habit was previously active)
+- [x] **Verification**: `cargo check --workspace` 0 errors; `npm run lint` 0 errors (4 pre-existing `<img>` warnings); `npm run typecheck` 0 errors; `npm run build` success (7 static routes)
 
 ## Completed
 
+- [x] Implemented complete 34-widget feature set across 5-Tab Multi-Section Architecture (Dashboard `/`, Board `/board`, Habits `/habits`, Timeline `/timeline`, Settings `/settings`) with Doppelrand (Double-Bezel) Machined Enclosure Architecture, Open-Meteo weather integration, quiet time focus timer, ambient media player, 4-column Kanban, habit streak matrix, multi-series analytics line chart, and Spotify/SMTC settings integration.
+- [x] Created exhaustive 34-widget master specification in `Feature_docs/DASHBOARD_FULL_WIDGET_SPECIFICATION.md` covering all 3 reference images with exact UI tokens (Doppelrand double-bezel architecture), mathematical formulas, frontend display rules, and backend wiring (SQLite, Zustand, Tauri IPC)
+- [x] Analyzed 3 uploaded reference designs (Image 1 Vitals, Image 2 Integrations, Image 3 Task Board) and created comprehensive design tokens, metric formulas, store interaction logic, and 5-tab feature distribution plan in `Feature_docs/DASHBOARD_REFERENCE_ANALYSIS.md`
 - [x] Implemented complete animations and motion polish (micro-interactions, modal/drawer entry, page tab crossfade, staggered list entries, number ticker stat counters, checkmark spring completion, progress ring fill, and prefers-reduced-motion accessibility guards) across all interactive elements, pages, modals, and lists (Section 4)
 - [x] Implemented complete component states (Loading Skeleton, Empty State CTA, Error Banner) across Timeline components (`TimelineStream`, `AnalyticsKPIGrid`, `CumulativeScreenTimeWidget`) and Settings components (`DataManagement`, `AppCategoryManager`, `TrackingPreferences`, `AppearanceSettings`) (Section 3)
 - [x] Implemented complete component states (Loading Skeleton, Empty State CTA, Error Banner, Form Submitting State, Validation Toasts) across Board components (`KanbanBoard`, `KanbanColumn`, `KanbanCard`, `TaskModal`) and Habits components (`HabitAnalyticsDashboard`, `HabitCalendar`, `HabitHeatmap`, `HabitStatsCard`, `HabitAchievements`, `AddHabitModal`) (Section 3)
@@ -464,6 +529,35 @@ Proceed to Phase 1 — Premium UI Patterns (bento grid, BaseCard, micro-interact
 - [x] `backdrop-blur` glassmorphism: 6 matches — all modal overlays/Navbar (allowed per spec)
 - [x] Italic headings: 0 matches — no italic headings anywhere
 - [x] All colors use `var(--)` tokens in UI chrome (inline hex only in data values)
+
+## Multi-Skill Design Audit Implementation (2026-07-29)
+
+Ran 10 parallel skill-specific audit agents (Hallmark, Premium Design, High-End Visual, Emil Design Engineering, Apple Design, UI Checklist, Redesign Existing, Design Taste, Performance Engineering, Design Basics). Each wrote a comprehensive report to `design-audits/<skill>-audit.md`. Then implemented 16 prioritized fixes in 2 parallel batches:
+
+### Batch 1 — 10 Parallel Fixes (All Different Files)
+- [x] **gamificationStore.ts** — LevelUpCelebration now syncs `lastLevelUpNotified` on init (was always comparing default=1 vs saved=5, firing on every nav) 
+- [x] **timerStore.ts** — Module-level `setInterval` now cleaned up via `cleanupTimerStore()` in `TimerPage` useEffect unmount
+- [x] **BaseCard.tsx** — Replaced `<motion.div>` JS mount animation with CSS `@keyframes card-enter` (GPU composited, 20+ fewer JS animations per page)
+- [x] **habitStore.ts** — Added Immer middleware; `toggleHabit` now does `state.records[key] = nextDone` instead of spreading 930+ key object
+- [x] **settings/page.tsx** — Fixed 7 broken CSS var references (`--foreground`→`--text-primary`, `--muted-foreground`→`--text-secondary`, `--card`→`--bg-surface`)
+- [x] **StreamCard.tsx + TimelineStream.tsx** — Reduced double-bezel padding from 32→20px per StreamCard, 26→16px per Timeline entry
+- [x] **Navbar.tsx** — Removed 6-color rainbow tab scheme (unified to single accent), removed `repeat: Infinity` floating levitation animations
+- [x] **page.tsx (Dashboard)** — Removed SkillOctagon, consolidated gamification row to 2 columns, moved QuickTaskInput above the fold
+- [x] **habits/page.tsx** — Removed duplicate SkillOctagon + XPProgressBar, expanded HabitCategoryMetricsCard to fill gap
+- [x] **globals.css** — Removed `translateY(-2px)` from card hover (shadow-only now), standardized easing to `--ease-smooth: cubic-bezier(0.16,1,0.3,1)`, removed dead `--color-*` OKLCH token system
+
+### Batch 2 — 6 More Fixes (Parallel)
+- [x] **timeline/page.tsx** — Removed `px-2 sm:px-4` override (was narrower than other pages), standardized to `pb-12`
+- [x] **Root layout.tsx** — Added `<ErrorBoundary>` wrapper (global crash recovery)
+- [x] **timeEntryStore.ts** — Replaced getter function calls during render with derived state fields (filteredEntries, filteredKPIs, taskLoggedSecondsMap) computed only on source data mutation; 8 components migrated to selector pattern
+- [x] **KanbanCard.tsx** — Added `React.memo` (prevents re-render cascade during DnD)
+- [x] **KanbanColumn.tsx** — Added `React.memo`, fixed missing export from KanbanCard.tsx
+- [x] **settingsStore.ts** — Replaced `style.setProperty('--accent', ...)` with `dataset.accent` + CSS cascade rules for both light/dark mode
+
+### Verification
+- [x] `npm run lint` — 0 errors (4 pre-existing warnings)
+- [x] `npm run typecheck` — 0 errors
+- [x] `npm run build` — 0 errors (7 static routes)
 
 ## Project Status: CI/CD AUTOMATED — FULL .MSI RELEASES ON EVERY PUSH 🚀
 

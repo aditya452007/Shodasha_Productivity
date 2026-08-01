@@ -4,7 +4,7 @@ import { setAutoStartInDb, fetchSettingsFromDb, saveSettingsToDb, setPollingInte
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 export type DataRetentionPeriod = '1_month' | '3_months' | '6_months' | 'indefinite'
-export type AccentColor = 'var(--accent-emerald)' | 'var(--accent-violet)' | 'var(--accent-amber)' | 'var(--accent-rose)'
+export type AccentColor = 'emerald' | 'violet' | 'amber' | 'rose'
 
 interface SettingsState extends AsyncState {
   pollingInterval: number
@@ -36,7 +36,7 @@ function persistAllSettings(state: Partial<SettingsState>) {
     dailyGoalHours: String(state.dailyGoalHours ?? 6.0),
     dataRetentionPeriod: state.dataRetentionPeriod || '6_months',
     themeMode: state.themeMode || 'dark',
-    accentColor: state.accentColor || 'var(--accent-emerald)',
+    accentColor: state.accentColor || 'emerald',
   })
 }
 
@@ -48,7 +48,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   dailyGoalHours: 6.0,
   dataRetentionPeriod: '6_months',
   themeMode: 'dark',
-  accentColor: 'var(--accent-emerald)',
+  accentColor: 'emerald',
   isLoading: false,
   error: null,
   isInitialized: false,
@@ -93,7 +93,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
           } else {
             document.documentElement.classList.remove('dark')
           }
-          document.documentElement.style.setProperty('--accent', accentColor)
+          document.documentElement.dataset.accent = accentColor
         }
       } else {
         set({ isLoading: false, isInitialized: true })
@@ -147,7 +147,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   setAccentColor: (color) => {
     set({ accentColor: color })
     if (typeof document !== 'undefined') {
-      document.documentElement.style.setProperty('--accent', color)
+      document.documentElement.dataset.accent = color
     }
     persistAllSettings(get())
   },

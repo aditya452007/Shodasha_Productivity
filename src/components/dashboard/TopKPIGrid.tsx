@@ -13,18 +13,16 @@ export function TopKPIGrid() {
   const habits = useHabitStore((s) => s.habits)
   const records = useHabitStore((s) => s.records)
 
-  const getTotalFocusSeconds = useTimeEntryStore((s) => s.getTotalFocusSecondsToday)
-  const getKPIsFiltered = useTimeEntryStore((s) => s.getKPIsFiltered)
+  const focusSeconds = useTimeEntryStore((s) => s.totalFocusSecondsToday)
+  const kpis = useTimeEntryStore((s) => s.filteredKPIs)
   const dailyGoalHours = useSettingsStore((s) => s.dailyGoalHours)
 
   // 1. Focus Time
-  const focusSeconds = getTotalFocusSeconds()
   const focusHours = Math.floor(focusSeconds / 3600)
   const focusMins = Math.floor((focusSeconds % 3600) / 60)
   const goalHours = dailyGoalHours || 6.0
 
   // 2. Focus Score
-  const kpis = getKPIsFiltered()
   const focusScore = kpis.focusScore
 
   // 3. Tasks Pending

@@ -121,6 +121,44 @@ export async function toggleHabitRecordInDb(id: string, habitId: string, date: s
   }
 }
 
+// Habit Categories IPC wrappers
+export async function fetchHabitCategoriesFromDb() {
+  if (!isTauri()) return null;
+  try {
+    return await invoke<any[]>('get_habit_categories');
+  } catch (err) {
+    handleIpcError('get_habit_categories', err);
+    return null;
+  }
+}
+
+export async function createHabitCategoryInDb(category: any) {
+  if (!isTauri()) return;
+  try {
+    await invoke('create_habit_category', { category });
+  } catch (err) {
+    handleIpcError('create_habit_category', err);
+  }
+}
+
+export async function updateHabitCategoryInDb(category: any) {
+  if (!isTauri()) return;
+  try {
+    await invoke('update_habit_category', { category });
+  } catch (err) {
+    handleIpcError('update_habit_category', err);
+  }
+}
+
+export async function deleteHabitCategoryFromDb(id: string) {
+  if (!isTauri()) return;
+  try {
+    await invoke('delete_habit_category', { id });
+  } catch (err) {
+    handleIpcError('delete_habit_category', err);
+  }
+}
+
 // Time Entries IPC wrappers
 export async function fetchTimeEntriesFromDb(date: string) {
   if (!isTauri()) return null;

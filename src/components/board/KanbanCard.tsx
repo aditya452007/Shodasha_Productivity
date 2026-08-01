@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { Task, useTaskStore } from '@/stores/taskStore'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { useSortable } from '@dnd-kit/sortable'
@@ -13,11 +14,10 @@ interface KanbanCardProps {
   onEdit: (task: Task) => void
 }
 
-export function KanbanCard({ task, onEdit }: KanbanCardProps) {
+export const KanbanCard = memo(function KanbanCard({ task, onEdit }: KanbanCardProps) {
   const toggleTaskStatus = useTaskStore((state) => state.toggleTaskStatus)
-  const getTaskLoggedSeconds = useTimeEntryStore((state) => state.getTaskLoggedSeconds)
+  const taskSeconds = useTimeEntryStore((state) => state.taskLoggedSecondsMap[task.id] ?? 0)
   const getSubTasks = useTaskStore((state) => state.getSubTasks)
-  const taskSeconds = getTaskLoggedSeconds(task.id)
   const subTasks = getSubTasks(task.id)
 
   const formatTaskDuration = (secs: number) => {
@@ -227,4 +227,6 @@ export function KanbanCard({ task, onEdit }: KanbanCardProps) {
       )}
     </motion.div>
   )
-}
+})
+
+KanbanCard.displayName = 'KanbanCard'

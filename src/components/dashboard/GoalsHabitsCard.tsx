@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { Target, Check, ChevronRight, ExternalLink } from 'lucide-react'
+import { Target, Check, ChevronRight, ExternalLink, Flame } from 'lucide-react'
 import { useHabitStore } from '@/stores/habitStore'
 import { openExternalUrl } from '@/lib/utils/url'
 import Link from 'next/link'
@@ -14,6 +14,9 @@ export function GoalsHabitsCard() {
   const toggleHabit = useHabitStore((s) => s.toggleHabit)
 
   const todayStr = new Date().toISOString().split('T')[0]
+
+  const highPriorityHabits = habits.filter((h) => h.priority === 'high')
+  const visibleHabits = highPriorityHabits.length > 0 ? highPriorityHabits.slice(0, 3) : habits.slice(0, 3)
 
   return (
     <BaseCard
@@ -32,10 +35,17 @@ export function GoalsHabitsCard() {
               Daily Habits & Goals
             </h3>
             <p className="text-xs text-[var(--text-secondary)]">
-              Consistency progress & target dates
+              High-priority habits & target dates
             </p>
           </div>
         </div>
+
+        {highPriorityHabits.length > 0 && (
+          <span className="flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-100/80 border border-amber-200 px-2 py-0.5 rounded-full">
+            <Flame className="w-3 h-3" />
+            High Priority
+          </span>
+        )}
 
         <Link
           href="/habits"
@@ -50,10 +60,18 @@ export function GoalsHabitsCard() {
       <div className="flex flex-col gap-4 my-1">
         {habits.length === 0 ? (
           <div className="py-8 text-center text-xs text-[var(--text-tertiary)]">
-            No habits configured. Create your first habit on the Habits page!
+            No habits configured. Create your first habit on the Habits page, then mark it{' '}
+            <span className="font-bold text-[var(--text-primary)]">High priority</span> to see it
+            here.
+          </div>
+        ) : highPriorityHabits.length === 0 ? (
+          <div className="py-8 text-center text-xs text-[var(--text-tertiary)]">
+            No high-priority habits yet. Set a habit to{' '}
+            <span className="font-bold text-[var(--text-primary)]">High priority</span> on the
+            Habits page to surface it here.
           </div>
         ) : (
-          habits.slice(0, 3).map((habit, idx) => {
+          visibleHabits.map((habit, idx) => {
             const isDone = !!records[`${habit.id}_${todayStr}`]
             
             // Calculate actual 30-day completion rate from SQLite records

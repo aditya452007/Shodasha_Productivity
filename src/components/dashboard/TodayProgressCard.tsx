@@ -22,8 +22,8 @@ export function TodayProgressCard() {
   const isHabitLoading = useHabitStore((state) => state.isLoading)
   const habitError = useHabitStore((state) => state.error)
 
-  const getTotalFocusSeconds = useTimeEntryStore((state) => state.getTotalFocusSecondsToday)
-  const getKPIsFiltered = useTimeEntryStore((state) => state.getKPIsFiltered)
+  const focusSeconds = useTimeEntryStore((state) => state.totalFocusSecondsToday)
+  const kpis = useTimeEntryStore((state) => state.filteredKPIs)
   const refreshAllData = useTimeEntryStore((state) => state.refreshAllData)
   const isRefreshing = useTimeEntryStore((state) => state.isRefreshing)
   const isTimeLoading = useTimeEntryStore((state) => state.isLoading)
@@ -42,11 +42,9 @@ export function TodayProgressCard() {
   const totalHabits = habits.length
   const habitProgress = totalHabits > 0 ? Math.round((completedHabits / totalHabits) * 100) : 0
 
-  const focusSeconds = getTotalFocusSeconds()
   const focusHours = Math.floor(focusSeconds / 3600)
   const focusMins = Math.floor((focusSeconds % 3600) / 60)
 
-  const kpis = getKPIsFiltered()
   const focusScore = kpis.focusScore
   const deepWorkRatio = kpis.deepWorkRatio
 

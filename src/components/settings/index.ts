@@ -7,4 +7,5 @@ export { NotificationsSettings } from './NotificationsSettings'
 export { DesktopPetSettings } from './DesktopPetSettings'
 export { AboutSettings } from './AboutSettings'
 export { GamificationSettings } from '@/components/gamification/GamificationSettings'
-
+export { SpotifyIntegrationWidget } from './SpotifyIntegrationWidget'
+export { MoreIntegrationsWidget } from './MoreIntegrationsWidget'

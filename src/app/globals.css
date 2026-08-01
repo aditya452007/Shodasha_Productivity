@@ -2,26 +2,13 @@
 
 @layer base {
   :root {
-    /* Color Tokens (Warm Editorial Light Mode System) */
-    --color-paper: oklch(96.5% 0.006 75);
-    --color-paper-elevated: oklch(98.5% 0.004 75);
-    --color-rule: oklch(89% 0.007 75);
-    --color-neutral: oklch(58% 0.008 75);
-    --color-muted: oklch(48% 0.008 70);
-    --color-ink: oklch(22% 0.012 60);
-    --color-warning: oklch(55% 0.15 80);
-    --color-rule-strong: oklch(78% 0.012 75);
-    --color-ink-secondary: oklch(40% 0.008 70);
-    --color-success: var(--success);
-    --color-error: var(--error);
-
     /* Warm Linen / Cream Light Mode Palette (No stark harsh #ffffff) */
     --bg-base: #f4f1eb;
     --bg-surface: #faf8f4;
     --bg-surface-hover: #eae6df;
-    --bg-primary: #f4f1eb;
-    --bg-secondary: #faf8f4;
-    --bg-tertiary: #eae6df;
+    --bg-primary: var(--bg-base);
+    --bg-secondary: var(--bg-surface);
+    --bg-tertiary: var(--bg-surface-hover);
     --bg-surface-elevated: #fcfbfa;
     --text-primary: #262320;
     --text-secondary: #615b53;
@@ -85,7 +72,8 @@
     --radius-pill: 9999px;
 
     /* Easing & Duration Tokens */
-    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out: var(--ease-smooth);
     --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
     --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
     --dur-micro: 120ms;
@@ -108,26 +96,13 @@
   }
 
   .dark {
-    /* Color Tokens (Rich Warm Espresso / Charcoal Dark Mode) */
-    --color-paper: oklch(19% 0.012 50);
-    --color-paper-elevated: oklch(23% 0.014 50);
-    --color-rule: oklch(32% 0.01 50);
-    --color-neutral: oklch(62% 0.008 50);
-    --color-muted: oklch(72% 0.006 50);
-    --color-ink: oklch(93% 0.006 70);
-    --color-warning: oklch(65% 0.18 80);
-    --color-rule-strong: oklch(40% 0.012 50);
-    --color-ink-secondary: oklch(78% 0.006 60);
-    --color-success: var(--success);
-    --color-error: var(--error);
-
     /* Warm Espresso & Charcoal Dark Palette (No Z-black / pitch black) */
     --bg-base: #171513;
     --bg-surface: #24211e;
     --bg-surface-hover: #332f2a;
-    --bg-primary: #171513;
-    --bg-secondary: #24211e;
-    --bg-tertiary: #332f2a;
+    --bg-primary: var(--bg-base);
+    --bg-secondary: var(--bg-surface);
+    --bg-tertiary: var(--bg-surface-hover);
     --bg-surface-elevated: #332f2a;
     --text-primary: #f2eee8;
     --text-secondary: #b8b0a5;
@@ -211,6 +186,49 @@
   .dark select option {
     background-color: #24211e !important;
     color: #f2eee8 !important;
+  }
+
+  /* Accent color variants — driven by data-accent on <html> */
+  [data-accent="emerald"] {
+    --accent: #059669;
+    --accent-hover: #047857;
+    --accent-muted: #d1fae5;
+  }
+  [data-accent="violet"] {
+    --accent: #7c3aed;
+    --accent-hover: #6d28d9;
+    --accent-muted: #ede9fe;
+  }
+  [data-accent="amber"] {
+    --accent: #d97706;
+    --accent-hover: #b45309;
+    --accent-muted: #fef3c7;
+  }
+  [data-accent="rose"] {
+    --accent: #e11d48;
+    --accent-hover: #be123c;
+    --accent-muted: #ffe4e6;
+  }
+
+  .dark[data-accent="emerald"] {
+    --accent: #10b981;
+    --accent-hover: #34d399;
+    --accent-muted: #042f2e;
+  }
+  .dark[data-accent="violet"] {
+    --accent: #a78bfa;
+    --accent-hover: #c4b5fd;
+    --accent-muted: #2e1e4a;
+  }
+  .dark[data-accent="amber"] {
+    --accent: #fbbf24;
+    --accent-hover: #fcd34d;
+    --accent-muted: #452d0a;
+  }
+  .dark[data-accent="rose"] {
+    --accent: #fb7185;
+    --accent-hover: #fda4af;
+    --accent-muted: #4c1d2a;
   }
 
   /* Micro-interactions: Focus ring, button hover/press, transitions */
@@ -467,7 +485,6 @@
 
 @media (hover: hover) and (pointer: fine) {
   .card-hover-lift:hover {
-    transform: translateY(-2px);
     box-shadow: var(--shadow-md);
   }
 
@@ -485,7 +502,6 @@
 @media (hover: hover) and (pointer: fine) {
   .card-hover-glow:hover {
     box-shadow: var(--shadow-md), 0 0 0 1px var(--accent-muted);
-    transform: translateY(-1px);
   }
 
   .card-hover-glow:active {
@@ -501,7 +517,6 @@
 @media (hover: hover) and (pointer: fine) {
   .card-hover-border:hover {
     border-color: var(--border-strong);
-    transform: translateY(-1px);
   }
 
   .card-hover-border:active {
@@ -539,6 +554,22 @@
 
 .dark .card-elevated {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.25);
+}
+
+/* Card mount animation (CSS, GPU-composited) */
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-card-enter {
+  animation: card-enter 0.3s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 
 /* Custom scrollbars */

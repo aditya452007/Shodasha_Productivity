@@ -7,6 +7,7 @@ import {
   requestNotificationPermission,
   sendWebNotification,
   sendHabitReminderNotification,
+  sendHabitScheduledReminder,
   sendIdleAlertNotification,
   sendDailySummaryNotification,
   deliverNotification,
@@ -28,6 +29,7 @@ interface NotificationState {
   dailySummaryTime: string;
   lastSummaryTriggerDate: string | null;
   lastHabitReminderDate: string | null;
+  habitReminderNotified: Record<string, string>; // habitId -> last notified date (YYYY-MM-DD)
 
   petDeliveryEnabled: boolean;
   petId: string | null;
@@ -65,6 +67,7 @@ export const useNotificationStore = create<NotificationState>()(
       dailySummaryTime: '21:00',
       lastSummaryTriggerDate: null,
       lastHabitReminderDate: null,
+      habitReminderNotified: {},
 
       petDeliveryEnabled: true,
       petId: null,
@@ -186,6 +189,48 @@ export const useNotificationStore = create<NotificationState>()(
           }
         }
 
+        // 1b. Per-habit scheduled reminders — including overdue catch-up for
+        // windows where the laptop was off or Shodasha wasn't running.
+        const { habits: allHabits, records } = useHabitStore.getState();
+        const notified = get().habitReminderNotified;
+        const nextNotified: Record<string, string> = { ...notified };
+        let notifiedChanged = false;
+
+        for (const habit of allHabits) {
+          if (!habit.reminderTime) continue;
+          const normalized = normalizeTime(habit.reminderTime);
+          if (!normalized) continue;
+          if (nextNotified[habit.id] === todayStr) continue;
+          if (!!records[`${habit.id}_${todayStr}`]) continue;
+          if (currentHoursMins < normalized) continue;
+
+          const isOverdue = currentHoursMins !== normalized;
+          const body = isOverdue
+            ? `"${habit.name}" was scheduled for ${normalized} and it's now ${currentHoursMins}. Time passed — do it now or mark it complete.`
+            : `It's ${normalized} — time for "${habit.name}". Keep your streak going!`;
+          const tag = `habit-scheduled-${habit.id}-${todayStr}`;
+
+          if (petDeliveryEnabled) {
+            await deliverNotification({ title: 'Habit Reminder', body, tag }, channelHabit, 'habit', petId ?? undefined);
+          } else {
+            await sendHabitScheduledReminder(habit.name, body, tag);
+          }
+          nextNotified[habit.id] = todayStr;
+          notifiedChanged = true;
+        }
+
+        // Prune entries for habits that were deleted
+        for (const key of Object.keys(nextNotified)) {
+          if (!allHabits.some((h) => h.id === key)) {
+            delete nextNotified[key];
+            notifiedChanged = true;
+          }
+        }
+
+        if (notifiedChanged) {
+          set({ habitReminderNotified: nextNotified });
+        }
+
         // 2. Daily Summary
         if (dailySummaryEnabled && normalizeTime(dailySummaryTime) === currentHoursMins && lastSummaryTriggerDate !== todayStr) {
           const timeStore = useTimeEntryStore.getState();
@@ -218,6 +263,7 @@ export const useNotificationStore = create<NotificationState>()(
         dailySummaryTime: state.dailySummaryTime,
         lastSummaryTriggerDate: state.lastSummaryTriggerDate,
         lastHabitReminderDate: state.lastHabitReminderDate,
+        habitReminderNotified: state.habitReminderNotified,
         petDeliveryEnabled: state.petDeliveryEnabled,
         petId: state.petId,
         channelHabit: state.channelHabit,

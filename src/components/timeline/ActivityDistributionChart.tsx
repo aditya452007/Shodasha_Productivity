@@ -27,8 +27,9 @@ const formatDuration = (seconds: number) => {
 }
 
 export function AnalyticsKPIGrid() {
-  const { getKPIsFiltered, isLoading, error } = useTimeEntryStore()
-  const kpis = getKPIsFiltered()
+  const kpis = useTimeEntryStore((s) => s.filteredKPIs)
+  const isLoading = useTimeEntryStore((s) => s.isLoading)
+  const error = useTimeEntryStore((s) => s.error)
 
   if (isLoading) {
     return (
@@ -108,8 +109,7 @@ export function AnalyticsKPIGrid() {
 }
 
 export function CumulativeScreenTimeWidget() {
-  const { getCumulativeScreenTimeFiltered } = useTimeEntryStore()
-  const points = getCumulativeScreenTimeFiltered()
+  const points = useTimeEntryStore((s) => s.filteredCumulativeScreenTime)
 
   const chartData = points.map((p) => ({
     label: p.timestamp,
@@ -154,10 +154,8 @@ export function CumulativeScreenTimeWidget() {
 }
 
 export function DistributionChartsWidget() {
-  const { getCategoryBreakdownFiltered, getTopAppsFiltered } = useTimeEntryStore()
-
-  const categories = getCategoryBreakdownFiltered()
-  const topApps = getTopAppsFiltered()
+  const categories = useTimeEntryStore((s) => s.filteredCategoryBreakdown)
+  const topApps = useTimeEntryStore((s) => s.filteredTopApps)
 
   const categorySlices = categories.map((c) => ({
     label: c.label,

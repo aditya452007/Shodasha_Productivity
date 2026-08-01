@@ -21,6 +21,7 @@
     "@tauri-apps/plugin-notification": "^2.3.3",
     "@tauri-apps/plugin-shell": "^2.3.5",
     "cmdk": "^1.1.1",
+    "immer": "^11.1.15",
     "lucide-react": "^1.26.0",
     "motion": "^12.42.2",
     "next": "^16.2.11",
