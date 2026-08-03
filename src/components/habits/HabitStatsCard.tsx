@@ -9,6 +9,7 @@ import { ErrorBanner } from '@/components/ui/ErrorBanner'
 import { NumberTicker } from '@/components/ui/NumberTicker'
 import { BaseCard } from '@/components/ui/BaseCard'
 import { LivingFlameIcon } from '@/components/gamification/LivingFlameIcon'
+import { calculateGlobalStreak } from '@/lib/utils/streak'
 
 export function HabitStatsCard() {
   const habits = useHabitStore((s) => s.habits)
@@ -20,31 +21,6 @@ export function HabitStatsCard() {
   const stats = useMemo(() => {
     const today = new Date()
     const todayStr = today.toISOString().split('T')[0]
-
-    // Find earliest habit creation date to establish global start boundary
-    const creationDates = habits.map((h) => h.createdAt.split('T')[0]).sort()
-    const globalStartBoundary = creationDates.length > 0 ? creationDates[0] : todayStr
-
-    // Calculate current streak (consecutive days where at least 1 habit was done)
-    let currentStreak = 0
-    let checkDate = new Date(today)
-
-    const anyDoneToday = habits.some((h) => !!records[`${h.id}_${todayStr}`])
-    if (!anyDoneToday) {
-      checkDate.setDate(checkDate.getDate() - 1)
-    }
-
-    while (true) {
-      const dateStr = checkDate.toISOString().split('T')[0]
-      if (dateStr < globalStartBoundary) break
-      const hasCompletedHabit = habits.some((h) => !!records[`${h.id}_${dateStr}`])
-      if (hasCompletedHabit) {
-        currentStreak++
-        checkDate.setDate(checkDate.getDate() - 1)
-      } else {
-        break
-      }
-    }
 
     // Today's progress
     const todayCompletedCount = habits.filter((h) => !!records[`${h.id}_${todayStr}`]).length
@@ -62,7 +38,7 @@ export function HabitStatsCard() {
     }
 
     return {
-      currentStreak,
+      currentStreak: calculateGlobalStreak(habits, records),
       todayCompletedCount,
       todayCompletionRate,
       last30DaysCount,

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { motion, useReducedMotion } from 'framer-motion'
 import { QuickHabitActionsWidget } from '@/components/habits/QuickHabitActionsWidget'
 import { HabitStatsCard } from '@/components/habits/HabitStatsCard'
@@ -8,15 +9,20 @@ import { HabitAnalyticsDashboard } from '@/components/habits/HabitAnalyticsDashb
 import { HabitAchievements } from '@/components/habits/HabitAchievements'
 import { HabitCalendar } from '@/components/habits/HabitCalendar'
 import { HabitHeatmap } from '@/components/habits/HabitHeatmap'
-import { AddHabitModal } from '@/components/habits/AddHabitModal'
 import { HabitCategoryMetricsCard } from '@/components/habits/HabitCategoryMetricsCard'
 import { useHabitStore, Habit } from '@/stores/habitStore'
 import { useGamificationStore } from '@/stores/gamificationStore'
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 
+const AddHabitModal = dynamic(
+  () => import('@/components/habits/AddHabitModal').then((m) => m.AddHabitModal),
+  { ssr: false }
+)
+
 export default function HabitsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null)
+  const [initialCategoryId, setInitialCategoryId] = useState<string | null>(null)
   const initializeGamification = useGamificationStore((s) => s.initializeGamification)
 
   const shouldReduceMotion = useReducedMotion()
@@ -28,11 +34,19 @@ export default function HabitsPage() {
 
   const handleOpenAddModal = () => {
     setEditingHabit(null)
+    setInitialCategoryId(null)
+    setIsModalOpen(true)
+  }
+
+  const handleOpenAddModalInCategory = (categoryId: string) => {
+    setEditingHabit(null)
+    setInitialCategoryId(categoryId)
     setIsModalOpen(true)
   }
 
   const handleOpenEditModal = (habit: Habit) => {
     setEditingHabit(habit)
+    setInitialCategoryId(null)
     setIsModalOpen(true)
   }
 
@@ -84,7 +98,7 @@ export default function HabitsPage() {
           {/* Habit Category Balance Metrics */}
           <div className="bento-grid bento-grid-cols-12 items-stretch">
             <div className="bento-col-span-12">
-              <HabitCategoryMetricsCard />
+              <HabitCategoryMetricsCard onAddHabitInCategory={handleOpenAddModalInCategory} />
             </div>
           </div>
 
@@ -99,6 +113,7 @@ export default function HabitsPage() {
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             editingHabit={editingHabit}
+            initialCategoryId={initialCategoryId}
           />
         </>
       )}

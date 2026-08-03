@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useHabitStore } from '@/stores/habitStore'
-import { useTimeEntryStore } from '@/stores/timeEntryStore'
+import { useTimeEntryStore, type TimeKPIs } from '@/stores/timeEntryStore'
 import { useTaskStore } from '@/stores/taskStore'
 import { ACHIEVEMENTS_LIST } from '@/lib/achievements'
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
@@ -32,10 +32,9 @@ const AXES: AxisData[] = [
   { label: 'Discipline', score: 0, color: 'var(--accent-orange)', description: 'Streak adherence' },
 ]
 
-function computeAxesScores(): AxisData[] {
+function computeAxesScores(filteredKPIs: TimeKPIs | null): AxisData[] {
   const habits = useHabitStore.getState().habits
   const records = useHabitStore.getState().records
-  const timeStore = useTimeEntryStore.getState()
   const tasks = useTaskStore.getState().tasks
 
   const today = new Date()
@@ -89,11 +88,10 @@ function computeAxesScores(): AxisData[] {
     streakAdherence = longestStreak > 0 ? Math.round((currentStreak / longestStreak) * 100) : 0
   }
 
-  const kpis = timeStore.getKPIsFiltered ? timeStore.getKPIsFiltered() : null
-  const deepWorkRatio = kpis?.deepWorkRatio ?? 0
-  const distractionRatio = kpis?.distractionRatio ?? 0
-  const activeFocusSeconds = kpis?.activeFocusSeconds ?? 0
-  const idleTimeSeconds = kpis?.idleTimeSeconds ?? 0
+  const deepWorkRatio = filteredKPIs?.deepWorkRatio ?? 0
+  const distractionRatio = filteredKPIs?.distractionRatio ?? 0
+  const activeFocusSeconds = filteredKPIs?.activeFocusSeconds ?? 0
+  const idleTimeSeconds = filteredKPIs?.idleTimeSeconds ?? 0
 
   const depthScore = Math.round(deepWorkRatio)
   const balanceScore = Math.round(100 - Math.abs(deepWorkRatio - distractionRatio))
@@ -167,11 +165,12 @@ export function SkillOctagon({ size = 260, className = '' }: SkillOctagonProps) 
   const error = useHabitStore((s) => s.error)
   const habits = useHabitStore((s) => s.habits)
   const isInitialized = useGamificationStore((s) => s.isInitialized)
+  const filteredKPIs = useTimeEntryStore((s) => s.filteredKPIs)
 
   const axes = useMemo(() => {
     if (!isInitialized) return AXES.map((a) => ({ ...a, score: 0 }))
-    return computeAxesScores()
-  }, [habits, isInitialized])
+    return computeAxesScores(filteredKPIs)
+  }, [habits, isInitialized, filteredKPIs])
 
   const cx = size / 2
   const cy = size / 2

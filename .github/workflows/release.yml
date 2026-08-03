@@ -93,7 +93,6 @@ jobs:
           workspaces: |
             .
             src-tauri
-            tracker
 
       - name: Install frontend dependencies
         if: steps.version.outputs.skip != 'true'
@@ -102,10 +101,6 @@ jobs:
       - name: Build Next.js frontend
         if: steps.version.outputs.skip != 'true'
         run: npm run build
-
-      - name: Build background tracker binary
-        if: steps.version.outputs.skip != 'true'
-        run: cargo build --manifest-path tracker/Cargo.toml --release
 
       - name: Build Tauri app (MSI + NSIS installers)
         if: steps.version.outputs.skip != 'true'

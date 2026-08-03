@@ -12,6 +12,7 @@ interface AddHabitModalProps {
   isOpen: boolean
   onClose: () => void
   editingHabit?: Habit | null
+  initialCategoryId?: string | null
 }
 
 const PRESET_COLORS = [
@@ -48,7 +49,7 @@ const STEP_TRANSITION = {
   exit: (dir: number) => ({ opacity: 0, x: dir * -28 }),
 }
 
-export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalProps) {
+export function AddHabitModal({ isOpen, onClose, editingHabit, initialCategoryId }: AddHabitModalProps) {
   const addHabit = useHabitStore((s) => s.addHabit)
   const updateHabit = useHabitStore((s) => s.updateHabit)
   const habitCategories = useHabitStore((s) => s.habitCategories)
@@ -73,6 +74,7 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
+    const categoriesInStore = useHabitStore.getState().habitCategories
     if (editingHabit) {
       setName(editingHabit.name)
       setColor(editingHabit.color || 'var(--accent-emerald)')
@@ -87,7 +89,11 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
       setLinkedTaskId('')
       setUrl('')
       setPriority('medium')
-      setCategory(GENERAL_CATEGORY)
+      setCategory(
+        initialCategoryId && categoriesInStore.some((c) => c.id === initialCategoryId)
+          ? initialCategoryId
+          : GENERAL_CATEGORY
+      )
       setReminderTime('')
     }
     setIsCreatingCategory(false)
@@ -97,7 +103,7 @@ export function AddHabitModal({ isOpen, onClose, editingHabit }: AddHabitModalPr
     setDirection(1)
     setIsSuccess(false)
     setIsSubmitting(false)
-  }, [editingHabit, isOpen])
+  }, [editingHabit, isOpen, initialCategoryId])
 
   const isCurrentStepValid = () => {
     if (currentStep === 0) return name.trim().length > 0

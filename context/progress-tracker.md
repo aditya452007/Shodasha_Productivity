@@ -4,11 +4,69 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-**Habits `/habits` review feedback round 5 — AddHabitModal wizard (Aug 2026)**
+**Performance optimization (per `design-audits/performance-critical-issues-report.md`, 2026-08-02) — Increment 7 of 8: SQL aggregates + lazy data**
 
 ## Current Goal
 
-Make habit creation a guided one-step-at-a-time wizard (Ant Design Steps + Cult UI Intro Disclosure design language) so users are never confronted with a wall of fields at once.
+Kill the terminal-on-launch bug, shared SQLite connection, WAL pragmas, indexes, single tracker writer, background-mode RAM, SQL aggregates, and frontend cleanup.
+
+## Completed (Performance Increment 7 — SQL aggregates + lazy data, Aug 2026)
+
+- [x] **New SQL aggregate command** `get_time_entry_aggregates(date)` in commands.rs → `time_entry_repo::get_time_entry_aggregates` — one `TimeEntryAggregatesDb` struct (focus/idle/computer-on seconds for the day, today's focus + computer-on seconds, top apps by `GROUP BY app_name` ordered by total seconds, task-logged seconds `GROUP BY linked_task_id` across ALL history). Half-open day range `start_time >= day AND start_time < date(day,'+1 day')` — a session at 23:59:59.5 now lands in its own day (fixes the report §3.6 boundary bug). Top-apps/totals exclude idle; today's numbers are UTC-`date('now')` so they are correct regardless of which date is loaded (fixes "today cards show 0 when viewing a past date")
+- [x] **Category breakdown stays in JS** (documented constraint): it needs the browser-title → site normalization (`getCategoryForEntry`) that SQL cannot express — only title-free aggregations moved to SQL
+- [x] **Store consumes aggregates**: `timeEntryStore` gains `aggregates` state (parallel `Promise.all` fetch in `initializeTimeEntries`); `computeDerivedState` now takes `aggregates` — `taskLoggedSecondsMap` = SQL all-history totals (was: only the loaded day's entries — board cards now show true total logged time), `totalFocusSecondsToday` = SQL today totals (was: JS filter of loaded day, wrong when viewing a past date), and KPI totals + top-apps come from SQL whenever the view is unfiltered (category/search filter falls back to the JS path since SQL can't re-filter by category). `linkTaskToTimeEntry` optimistically syncs the SQL map on link/unlink; `getTotalFocusSecondsToday` prefers the aggregate
+- [x] **Habit records date-bounded**: `habit_repo::get_habit_records` now `WHERE date >= date('now','-366 days')` — streak/HP/calendar math never needs older history; fetch is O(recent records) not O(all records)
+- [x] **Dead wrapper removed**: `fetchTimeEntriesRangeFromDb` (imported but never called — grep-verified) replaced with `fetchTimeEntryAggregatesFromDb`; grep confirms zero remaining references to the old wrapper or `get_time_entries_range` in `src/` (the Rust command remains for now — flagged for the increment-8 dead-code sweep)
+- [x] **Verification**: `cargo check src-tauri` 0 errors (2 pre-existing pet_store warnings); lint 0 errors (4 pre-existing warnings); typecheck 0 errors; build success (8 static routes)
+
+
+## Completed (Performance Increment 6 — RAM / background mode, Aug 2026)
+
+- [x] **No window on `--autostart`**: removed the static window from `tauri.conf.json`; window is now created lazily via `WebviewWindowBuilder` in `lib.rs` (`create_main_window`/`show_main_window`) — autostart boot = Rust core only (~30 MB), no hidden WebView (~150–300 MB)
+- [x] **Close-to-tray destroys the WebView**: `CloseRequested` now `prevent_close()` + `window.destroy()` (was `hide()`); tray menu "Show Shodasha" and left-click tray both rebuild the window if missing (`get_webview_window("main")` → None → rebuild) — true background mode
+- [x] **Visibility-gated intervals**: timeline 15 s refresh and NotificationScheduler 60 s check now skip when `document.visibilityState !== 'visible'`, with a `visibilitychange` listener to catch up immediately on show (overdue reminder catch-up already built into notificationStore)
+- [x] **Deleted `MusicPlayerWidget.tsx`** (grep-verified: exported, never imported) — removes the guaranteed-error `get_active_media_session` IPC every 10 s plus its 2 infinite framer loops
+- [x] **Verification**: `cargo check` 0 errors (2 pre-existing warnings); lint 0 errors; typecheck 0 errors; build success
+
+## Completed (Performance Increment 5 — single tracker writer, Aug 2026)
+
+- [x] **Deleted the `tracker/` crate** — the embedded thread in `tracker_service.rs` is a strict superset (gap entries, configurable interval, transient filtering, quit-close); a standalone poller risked duplicate `time_{millis}` rows and cross-writer orphan-close corruption
+- [x] **Root workspace fixed**: removed `"tracker"` from the root `Cargo.toml` workspace members (was blocking `cargo check` after deletion)
+- [x] **CI cleaned**: removed the "Build Background Tracker Binary" step and `tracker` workspace entry from both `.github/workflows/ci.yml` and `release.yml`; `package.json` lost `build:tracker` (and `build:all` no longer calls it)
+- [x] **Stale copy fixed**: `TrackingPreferences.tsx:171` now says "Starts Shodasha silently in the background (embedded tracker)…" instead of "Runs tracker.exe silently…"
+- [x] **Docs synced per AGENTS.md**: `context/architecture.md` rewritten to single-crate layout + embedded-thread tracker flow; `README.md` build instructions/project tree updated; `docs/adr/0002-standalone-tracker-process-with-wal.md` marked Superseded with ADR-0002-R1 record
+- [x] **Verification**: grep confirms zero remaining references to `tracker/`/`tracker.exe`/`build:tracker` in code/config; `cargo check src-tauri` 0 errors (2 pre-existing warnings); lint 0 errors; typecheck 0 errors; build success
+
+## Completed (Performance Increments 3+4 — WAL pragmas + indexes + orphan-close, Aug 2026)
+
+- [x] **WAL pragmas**: `PRAGMA synchronous=NORMAL` + `PRAGMA journal_size_limit=67108864` added to `src-tauri/src/db.rs` and `tracker/src/db.rs` (safe under WAL — kills the fsync-per-commit churn of `synchronous=FULL`; tracker writes every 10 s 24/7)
+- [x] **Missing indexes**: `idx_time_entries_end_time`, partial `idx_time_entries_open (WHERE end_time IS NULL)`, `idx_habit_records_date` added to the migration batch in db.rs (follows the repo's existing unconditional `CREATE INDEX IF NOT EXISTS` convention, idempotent every launch) — orphan-close goes O(N) → O(open rows), habit records by date get an index
+- [x] **Single orphan-close call site at launch**: removed the duplicate `close_orphaned_entries` inside the tracker thread's connection bootstrap (tracker_service.rs) — now exactly 2 call sites: once at startup (lib.rs:32) + once on tray Quit (intentional)
+- [x] **Verification**: `cargo check` both crates 0 errors (2 pre-existing pet_store warnings)
+
+## Completed (Performance Increment 2 — shared SQLite connection, Aug 2026)
+
+- [x] **Single `Mutex<Connection>` in Tauri state**: new `DbState { conn: Mutex<Connection> }` in lib.rs, initialized once via `db::init_db()` (migrations + seeds run exactly once at startup, not per command) and `.manage()`d; all **32 DB-touching commands** in commands.rs now take `state: tauri::State<'_, DbState>` and lock the shared connection (`state.conn.lock()`) instead of calling `init_db()` — eliminates the ~25-statement migration/seed replay per IPC call
+- [x] **Tray "Quit"** now uses the shared connection for the final orphan-close instead of opening a fresh one
+- [x] **No deadlocks**: mutex is held only inside a single command handler (no nesting, no awaits); the embedded tracker thread keeps its own dedicated connection (tracker_service.rs:216); `busy_timeout=5000` covers cross-connection writer contention
+- [x] **Verification**: `cargo check src-tauri` 0 errors (2 pre-existing pet_store warnings); `npm run lint` 0 errors (4 pre-existing warnings); `npm run typecheck` 0 errors; `npm run build` success
+
+## Completed (Performance Increment 1 — P0 terminal bug, Aug 2026)
+
+- [x] **Release builds**: `package.json` `build:tauri` → `cargo build --release --manifest-path src-tauri/Cargo.toml`; `build:tracker` → `cargo build --release --manifest-path tracker/Cargo.toml` (debug builds were console-subsystem → terminal window + `CTRL_CLOSE_EVENT` killed the app)
+- [x] **Tracker always GUI-subsystem**: `tracker/src/main.rs:1` `#![cfg_attr(not(debug_assertions), ...)]` → `#![cfg_attr(windows, windows_subsystem = "windows")]` (headless poller never wants a console, any profile)
+- [x] **Autostart write-on-change**: `commands::set_auto_start` now reads the existing `HKCU\...\Run\ShodashaTracker` value via `RegQueryValueExW` and skips `RegSetValueExW` when it already matches (boot-time churn on every launch eliminated)
+- [x] **Deleted 0-byte placeholder** `target/release/tracker.exe`; removed the `"resources": ["../target/release/tracker.exe"]` entry from `src-tauri/tauri.conf.json` (broke `cargo check` once the placeholder was gone — removed here rather than in increment 5 to keep the build green)
+- [x] **Verification**: `cargo check src-tauri` 0 errors (2 pre-existing pet_store warnings); `cargo check tracker` 0 errors; `npm run lint` 0 errors (4 pre-existing `<img>` warnings); `npm run typecheck` 0 errors; `npm run build` success (8 static routes)
+
+## Completed (Round 5 hotfix — data preservation & auto-categorization, Aug 2026)
+
+- [x] **Diagnosis**: reported "all habits disappeared" — verified live DB (`%APPDATA%\Shodasha\data.db`) is fully intact: 14 habits, 32 habit_records, 5 habit_categories (4 seeds + user's "Frontend" cat-1785596229893), XP 685 + achievements, `schema_version` = 1. Root cause was the load path: `habitStore.initializeHabits` silently wiped the UI to `habits: []` when the IPC fetch returned null (browser fallback / backend hiccup) — no error, no retry, data safe in SQLite
+- [x] **Load-path hardening**: `initializeHabits` now distinguishes backend-present-but-failed (keeps existing state, sets `error` + stays un-initialized for retry) from browser preview (empty store expected, still initializes); per-collection null checks; `isTauri()` guard
+- [x] **Retry + self-heal**: `HabitCalendar` error state now shows a retry button calling `initializeHabits()`; `AppInitializer` re-initializes the habit store when the window regains focus if it's un-initialized or errored (recovers after backend restarts)
+- [x] **Auto-categorization migration (schema v2)**: `auto_categorize_habits()` runs once on `schema_version < 2` — keyword rules in priority order (language → comm → coding → ui → work → health → personal → learning) applied only to habits still in `general`; `design%pattern` matches underscore/space variants so `Design_Patterns` → Coding & Algorithms, not Design & UI. Verified via dry-run on a `.backup` copy of the live DB: DSA/Dsa/Design_Patterns/System Design(+Geeks)/Devops → Coding & Algorithms; Learn Ui/UI Checklist/Design Psychology → Design & UI; English Speak/English Words → Language Learning; Cold Message/Record Yourself in Camera → Communication & Confidence; Design_Philosophy untouched in user's Frontend category. Records untouched, user categories untouched, safe to re-run
+- [x] **Seed fix**: category seeding was gated on `category_count == 0`, so the 4 new categories (Design & UI, Language Learning, Coding & Algorithms, Communication & Confidence) would never be inserted into an existing DB — now unconditional `INSERT OR IGNORE` (idempotent, never touches user categories)
+- [x] **Verification**: `cargo check --workspace` 0 errors (2 pre-existing pet_store warnings); `npm run lint` 0 errors (4 pre-existing `<img>` warnings); `npm run typecheck` 0 errors; `npm run build` success (8 routes: 7 static + _not-found)
 
 ## Completed (Review Feedback Round 5 — habit wizard)
 

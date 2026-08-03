@@ -168,7 +168,7 @@ export function TrackingPreferences() {
                   Launch on Windows Startup
                 </span>
                 <span className="text-xs text-[var(--text-tertiary)]">
-                  Runs tracker.exe silently on system boot via Windows HKCU\...\Run registry
+                  Starts Shodasha silently in the background (embedded tracker) on system boot via Windows HKCU\...\Run registry
                 </span>
               </div>
             </div>

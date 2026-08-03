@@ -1,10 +1,15 @@
 'use client'
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import { Plus, Compass, Sparkles } from 'lucide-react'
-import { AddHabitModal } from '@/components/habits/AddHabitModal'
 import { useHabitStore } from '@/stores/habitStore'
 import { toast } from 'sonner'
+
+const AddHabitModal = dynamic(
+  () => import('@/components/habits/AddHabitModal').then((m) => m.AddHabitModal),
+  { ssr: false }
+)
 
 export function QuickHabitActionsWidget() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)

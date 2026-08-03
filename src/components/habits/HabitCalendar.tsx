@@ -132,7 +132,13 @@ export function HabitCalendar({ onOpenAddModal, onOpenEditModal }: HabitCalendar
   }
 
   if (error) {
-    return <ErrorBanner title="Failed to load habit calendar" message={error} />
+    return (
+      <ErrorBanner
+        title="Failed to load habit calendar"
+        message={error}
+        onRetry={() => useHabitStore.getState().initializeHabits()}
+      />
+    )
   }
 
   return (

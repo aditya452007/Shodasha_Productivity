@@ -2,7 +2,22 @@
 
 **Date:** 2026-07-23
 
-**Status:** Accepted
+**Status:** Superseded by ADR-0002-R1 (2026-08-02) — see below
+
+## ADR-0002-R1: Superseded — Single-process embedded tracker
+
+The `tracker/` crate was **deleted** (2026-08-02). The standalone tracker binary is
+replaced by an **embedded Rust thread** in `src-tauri/src/services/tracker_service.rs`,
+which runs in-process and keeps its own SQLite connection. The app is always resident
+in the system tray, so the original constraint ("tracking must work when the UI is
+closed") is still met — "closed" now means "hidden to tray". This also:
+
+- eliminates the duplicate-writer hazard (two processes could close/overwrite each
+  other's open `time_entries` rows → corrupt durations, double-counted analytics);
+- removes the second binary from the installer, CI, and the `HKCU\...\Run` launcher;
+- keeps WAL + `busy_timeout` + `synchronous=NORMAL` on both connections.
+
+The rest of this document records the original (now rejected) decision, kept for history.
 
 ## Context
 

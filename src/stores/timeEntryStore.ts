@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { AsyncState } from './taskStore'
 import {
   fetchTimeEntriesFromDb,
-  fetchTimeEntriesRangeFromDb,
+  fetchTimeEntryAggregatesFromDb,
   fetchAppCategoriesFromDb,
   setAppCategoryInDb,
   linkTaskToTimeEntryInDb,
@@ -88,6 +88,16 @@ export interface InactiveGapBlock {
 
 export type TimelinePeriodItem = ActivePeriodBlock | InactiveGapBlock
 
+export interface TimeEntryAggregates {
+  focusSeconds: number
+  idleSeconds: number
+  computerOnSeconds: number
+  todayFocusSeconds: number
+  todayComputerOnSeconds: number
+  topApps: { appName: string; totalSeconds: number; sessionsCount: number }[]
+  taskLoggedSeconds: { linkedTaskId: string; totalSeconds: number }[]
+}
+
 interface TimeEntryState extends AsyncState {
   entries: TimeEntry[]
   categories: Record<string, CategoryType>
@@ -97,6 +107,7 @@ interface TimeEntryState extends AsyncState {
   searchQuery: string
   widgetOrder: string[]
   isRefreshing: boolean
+  aggregates: TimeEntryAggregates | null
 
   // Derived / memoized state — updated when source data changes
   filteredEntries: TimeEntry[]
@@ -120,13 +131,6 @@ interface TimeEntryState extends AsyncState {
 
   getTotalFocusSecondsToday: () => number
   getCategoryBreakdownToday: () => { category: CategoryType; label: string; seconds: number; percentage: number }[]
-  getFilteredEntries: () => TimeEntry[]
-  getFilteredFocusSeconds: () => number
-  getCategoryBreakdownFiltered: () => { category: CategoryType; label: string; seconds: number; percentage: number }[]
-  getTopAppsFiltered: () => AppStatItem[]
-  getCumulativeScreenTimeFiltered: () => CumulativePoint[]
-  getKPIsFiltered: () => TimeKPIs
-  getTaskLoggedSeconds: (taskId: string) => number
 
   getDailyUsageHours: (daysCount?: number) => DailyUsageBar[]
   getActivePeriods: (dateStr?: string) => TimelinePeriodItem[]
@@ -165,8 +169,10 @@ function computeDerivedState(
   entries: TimeEntry[],
   categories: Record<string, CategoryType>,
   selectedCategory: CategoryFilter,
-  searchQuery: string
+  searchQuery: string,
+  aggregates: TimeEntryAggregates | null
 ): DerivedTimeEntryState {
+  const useSqlAggregates = aggregates !== null && selectedCategory === 'all' && !searchQuery.trim()
   let filteredEntries = entries
   if (selectedCategory !== 'all') {
     filteredEntries = filteredEntries.filter((e) => getCategoryForEntry(e, categories) === selectedCategory)
@@ -201,27 +207,40 @@ function computeDerivedState(
     { category: 'distraction' as CategoryType, label: 'Distraction', seconds: distractionSec, percentage: Math.round((distractionSec / catTotal) * 100) },
   ]
 
-  const appMap = new Map<string, { totalSeconds: number; sessionsCount: number }>()
-  let grandTotal = 0
-  filteredEntries.forEach((entry) => {
-    if (entry.endReason === 'idle') return
-    const dur = entry.durationSeconds || 0
-    grandTotal += dur
-    const curr = appMap.get(entry.appName) || { totalSeconds: 0, sessionsCount: 0 }
-    appMap.set(entry.appName, { totalSeconds: curr.totalSeconds + dur, sessionsCount: curr.sessionsCount + 1 })
-  })
-  const filteredTopApps: AppStatItem[] = []
-  appMap.forEach((val, appName) => {
-    const cat = categories[appName] || 'neutral'
-    filteredTopApps.push({
-      appName,
-      category: cat,
-      totalSeconds: val.totalSeconds,
-      percentage: grandTotal > 0 ? Math.round((val.totalSeconds / grandTotal) * 100) : 0,
-      sessionsCount: val.sessionsCount,
+  let filteredTopApps: AppStatItem[]
+  if (useSqlAggregates) {
+    const sql = aggregates!
+    const grandTotal = sql.topApps.reduce((s, a) => s + a.totalSeconds, 0)
+    filteredTopApps = sql.topApps.map((a) => ({
+      appName: a.appName,
+      category: categories[a.appName] || 'neutral',
+      totalSeconds: a.totalSeconds,
+      percentage: grandTotal > 0 ? Math.round((a.totalSeconds / grandTotal) * 100) : 0,
+      sessionsCount: a.sessionsCount,
+    }))
+  } else {
+    const appMap = new Map<string, { totalSeconds: number; sessionsCount: number }>()
+    let grandTotal = 0
+    filteredEntries.forEach((entry) => {
+      if (entry.endReason === 'idle') return
+      const dur = entry.durationSeconds || 0
+      grandTotal += dur
+      const curr = appMap.get(entry.appName) || { totalSeconds: 0, sessionsCount: 0 }
+      appMap.set(entry.appName, { totalSeconds: curr.totalSeconds + dur, sessionsCount: curr.sessionsCount + 1 })
     })
-  })
-  filteredTopApps.sort((a, b) => b.totalSeconds - a.totalSeconds)
+    filteredTopApps = []
+    appMap.forEach((val, appName) => {
+      const cat = categories[appName] || 'neutral'
+      filteredTopApps.push({
+        appName,
+        category: cat,
+        totalSeconds: val.totalSeconds,
+        percentage: grandTotal > 0 ? Math.round((val.totalSeconds / grandTotal) * 100) : 0,
+        sessionsCount: val.sessionsCount,
+      })
+    })
+    filteredTopApps.sort((a, b) => b.totalSeconds - a.totalSeconds)
+  }
 
   let filteredCumulativeScreenTime: CumulativePoint[]
   if (filteredEntries.length === 0) {
@@ -309,9 +328,9 @@ function computeDerivedState(
     }
   })
   const filteredKPIs: TimeKPIs = {
-    computerOnTimeSeconds: totalTracked,
-    activeFocusSeconds: focusSec,
-    idleTimeSeconds: idleSec,
+    computerOnTimeSeconds: useSqlAggregates ? aggregates!.computerOnSeconds : totalTracked,
+    activeFocusSeconds: useSqlAggregates ? aggregates!.focusSeconds : focusSec,
+    idleTimeSeconds: useSqlAggregates ? aggregates!.idleSeconds : idleSec,
     focusEfficiency,
     contextSwitches,
     deepWorkRatio,
@@ -323,16 +342,24 @@ function computeDerivedState(
   }
 
   const todayStr = new Date().toISOString().split('T')[0]
-  const totalFocusSecondsToday = entries.reduce((total, entry) => {
-    if (entry.endReason === 'idle') return total
-    if (entry.startTime.startsWith(todayStr)) return total + (entry.durationSeconds || 0)
-    return total
-  }, 0)
+  const totalFocusSecondsToday = aggregates
+    ? aggregates.todayFocusSeconds
+    : entries.reduce((total, entry) => {
+        if (entry.endReason === 'idle') return total
+        if (entry.startTime.startsWith(todayStr)) return total + (entry.durationSeconds || 0)
+        return total
+      }, 0)
 
   const taskLoggedSecondsMap: Record<string, number> = {}
-  for (const e of entries) {
-    if (e.linkedTaskId && e.durationSeconds) {
-      taskLoggedSecondsMap[e.linkedTaskId] = (taskLoggedSecondsMap[e.linkedTaskId] || 0) + e.durationSeconds
+  if (aggregates) {
+    for (const t of aggregates.taskLoggedSeconds) {
+      taskLoggedSecondsMap[t.linkedTaskId] = t.totalSeconds
+    }
+  } else {
+    for (const e of entries) {
+      if (e.linkedTaskId && e.durationSeconds) {
+        taskLoggedSecondsMap[e.linkedTaskId] = (taskLoggedSecondsMap[e.linkedTaskId] || 0) + e.durationSeconds
+      }
     }
   }
 
@@ -371,17 +398,21 @@ export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
   searchQuery: '',
   widgetOrder: initialWidgetOrder,
   isRefreshing: false,
+  aggregates: null,
   isLoading: false,
   error: null,
   isInitialized: false,
-  ...computeDerivedState(initialEntries, initialCategories, 'all', ''),
+  ...computeDerivedState(initialEntries, initialCategories, 'all', '', null),
 
   initializeTimeEntries: async (targetDateStr?: string) => {
     set({ isLoading: true, error: null })
     try {
       const dateStr = targetDateStr || get().selectedDate || new Date().toISOString().split('T')[0]
-      const dbEntries = await fetchTimeEntriesFromDb(dateStr)
-      const dbCategories = await fetchAppCategoriesFromDb()
+      const [dbEntries, dbCategories, dbAggregates] = await Promise.all([
+        fetchTimeEntriesFromDb(dateStr),
+        fetchAppCategoriesFromDb(),
+        fetchTimeEntryAggregatesFromDb(dateStr),
+      ])
 
       if (dbEntries && Array.isArray(dbEntries)) {
         const mappedEntries: TimeEntry[] = dbEntries.map((e: any) => ({
@@ -405,7 +436,28 @@ export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
         })
         set({ categories: catMap })
       }
-      set(computeDerivedState(get().entries, get().categories, get().selectedCategory, get().searchQuery))
+
+      if (dbAggregates) {
+        const aggregates: TimeEntryAggregates = {
+          focusSeconds: dbAggregates.focus_seconds ?? 0,
+          idleSeconds: dbAggregates.idle_seconds ?? 0,
+          computerOnSeconds: dbAggregates.computer_on_seconds ?? 0,
+          todayFocusSeconds: dbAggregates.today_focus_seconds ?? 0,
+          todayComputerOnSeconds: dbAggregates.today_computer_on_seconds ?? 0,
+          topApps: (dbAggregates.top_apps || []).map((a: any) => ({
+            appName: a.app_name,
+            totalSeconds: a.total_seconds ?? 0,
+            sessionsCount: a.sessions_count ?? 0,
+          })),
+          taskLoggedSeconds: (dbAggregates.task_logged_seconds || []).map((t: any) => ({
+            linkedTaskId: t.linked_task_id,
+            totalSeconds: t.total_seconds ?? 0,
+          })),
+        }
+        set({ aggregates })
+      }
+
+      set(computeDerivedState(get().entries, get().categories, get().selectedCategory, get().searchQuery, get().aggregates))
       set({ isLoading: false, isInitialized: true })
     } catch (err: any) {
       set({ error: err?.message || 'Failed to initialize time entries', isLoading: false, isInitialized: true })
@@ -432,7 +484,7 @@ export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
     set((state) => ({
       categories: { ...state.categories, [appName]: category },
     }))
-    set(computeDerivedState(get().entries, get().categories, get().selectedCategory, get().searchQuery))
+    set(computeDerivedState(get().entries, get().categories, get().selectedCategory, get().searchQuery, get().aggregates))
     setAppCategoryInDb(appName, category)
   },
 
@@ -440,26 +492,50 @@ export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
   setSelectedCategory: (cat) => {
     if (get().selectedCategory === cat) return
     set({ selectedCategory: cat })
-    set(computeDerivedState(get().entries, get().categories, cat, get().searchQuery))
+    set(computeDerivedState(get().entries, get().categories, cat, get().searchQuery, get().aggregates))
   },
   setSearchQuery: (query) => {
     if (get().searchQuery === query) return
     set({ searchQuery: query })
-    set(computeDerivedState(get().entries, get().categories, get().selectedCategory, query))
+    set(computeDerivedState(get().entries, get().categories, get().selectedCategory, query, get().aggregates))
   },
   setWidgetOrder: (order) => set({ widgetOrder: order }),
 
   linkTaskToTimeEntry: (entryId, taskId) => {
+    const prevEntry = get().entries.find((e) => e.id === entryId)
+    const prevTaskId = prevEntry?.linkedTaskId
     set((state) => ({
       entries: state.entries.map((entry) =>
         entry.id === entryId ? { ...entry, linkedTaskId: taskId } : entry
       ),
     }))
-    set(computeDerivedState(get().entries, get().categories, get().selectedCategory, get().searchQuery))
+    const aggregates = get().aggregates
+    if (aggregates && prevTaskId !== taskId) {
+      const taskLoggedSeconds = [...aggregates.taskLoggedSeconds]
+      const entrySeconds = prevEntry?.durationSeconds || 0
+      if (prevTaskId) {
+        const i = taskLoggedSeconds.findIndex((t) => t.linkedTaskId === prevTaskId)
+        if (i >= 0) {
+          taskLoggedSeconds[i] = {
+            ...taskLoggedSeconds[i],
+            totalSeconds: Math.max(0, taskLoggedSeconds[i].totalSeconds - entrySeconds),
+          }
+        }
+      }
+      if (taskId) {
+        const existing = taskLoggedSeconds.find((t) => t.linkedTaskId === taskId)
+        if (existing) existing.totalSeconds += entrySeconds
+        else taskLoggedSeconds.push({ linkedTaskId: taskId, totalSeconds: entrySeconds })
+      }
+      set({ aggregates: { ...aggregates, taskLoggedSeconds } })
+    }
+    set(computeDerivedState(get().entries, get().categories, get().selectedCategory, get().searchQuery, get().aggregates))
     linkTaskToTimeEntryInDb(entryId, taskId || null)
   },
 
   getTotalFocusSecondsToday: () => {
+    const aggregates = get().aggregates
+    if (aggregates) return aggregates.todayFocusSeconds
     const todayStr = new Date().toISOString().split('T')[0]
     return get().entries.reduce((total, entry) => {
       if (entry.endReason === 'idle') return total
@@ -496,227 +572,6 @@ export const useTimeEntryStore = create<TimeEntryState>((set, get) => ({
       { category: 'neutral', label: 'Utilities / Browser', seconds: neutralSec, percentage: Math.round((neutralSec / total) * 100) },
       { category: 'distraction', label: 'Media / Social', seconds: distractionSec, percentage: Math.round((distractionSec / total) * 100) },
     ]
-  },
-
-  getFilteredEntries: () => {
-    let list = get().entries
-    const catFilter = get().selectedCategory
-    const search = get().searchQuery.toLowerCase().trim()
-    const categories = get().categories
-
-    if (catFilter !== 'all') {
-      list = list.filter((e) => getCategoryForEntry(e, categories) === catFilter)
-    }
-
-    if (search) {
-      list = list.filter(
-        (e) =>
-          e.appName.toLowerCase().includes(search) ||
-          e.windowTitle.toLowerCase().includes(search)
-      )
-    }
-
-    return list
-  },
-
-  getFilteredFocusSeconds: () => {
-    return get()
-      .getFilteredEntries()
-      .reduce((acc, curr) => (curr.endReason === 'idle' ? acc : acc + (curr.durationSeconds || 0)), 0)
-  },
-
-  getCategoryBreakdownFiltered: () => {
-    const filtered = get().getFilteredEntries()
-    const categories = get().categories
-
-    let workSec = 0
-    let neutralSec = 0
-    let distractionSec = 0
-
-    filtered.forEach((entry) => {
-      if (entry.endReason === 'idle') return
-      const dur = entry.durationSeconds || 0
-      const cat = getCategoryForEntry(entry, categories)
-      if (cat === 'work') workSec += dur
-      else if (cat === 'distraction') distractionSec += dur
-      else neutralSec += dur
-    })
-
-    const total = workSec + neutralSec + distractionSec || 1
-
-    return [
-      { category: 'work', label: 'Work', seconds: workSec, percentage: Math.round((workSec / total) * 100) },
-      { category: 'neutral', label: 'Neutral', seconds: neutralSec, percentage: Math.round((neutralSec / total) * 100) },
-      { category: 'distraction', label: 'Distraction', seconds: distractionSec, percentage: Math.round((distractionSec / total) * 100) },
-    ]
-  },
-
-  getTopAppsFiltered: () => {
-    const filtered = get().getFilteredEntries()
-    const categories = get().categories
-
-    const map = new Map<string, { totalSeconds: number; sessionsCount: number }>()
-
-    let grandTotal = 0
-    filtered.forEach((entry) => {
-      if (entry.endReason === 'idle') return
-      const dur = entry.durationSeconds || 0
-      grandTotal += dur
-      const curr = map.get(entry.appName) || { totalSeconds: 0, sessionsCount: 0 }
-      map.set(entry.appName, {
-        totalSeconds: curr.totalSeconds + dur,
-        sessionsCount: curr.sessionsCount + 1,
-      })
-    })
-
-    const result: AppStatItem[] = []
-    map.forEach((val, appName) => {
-      const cat = categories[appName] || 'neutral'
-      result.push({
-        appName,
-        category: cat,
-        totalSeconds: val.totalSeconds,
-        percentage: grandTotal > 0 ? Math.round((val.totalSeconds / grandTotal) * 100) : 0,
-        sessionsCount: val.sessionsCount,
-      })
-    })
-
-    return result.sort((a, b) => b.totalSeconds - a.totalSeconds)
-  },
-
-  getCumulativeScreenTimeFiltered: () => {
-    const filtered = get().getFilteredEntries()
-    const categories = get().categories
-
-    if (filtered.length === 0) {
-      return [
-        { timestamp: '12:00 AM', cumulativeFocusMins: 0, cumulativeTotalMins: 0 },
-        { timestamp: '12:00 PM', cumulativeFocusMins: 0, cumulativeTotalMins: 0 },
-      ]
-    }
-
-    const sorted = [...filtered].sort(
-      (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
-    )
-
-    const BUCKET_MINUTES = 60
-    function getBucketKey(dateStr: string): string {
-      const d = new Date(dateStr)
-      const bucket = Math.floor(d.getHours() / (BUCKET_MINUTES / 60)) * BUCKET_MINUTES
-      const h = Math.floor(bucket / 60)
-      const m = bucket % 60
-      const label = new Date(d.getFullYear(), d.getMonth(), d.getDate(), h, m)
-      return label.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
-    }
-
-    const firstDate = new Date(sorted[0].startTime)
-    const firstBucket = getBucketKey(sorted[0].startTime)
-    const buckets = new Map<string, { focusSec: number; totalSec: number }>()
-
-    sorted.forEach((entry) => {
-      const dur = entry.durationSeconds || 0
-      const key = getBucketKey(entry.startTime)
-      const prev = buckets.get(key) || { focusSec: 0, totalSec: 0 }
-      prev.totalSec += dur
-      const cat = getCategoryForEntry(entry, categories)
-      if (cat === 'work' && entry.endReason !== 'idle') {
-        prev.focusSec += dur
-      }
-      buckets.set(key, prev)
-    })
-
-    const bucketKeys = Array.from(buckets.keys()).sort((a, b) => {
-      const ta = new Date(`1970/01/01 ${a}`).getTime()
-      const tb = new Date(`1970/01/01 ${b}`).getTime()
-      return ta - tb
-    })
-
-    let totalFocusSec = 0
-    let totalScreenSec = 0
-    const points: CumulativePoint[] = []
-
-    points.push({
-      timestamp: firstBucket,
-      cumulativeFocusMins: 0,
-      cumulativeTotalMins: 0,
-    })
-
-    bucketKeys.forEach((key) => {
-      const bucket = buckets.get(key)!
-      totalScreenSec += bucket.totalSec
-      totalFocusSec += bucket.focusSec
-      points.push({
-        timestamp: key,
-        cumulativeFocusMins: Math.round(totalFocusSec / 60),
-        cumulativeTotalMins: Math.round(totalScreenSec / 60),
-      })
-    })
-
-    return points
-  },
-
-  getKPIsFiltered: () => {
-    const filtered = get().getFilteredEntries()
-    const categories = get().categories
-
-    let focusSec = 0
-    let idleSec = 0
-    let workSec = 0
-    let neutralSec = 0
-    let distractionSec = 0
-
-    filtered.forEach((entry) => {
-      const dur = entry.durationSeconds || 0
-      if (entry.endReason === 'idle') {
-        idleSec += dur
-      } else {
-        focusSec += dur
-        const cat = getCategoryForEntry(entry, categories)
-        if (cat === 'work') workSec += dur
-        else if (cat === 'neutral') neutralSec += dur
-        else if (cat === 'distraction') distractionSec += dur
-      }
-    })
-
-    const totalTracked = focusSec + idleSec || 1
-    const focusEfficiency = Math.round((focusSec / totalTracked) * 100)
-    const deepWorkRatio = Math.round((workSec / (focusSec || 1)) * 100)
-    const neutralRatio = Math.round((neutralSec / (focusSec || 1)) * 100)
-    const distractionRatio = Math.round((distractionSec / (focusSec || 1)) * 100)
-    const focusScore = Math.min(100, Math.max(0, Math.round(((workSec * 1.0 + neutralSec * 0.3) / (focusSec || 1)) * 100)))
-
-    const topApps = get().getTopAppsFiltered()
-    const topApp = topApps[0]
-
-    let contextSwitches = 0
-    let lastApp = ''
-    filtered.forEach((entry) => {
-      if (entry.appName && entry.appName !== lastApp) {
-        contextSwitches++
-        lastApp = entry.appName
-      }
-    })
-
-    return {
-      computerOnTimeSeconds: totalTracked,
-      activeFocusSeconds: focusSec,
-      idleTimeSeconds: idleSec,
-      focusEfficiency,
-      contextSwitches,
-      deepWorkRatio,
-      neutralRatio,
-      distractionRatio,
-      focusScore,
-      topAppName: topApp ? topApp.appName : 'None',
-      topAppDurationSeconds: topApp ? topApp.totalSeconds : focusSec,
-    }
-  },
-
-  getTaskLoggedSeconds: (taskId: string) => {
-    if (!taskId) return 0
-    return get().entries
-      .filter((e) => e.linkedTaskId === taskId && (e.durationSeconds || 0) > 0)
-      .reduce((sum, e) => sum + (e.durationSeconds || 0), 0)
   },
 
   getDailyUsageHours: (daysCount = 7) => {

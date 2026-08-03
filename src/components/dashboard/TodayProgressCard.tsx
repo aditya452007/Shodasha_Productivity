@@ -11,6 +11,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorBanner } from '@/components/ui/ErrorBanner'
 import { ProgressRing } from '@/components/ui/ProgressRing'
 import { NumberTicker } from '@/components/ui/NumberTicker'
+import { calculateGlobalStreak } from '@/lib/utils/streak'
 
 export function TodayProgressCard() {
   const tasks = useTaskStore((state) => state.tasks)
@@ -53,29 +54,7 @@ export function TodayProgressCard() {
   const goalProgressPercent = Math.min(100, Math.round((focusSeconds / goalSeconds) * 100))
   const isGoalAchieved = focusSeconds >= goalSeconds
 
-  // Dynamic habit streak calculation
-  const streak = useMemo(() => {
-    if (habits.length === 0) return 0
-    let currentStreak = 0
-    let checkDate = new Date()
-
-    const anyDoneToday = habits.some((h) => !!records[`${h.id}_${todayStr}`])
-    if (!anyDoneToday) {
-      checkDate.setDate(checkDate.getDate() - 1)
-    }
-
-    while (true) {
-      const dateStr = checkDate.toISOString().split('T')[0]
-      const hasCompletedHabit = habits.some((h) => !!records[`${h.id}_${dateStr}`])
-      if (hasCompletedHabit) {
-        currentStreak++
-        checkDate.setDate(checkDate.getDate() - 1)
-      } else {
-        break
-      }
-    }
-    return currentStreak
-  }, [habits, records, todayStr])
+  const streak = useMemo(() => calculateGlobalStreak(habits, records), [habits, records])
 
   if (isLoading) {
     return (

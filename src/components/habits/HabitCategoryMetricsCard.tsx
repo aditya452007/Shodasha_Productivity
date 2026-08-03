@@ -26,7 +26,13 @@ interface CategoryGroup {
   rate: number
 }
 
-export function HabitCategoryMetricsCard({ className = '' }: { className?: string }) {
+export function HabitCategoryMetricsCard({
+  className = '',
+  onAddHabitInCategory,
+}: {
+  className?: string
+  onAddHabitInCategory?: (categoryId: string) => void
+}) {
   const shouldReduceMotion = useReducedMotion()
   const habits = useHabitStore((s) => s.habits)
   const records = useHabitStore((s) => s.records)
@@ -102,12 +108,12 @@ export function HabitCategoryMetricsCard({ className = '' }: { className?: strin
     >
       <div>
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3 mb-4">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/30">
+        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3 mb-4 gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="p-2 rounded-xl bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/30 shrink-0">
               <Layers className="w-4 h-4 stroke-[2]" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h3 className="font-display text-sm font-bold text-[var(--text-primary)]">
                 Category Balance
               </h3>
@@ -116,75 +122,34 @@ export function HabitCategoryMetricsCard({ className = '' }: { className?: strin
               </p>
             </div>
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">
-            {totalActiveHabits} Active
-          </span>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 hidden sm:inline-block">
+              {totalActiveHabits} Active
+            </span>
+            {isAdding ? (
+              <button
+                type="button"
+                onClick={() => setIsAdding(false)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-primary)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)] transition-colors"
+              >
+                <X className="w-3.5 h-3.5" /> Cancel
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsAdding(true)}
+                aria-label="Create new category"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-semibold shadow-xs hover:opacity-90 active:scale-[0.97] transition-all"
+              >
+                <Plus className="w-3.5 h-3.5" /> New Category
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Category Meters — scrollable for unlimited categories */}
-        <div className="space-y-3.5 max-h-[320px] overflow-y-auto overscroll-contain pr-1">
-          {categoryGroups.length === 0 ? (
-            <p className="text-xs text-[var(--text-tertiary)] py-4 text-center">
-              No habits yet — create one to see category balance.
-            </p>
-          ) : (
-            categoryGroups.map((cat, idx) => {
-              const Icon = cat.icon
-              return (
-                <motion.div
-                  key={cat.id}
-                  initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.3,
-                    ease: [0.23, 1, 0.32, 1],
-                    delay: shouldReduceMotion ? 0 : Math.min(idx * 0.04, 0.24),
-                  }}
-                  className="space-y-1.5 group/meter"
-                >
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2 font-medium text-[var(--text-primary)] min-w-0">
-                      <span
-                        className="p-1 rounded-md text-white shrink-0"
-                        style={{ backgroundColor: cat.color }}
-                      >
-                        <Icon className="w-3 h-3" />
-                      </span>
-                      <span className="truncate">{cat.label}</span>
-                      <button
-                        onClick={() => handleDeleteCategory(cat)}
-                        aria-label={`Delete category ${cat.label}`}
-                        title="Delete category — habits move to General"
-                        className="p-0.5 rounded-md text-[var(--text-tertiary)] hover:text-[var(--error)] hover:bg-[var(--error)]/10 opacity-0 group-hover/meter:opacity-100 transition-opacity shrink-0"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                    <span className="font-mono text-[11px] font-bold text-[var(--text-secondary)] shrink-0">
-                      {cat.doneToday}/{cat.totalCount} ({cat.rate}%)
-                    </span>
-                  </div>
-
-                  <div className="h-2 w-full rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
-                    <motion.div
-                      className="h-full rounded-full"
-                      style={{ backgroundColor: cat.color }}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${cat.rate}%` }}
-                      transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-                    />
-                  </div>
-                </motion.div>
-              )
-            })
-          )}
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div className="mt-4 pt-3 border-t border-[var(--border-subtle)]">
-        {isAdding ? (
-          <div className="space-y-2">
+        {/* Inline create form — appears right below the header */}
+        {isAdding && (
+          <div className="space-y-2 mb-4">
             <div className="flex items-center gap-2">
               <input
                 autoFocus
@@ -234,16 +199,86 @@ export function HabitCategoryMetricsCard({ className = '' }: { className?: strin
               ))}
             </div>
           </div>
-        ) : (
-          <button
-            onClick={() => setIsAdding(true)}
-            className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--accent)] hover:underline"
-          >
-            <Plus className="w-3.5 h-3.5" /> New Category
-          </button>
         )}
-        <div className="mt-2 flex items-center justify-between text-[11px] text-[var(--text-tertiary)]">
-          <span>Delete a category to move its habits to General</span>
+
+        {/* Category Meters — scrollable for unlimited categories */}
+        <div className="space-y-3.5 max-h-[320px] overflow-y-auto overscroll-contain pr-1">
+          {categoryGroups.length === 0 ? (
+            <p className="text-xs text-[var(--text-tertiary)] py-4 text-center">
+              No habits yet — create one to see category balance.
+            </p>
+          ) : (
+            categoryGroups.map((cat, idx) => {
+              const Icon = cat.icon
+              return (
+                <motion.div
+                  key={cat.id}
+                  initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.3,
+                    ease: [0.23, 1, 0.32, 1],
+                    delay: shouldReduceMotion ? 0 : Math.min(idx * 0.04, 0.24),
+                  }}
+                  onClick={() => onAddHabitInCategory?.(cat.id)}
+                  title={onAddHabitInCategory ? `Add a habit in "${cat.label}"` : undefined}
+                  className={`space-y-1.5 group/meter ${
+                    onAddHabitInCategory
+                      ? 'cursor-pointer rounded-lg px-1.5 -mx-1.5 py-1 -my-1 transition-colors hover:bg-[var(--bg-tertiary)]/60'
+                      : ''
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2 font-medium text-[var(--text-primary)] min-w-0">
+                      <span
+                        className="p-1 rounded-md text-white shrink-0"
+                        style={{ backgroundColor: cat.color }}
+                      >
+                        <Icon className="w-3 h-3" />
+                      </span>
+                      <span className="truncate">{cat.label}</span>
+                      {onAddHabitInCategory && (
+                        <span className="flex items-center gap-0.5 text-[10px] font-semibold text-[var(--accent)] opacity-0 group-hover/meter:opacity-100 transition-opacity shrink-0">
+                          <Plus className="w-3 h-3" /> Add habit
+                        </span>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteCategory(cat)
+                        }}
+                        aria-label={`Delete category ${cat.label}`}
+                        title="Delete category — habits move to General"
+                        className="p-0.5 rounded-md text-[var(--text-tertiary)] hover:text-[var(--error)] hover:bg-[var(--error)]/10 opacity-0 group-hover/meter:opacity-100 transition-opacity shrink-0"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <span className="font-mono text-[11px] font-bold text-[var(--text-secondary)] shrink-0">
+                      {cat.doneToday}/{cat.totalCount} ({cat.rate}%)
+                    </span>
+                  </div>
+
+                  <div className="h-2 w-full rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
+                    <motion.div
+                      className="h-full rounded-full"
+                      style={{ backgroundColor: cat.color }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${cat.rate}%` }}
+                      transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+                    />
+                  </div>
+                </motion.div>
+              )
+            })
+          )}
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="mt-4 pt-3 border-t border-[var(--border-subtle)]">
+        <div className="flex items-center justify-between text-[11px] text-[var(--text-tertiary)]">
+          <span>{onAddHabitInCategory ? 'Click a category to add a habit in it' : 'Delete a category to move its habits to General'}</span>
           <span className="font-mono font-medium">Daily</span>
         </div>
       </div>

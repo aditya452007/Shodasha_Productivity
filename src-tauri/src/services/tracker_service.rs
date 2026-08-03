@@ -214,7 +214,6 @@ pub fn start_background_tracker(config: TrackerConfig) {
         loop {
             if conn_opt.is_none() {
                 if let Ok(conn) = init_db() {
-                    let _ = close_orphaned_entries(&conn);
                     conn_opt = Some(conn);
                 }
             }

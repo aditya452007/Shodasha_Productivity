@@ -6,37 +6,14 @@ import { Zap } from 'lucide-react'
 import { useHabitStore } from '@/stores/habitStore'
 import { BaseCard } from '@/components/ui/BaseCard'
 import { LivingFlameIcon } from '@/components/gamification/LivingFlameIcon'
+import { calculateGlobalStreak } from '@/lib/utils/streak'
 
 export function StreakHeroCard() {
   const shouldReduceMotion = useReducedMotion()
   const habits = useHabitStore((s) => s.habits)
   const records = useHabitStore((s) => s.records)
 
-  const todayStr = new Date().toISOString().split('T')[0]
-
-  // Dynamic habit streak calculation
-  const streak = useMemo(() => {
-    if (habits.length === 0) return 0
-    let currentStreak = 0
-    let checkDate = new Date()
-
-    const anyDoneToday = habits.some((h) => !!records[`${h.id}_${todayStr}`])
-    if (!anyDoneToday) {
-      checkDate.setDate(checkDate.getDate() - 1)
-    }
-
-    while (true) {
-      const dateStr = checkDate.toISOString().split('T')[0]
-      const hasCompletedHabit = habits.some((h) => !!records[`${h.id}_${dateStr}`])
-      if (hasCompletedHabit) {
-        currentStreak++
-        checkDate.setDate(checkDate.getDate() - 1)
-      } else {
-        break
-      }
-    }
-    return currentStreak
-  }, [habits, records, todayStr])
+  const streak = useMemo(() => calculateGlobalStreak(habits, records), [habits, records])
 
   return (
     <BaseCard

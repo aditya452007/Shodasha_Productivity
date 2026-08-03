@@ -15,7 +15,6 @@ export interface GamificationState {
   getTierColor: (level: number) => string
   getTotalXPForLevel: (level: number) => number
   awardXP: (amount: number, key: string) => void
-  checkAndAwardStreakMilestone: (streak: number) => void
   checkAndAwardAchievement: (achievementId: string) => void
   resetGamification: () => void
   initializeGamification: () => Promise<void>
@@ -134,17 +133,6 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
         [STORAGE_KEYS.unlockedAchievements]: savedAchievements.join(','),
       })
     }, 0)
-  },
-
-  checkAndAwardStreakMilestone: (streak: number) => {
-    const milestones = [7, 14, 30, 60, 90, 365]
-    const unlocked = get().unlockedAchievements
-    milestones.forEach((ms) => {
-      if (streak >= ms && !unlocked.includes(`streak_milestone_${ms}`)) {
-        get().awardXP(100, `streak_milestone_${ms}`)
-        set((s) => ({ unlockedAchievements: [...s.unlockedAchievements, `streak_milestone_${ms}`] }))
-      }
-    })
   },
 
   checkAndAwardAchievement: (achievementId: string) => {

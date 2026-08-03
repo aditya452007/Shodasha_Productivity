@@ -4429,20 +4429,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tracker"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "dirs 5.0.1",
- "rusqlite",
- "serde",
- "serde_json",
- "tracing",
- "tracing-subscriber",
- "windows-sys 0.59.0",
-]
-
-[[package]]
 name = "tray-icon"
 version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

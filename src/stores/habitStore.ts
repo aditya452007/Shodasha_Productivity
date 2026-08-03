@@ -13,6 +13,7 @@ import {
   createHabitCategoryInDb,
   updateHabitCategoryInDb,
   deleteHabitCategoryFromDb,
+  isTauri,
 } from '@/lib/db'
 
 export type HabitPriority = 'high' | 'medium' | 'low'
@@ -89,11 +90,16 @@ export const useHabitStore = create<HabitState>()(
   initializeHabits: async () => {
     set({ isLoading: true, error: null })
     try {
+      const backendReachable = isTauri()
       const dbHabits = await fetchHabitsFromDb()
       const dbRecords = await fetchHabitRecordsFromDb()
       const dbCategories = await fetchHabitCategoriesFromDb()
 
-      if (dbHabits && Array.isArray(dbHabits)) {
+      // A null result only means failure when the Tauri backend is present —
+      // in browser preview there is no backend and an empty store is expected.
+      const fetchFailed = backendReachable && dbHabits === null
+
+      if (dbHabits !== null && Array.isArray(dbHabits)) {
         const mappedHabits: Habit[] = dbHabits.map((h: any) => ({
           id: h.id,
           name: h.name,
@@ -108,7 +114,17 @@ export const useHabitStore = create<HabitState>()(
         set({ habits: sortHabitsByPriority(mappedHabits) })
       }
 
-      if (dbCategories && Array.isArray(dbCategories)) {
+      if (dbRecords !== null && Array.isArray(dbRecords)) {
+        const recMap: Record<string, boolean> = {}
+        dbRecords.forEach((r: any) => {
+          if (r.done) {
+            recMap[`${r.habit_id}_${r.date}`] = true
+          }
+        })
+        set({ records: recMap })
+      }
+
+      if (dbCategories !== null && Array.isArray(dbCategories)) {
         const mappedCategories: HabitCategory[] = dbCategories.map((c: any) => ({
           id: c.id,
           name: c.name,
@@ -118,18 +134,23 @@ export const useHabitStore = create<HabitState>()(
         set({ habitCategories: mappedCategories })
       }
 
-      if (dbRecords && Array.isArray(dbRecords)) {
-        const recMap: Record<string, boolean> = {}
-        dbRecords.forEach((r: any) => {
-          if (r.done) {
-            recMap[`${r.habit_id}_${r.date}`] = true
-          }
+      if (fetchFailed) {
+        // Backend is present but the read failed — never wipe existing state.
+        // Keep whatever is loaded and surface a retry instead.
+        set({
+          error: 'Failed to load habits from storage. Your data is safe — try again.',
+          isLoading: false,
+          isInitialized: false,
         })
-        set({ records: recMap })
+        return
       }
       set({ isLoading: false, isInitialized: true })
     } catch (err: any) {
-      set({ error: err?.message || 'Failed to initialize habits', isLoading: false, isInitialized: true })
+      set({
+        error: err?.message || 'Failed to initialize habits',
+        isLoading: false,
+        isInitialized: isTauri() ? false : true,
+      })
     }
   },
   toggleHabit: async (habitId, date) => {

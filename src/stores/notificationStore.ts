@@ -236,8 +236,7 @@ export const useNotificationStore = create<NotificationState>()(
           const timeStore = useTimeEntryStore.getState();
           const focusSecs = timeStore.getTotalFocusSecondsToday();
           const hours = Math.round((focusSecs / 3600) * 10) / 10;
-          const topApps = timeStore.getTopAppsFiltered();
-          const topApp = topApps.length > 0 ? topApps[0].appName : 'Desktop Apps';
+          const topApp = timeStore.filteredTopApps.length > 0 ? timeStore.filteredTopApps[0].appName : 'Desktop Apps';
 
           if (petDeliveryEnabled) {
             await deliverNotification(

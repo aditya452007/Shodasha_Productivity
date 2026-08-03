@@ -32,7 +32,6 @@ jobs:
           workspaces: |
             .
             src-tauri
-            tracker
 
       - name: Install Frontend Dependencies
         run: npm ci
@@ -45,9 +44,6 @@ jobs:
 
       - name: Build Next.js Static Export
         run: npm run build
-
-      - name: Build Background Tracker Binary (tracker.exe)
-        run: cargo build --manifest-path tracker/Cargo.toml --release
 
       - name: Verify Tauri Rust Workspace (src-tauri)
         run: cargo check --manifest-path src-tauri/Cargo.toml

@@ -170,12 +170,12 @@ export async function fetchTimeEntriesFromDb(date: string) {
   }
 }
 
-export async function fetchTimeEntriesRangeFromDb(startDate: string, endDate: string) {
+export async function fetchTimeEntryAggregatesFromDb(date: string) {
   if (!isTauri()) return null;
   try {
-    return await invoke<any[]>('get_time_entries_range', { startDate, endDate });
+    return await invoke<any>('get_time_entry_aggregates', { date });
   } catch (err) {
-    handleIpcError('get_time_entries_range', err);
+    handleIpcError('get_time_entry_aggregates', err);
     return null;
   }
 }

@@ -1,11 +1,16 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { KanbanBoard } from '@/components/board/KanbanBoard'
+import dynamic from 'next/dynamic'
 import { useTaskStore } from '@/stores/taskStore'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Calendar, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { BaseCard } from '@/components/ui/BaseCard'
+
+const KanbanBoard = dynamic(
+  () => import('@/components/board/KanbanBoard').then((m) => m.KanbanBoard),
+  { ssr: false }
+)
 
 export default function BoardPage() {
   const shouldReduceMotion = useReducedMotion()

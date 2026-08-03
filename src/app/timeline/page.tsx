@@ -17,9 +17,16 @@ export default function TimelinePage() {
   useEffect(() => {
     refreshAllData()
     const interval = setInterval(() => {
-      refreshAllData()
+      if (document.visibilityState === 'visible') refreshAllData()
     }, 15000)
-    return () => clearInterval(interval)
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') refreshAllData()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [refreshAllData])
 
   const todayStr = new Date().toISOString().split('T')[0]

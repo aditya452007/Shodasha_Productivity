@@ -1,4 +1,46 @@
 /**
+ * Calculates the current global streak: consecutive days (ending today or
+ * yesterday if today isn't completed yet) on which at least one habit was done.
+ * Shared by StreakHeroCard, TodayProgressCard, and HabitStatsCard.
+ * @param habits Habits with an `id` and a `createdAt` ISO timestamp
+ * @param records Record map keyed by `${habitId}_${YYYY-MM-DD}` -> boolean
+ */
+export function calculateGlobalStreak(
+  habits: { id: string; createdAt: string }[],
+  records: Record<string, boolean>
+): number {
+  if (habits.length === 0) return 0
+
+  const today = new Date()
+  const todayStr = today.toISOString().split('T')[0]
+
+  const creationDates = habits.map((h) => h.createdAt.split('T')[0]).sort()
+  const globalStartBoundary = creationDates[0]
+
+  let currentStreak = 0
+  let checkDate = new Date(today)
+
+  const anyDoneToday = habits.some((h) => !!records[`${h.id}_${todayStr}`])
+  if (!anyDoneToday) {
+    checkDate.setDate(checkDate.getDate() - 1)
+  }
+
+  while (true) {
+    const dateStr = checkDate.toISOString().split('T')[0]
+    if (dateStr < globalStartBoundary) break
+    const hasCompletedHabit = habits.some((h) => !!records[`${h.id}_${dateStr}`])
+    if (hasCompletedHabit) {
+      currentStreak++
+      checkDate.setDate(checkDate.getDate() - 1)
+    } else {
+      break
+    }
+  }
+
+  return currentStreak
+}
+
+/**
  * Utility functions for calculating streaks from habit completion records.
  */
 

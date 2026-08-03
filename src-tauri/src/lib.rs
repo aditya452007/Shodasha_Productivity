@@ -5,17 +5,50 @@ pub mod repositories;
 pub mod services;
 
 use std::sync::atomic::AtomicU64;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder},
     tray::TrayIconBuilder,
-    WindowEvent, Manager,
+    WebviewUrl, WebviewWindowBuilder, WindowEvent, Manager,
 };
 use tracing::info;
 
 pub struct TrackerState {
     pub polling_interval_secs: Arc<AtomicU64>,
     pub idle_threshold_secs: Arc<AtomicU64>,
+}
+
+pub struct DbState {
+    pub conn: Mutex<rusqlite::Connection>,
+}
+
+/// Create the main window on demand. The window is never created at startup
+/// when running with `--autostart` (background mode = Rust core only, ~30 MB
+/// instead of a hidden WebView); it is built lazily from the tray "show"
+/// handlers and rebuilt after a close-to-tray destroy.
+fn create_main_window(app: &tauri::AppHandle) -> tauri::Result<tauri::WebviewWindow> {
+    let window = WebviewWindowBuilder::new(app, "main", WebviewUrl::App("index.html".into()))
+        .title("Shodasha")
+        .inner_size(1200.0, 800.0)
+        .resizable(true)
+        .decorations(false)
+        .visible(false)
+        .build()?;
+    Ok(window)
+}
+
+fn show_main_window(app: &tauri::AppHandle) {
+    let window = match app.get_webview_window("main") {
+        Some(window) => window,
+        None => {
+            let Ok(window) = create_main_window(app) else {
+                return;
+            };
+            window
+        }
+    };
+    let _ = window.show();
+    let _ = window.set_focus();
 }
 
 pub fn run() {
@@ -56,6 +89,9 @@ pub fn run() {
             polling_interval_secs: polling_interval,
             idle_threshold_secs: idle_threshold,
         })
+        .manage(DbState {
+            conn: Mutex::new(conn),
+        })
         .setup(|app| {
             let show_item = MenuItemBuilder::with_id("show", "Show Shodasha").build(app)?;
             let quit_item = MenuItemBuilder::with_id("quit", "Quit Shodasha").build(app)?;
@@ -68,16 +104,11 @@ pub fn run() {
                 .icon(app.default_window_icon().unwrap().clone())
                 .menu(&tray_menu)
                 .on_menu_event(|app, event| match event.id.as_ref() {
-                    "show" => {
-                        if let Some(window) = app.get_webview_window("main") {
-                            let _ = window.show();
-                            let _ = window.set_focus();
-                        }
-                    }
+                    "show" => show_main_window(app),
                     "quit" => {
-                        let conn = db::init_db();
-                        if let Ok(c) = conn {
-                            services::tracker_service::close_orphaned_entries(&c).ok();
+                        let db = app.state::<DbState>();
+                        if let Ok(conn) = db.conn.lock() {
+                            services::tracker_service::close_orphaned_entries(&conn).ok();
                         }
                         std::process::exit(0);
                     }
@@ -85,29 +116,24 @@ pub fn run() {
                 })
                 .on_tray_icon_event(|tray, event| {
                     if let tauri::tray::TrayIconEvent::Click { button: tauri::tray::MouseButton::Left, .. } = event {
-                        let app = tray.app_handle();
-                        if let Some(window) = app.get_webview_window("main") {
-                            let _ = window.show();
-                            let _ = window.set_focus();
-                        }
+                        show_main_window(tray.app_handle());
                     }
                 })
                 .build(app)?;
 
             let is_autostart = std::env::args().any(|arg| arg == "--autostart" || arg == "--minimized");
             if !is_autostart {
-                if let Some(window) = app.get_webview_window("main") {
-                    let _ = window.show();
-                    let _ = window.set_focus();
-                }
+                show_main_window(app.handle());
             }
 
             Ok(())
         })
         .on_window_event(|window, event| {
             if let WindowEvent::CloseRequested { api, .. } = event {
+                // Close-to-tray: destroy the WebView entirely so background RAM
+                // drops to the Rust-core footprint; the tray "show" rebuilds it.
                 api.prevent_close();
-                let _ = window.hide();
+                let _ = window.destroy();
             }
         })
         .invoke_handler(tauri::generate_handler![
@@ -127,7 +153,7 @@ pub fn run() {
             commands::update_habit_category,
             commands::delete_habit_category,
             commands::get_time_entries,
-            commands::get_time_entries_range,
+            commands::get_time_entry_aggregates,
             commands::link_task_to_time_entry,
             commands::get_app_categories,
             commands::set_app_category,

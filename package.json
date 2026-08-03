@@ -6,9 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:tauri": "cargo build --manifest-path src-tauri/Cargo.toml",
-    "build:tracker": "cargo build --manifest-path tracker/Cargo.toml",
-    "build:all": "npm run build && npm run build:tauri && npm run build:tracker",
+    "build:tauri": "cargo build --release --manifest-path src-tauri/Cargo.toml",
+    "build:all": "npm run build && npm run build:tauri",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "lint": "eslint src/",

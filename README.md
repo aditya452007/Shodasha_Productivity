@@ -61,14 +61,7 @@ cd Shodasha_Productivity
 # Install frontend dependencies
 npm install
 
-# Build the background tracker (Rust)
-cargo build --manifest-path tracker/Cargo.toml --release
-
-# Copy tracker binary for Tauri bundle
-mkdir -p target/release
-cp tracker/target/release/tracker.exe target/release/tracker.exe
-
-# Build the full desktop app
+# Build the full desktop app (release)
 npm run build:all
 
 # Or run in development mode
@@ -86,9 +79,8 @@ Shodasha_Productivity/
 │   ├── components/     # Reusable UI components
 │   ├── stores/         # Zustand state stores
 │   └── lib/            # Utilities and helpers
-├── src-tauri/          # Tauri Rust shell
+├── src-tauri/          # Tauri Rust shell (commands, SQLite, embedded background tracker thread)
 │   └── src/            # Tauri commands, SQLite database layer
-├── tracker/            # Windows background activity tracker (Rust binary)
 ├── .github/workflows/  # CI/CD pipelines
 └── context/            # Project design and architecture docs
 ```

@@ -54,8 +54,10 @@ pub fn get_habits(conn: &Connection) -> Result<Vec<HabitDb>> {
 }
 
 pub fn get_habit_records(conn: &Connection) -> Result<Vec<HabitRecordDb>> {
+    // Bound to a trailing year — streak/HP/calendar math never needs older
+    // history, and it keeps the fetch O(recent records) instead of O(all).
     let mut stmt = conn.prepare(
-        "SELECT id, habit_id, date, done FROM habit_records"
+        "SELECT id, habit_id, date, done FROM habit_records WHERE date >= date('now', '-366 days')"
     )?;
 
     let records = stmt.query_map([], |row| {
