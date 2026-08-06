@@ -145,7 +145,7 @@ pub fn run() {
                 let db = app.state::<DbState>();
                 if let Ok(conn) = db.conn.lock() {
                     let _ = conn.execute_batch("PRAGMA shrink_memory;");
-                }
+                };
             }
         })
         .invoke_handler(tauri::generate_handler![
