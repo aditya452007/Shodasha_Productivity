@@ -24,10 +24,16 @@ pub fn init_db() -> Result<Connection> {
          PRAGMA busy_timeout=5000;
          PRAGMA foreign_keys=ON;
          PRAGMA synchronous=NORMAL;
-         PRAGMA journal_size_limit=67108864;",
+         PRAGMA cache_size=-512;
+         PRAGMA temp_store=FILE;
+         PRAGMA mmap_size=0;
+         PRAGMA journal_size_limit=1048576;",
     )?;
 
     run_migrations(&conn)?;
+
+    // Reclaim memory after startup migrations/pruning
+    conn.execute_batch("PRAGMA shrink_memory;")?;
 
     Ok(conn)
 }

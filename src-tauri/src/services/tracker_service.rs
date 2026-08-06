@@ -1,8 +1,7 @@
 use chrono::{DateTime, Utc};
 use rusqlite::{params, Connection};
-use std::path::Path;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 use tracing::{error, info};
@@ -15,8 +14,6 @@ use windows_sys::Win32::UI::Input::KeyboardAndMouse::{GetLastInputInfo, LASTINPU
 use windows_sys::Win32::UI::WindowsAndMessaging::{
     GetForegroundWindow, GetWindowTextW, GetWindowThreadProcessId,
 };
-
-use crate::db::init_db;
 
 const SYSTEM_PROCESSES: &[&str] = &[
     "explorer.exe",
@@ -56,29 +53,24 @@ struct ActiveEntryState {
 pub struct TrackerConfig {
     pub polling_interval_secs: Arc<AtomicU64>,
     pub idle_threshold_secs: Arc<AtomicU64>,
-}
-
-impl Default for TrackerConfig {
-    fn default() -> Self {
-        Self {
-            polling_interval_secs: Arc::new(AtomicU64::new(10)),
-            idle_threshold_secs: Arc::new(AtomicU64::new(300)),
-        }
-    }
+    pub conn: Arc<Mutex<Connection>>,
 }
 
 fn is_system_process(app_name: &str) -> bool {
-    let lower = app_name.to_lowercase();
-    SYSTEM_PROCESSES.iter().any(|&p| lower == p)
+    SYSTEM_PROCESSES.iter().any(|&p| app_name.eq_ignore_ascii_case(p))
 }
 
 fn is_transient_window(window_title: &str, app_name: &str) -> bool {
-    let lower_title = window_title.to_lowercase();
-    let lower_app = app_name.to_lowercase();
-    if lower_title.is_empty() || lower_title == "untitled window" || lower_title == "program manager" || lower_title == "start" {
+    if window_title.is_empty()
+        || window_title.eq_ignore_ascii_case("untitled window")
+        || window_title.eq_ignore_ascii_case("program manager")
+        || window_title.eq_ignore_ascii_case("start")
+    {
         return true;
     }
-    if lower_app == "explorer.exe" && lower_title.contains("desktop") {
+    if app_name.eq_ignore_ascii_case("explorer.exe")
+        && window_title.to_ascii_lowercase().contains("desktop")
+    {
         return true;
     }
     false
@@ -205,78 +197,90 @@ pub fn start_background_tracker(config: TrackerConfig) {
 
     let polling_interval = config.polling_interval_secs;
     let idle_threshold = config.idle_threshold_secs;
+    let shared_conn = config.conn;
 
     thread::spawn(move || {
         let mut current_state: Option<ActiveEntryState> = None;
         let mut idle_start_time: Option<DateTime<Utc>> = None;
-        let mut conn_opt: Option<Connection> = None;
+        // Only write extend_entry every N-th poll to reduce WAL churn
+        let mut extend_counter: u32 = 0;
+        const EXTEND_WRITE_EVERY: u32 = 3; // write every 3rd poll (~30s at 10s interval)
 
         loop {
-            if conn_opt.is_none() {
-                if let Ok(conn) = init_db() {
-                    conn_opt = Some(conn);
+            let conn_guard = match shared_conn.lock() {
+                Ok(g) => g,
+                Err(e) => {
+                    error!("Tracker thread failed to lock DB: {}", e);
+                    let interval = polling_interval.load(Ordering::Relaxed);
+                    thread::sleep(Duration::from_secs(interval));
+                    continue;
                 }
-            }
+            };
 
-            if let Some(ref conn) = conn_opt {
-                let now = Utc::now();
-                let threshold = idle_threshold.load(Ordering::Relaxed);
-                let window_opt = get_active_window_info(threshold);
+            let now = Utc::now();
+            let threshold = idle_threshold.load(Ordering::Relaxed);
+            let window_opt = get_active_window_info(threshold);
 
-                match window_opt {
-                    None => {
-                        if current_state.is_some() {
-                            if let Some(state) = current_state.take() {
-                                let dur = (now - state.start_time).num_seconds();
-                                if dur >= MINIMUM_DURATION_SECONDS {
-                                    close_entry(conn, &state, now, "idle");
-                                }
+            match window_opt {
+                None => {
+                    if current_state.is_some() {
+                        if let Some(state) = current_state.take() {
+                            let dur = (now - state.start_time).num_seconds();
+                            if dur >= MINIMUM_DURATION_SECONDS {
+                                close_entry(&conn_guard, &state, now, "idle");
                             }
-                            idle_start_time = Some(now);
-                        } else if idle_start_time.is_none() {
-                            idle_start_time = Some(now);
                         }
+                        idle_start_time = Some(now);
+                    } else if idle_start_time.is_none() {
+                        idle_start_time = Some(now);
                     }
-                    Some(win_info) => {
-                        if let Some(idle_start) = idle_start_time.take() {
-                            insert_gap_entry(conn, idle_start, now);
+                    extend_counter = 0;
+                }
+                Some(win_info) => {
+                    if let Some(idle_start) = idle_start_time.take() {
+                        insert_gap_entry(&conn_guard, idle_start, now);
+                    }
+
+                    let is_same = match &current_state {
+                        Some(state) => {
+                            state.app_name == win_info.app_name
+                                && state.window_title == win_info.window_title
                         }
+                        None => false,
+                    };
 
-                        let is_same = match &current_state {
-                            Some(state) => {
-                                state.app_name == win_info.app_name
-                                    && state.window_title == win_info.window_title
-                            }
-                            None => false,
-                        };
-
-                        if is_same {
+                    if is_same {
+                        extend_counter += 1;
+                        if extend_counter >= EXTEND_WRITE_EVERY {
                             if let Some(ref state) = current_state {
-                                extend_entry(conn, state, now);
+                                extend_entry(&conn_guard, state, now);
                             }
-                        } else {
-                            if let Some(state) = current_state.take() {
-                                let dur = (now - state.start_time).num_seconds();
-                                if dur >= MINIMUM_DURATION_SECONDS {
-                                    close_entry(conn, &state, now, "closed");
-                                }
-                            }
-
-                            let new_id = format!("time_{}", now.timestamp_millis());
-                            if let Ok(_) = create_entry(conn, &new_id, &win_info, now) {
-                                current_state = Some(ActiveEntryState {
-                                    id: new_id,
-                                    app_name: win_info.app_name,
-                                    window_title: win_info.window_title,
-                                    start_time: now,
-                                });
+                            extend_counter = 0;
+                        }
+                    } else {
+                        if let Some(state) = current_state.take() {
+                            let dur = (now - state.start_time).num_seconds();
+                            if dur >= MINIMUM_DURATION_SECONDS {
+                                close_entry(&conn_guard, &state, now, "closed");
                             }
                         }
+
+                        let new_id = format!("time_{}", now.timestamp_millis());
+                        if create_entry(&conn_guard, &new_id, &win_info, now).is_ok() {
+                            current_state = Some(ActiveEntryState {
+                                id: new_id,
+                                app_name: win_info.app_name,
+                                window_title: win_info.window_title,
+                                start_time: now,
+                            });
+                        }
+                        extend_counter = 0;
                     }
                 }
-            } else {
-                error!("Tracker thread failed to connect to SQLite DB, retrying...");
             }
+
+            // Drop the lock before sleeping so the main thread can use the DB
+            drop(conn_guard);
 
             let interval = polling_interval.load(Ordering::Relaxed);
             thread::sleep(Duration::from_secs(interval));

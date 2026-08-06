@@ -97,6 +97,15 @@ struct SafeHandle(HANDLE);
 
 unsafe impl Send for SafeHandle {}
 
+impl Drop for SafeHandle {
+    fn drop(&mut self) {
+        if self.0 != INVALID_HANDLE_VALUE && !self.0.is_negative() {
+            unsafe { CloseHandle(self.0); }
+        }
+    }
+}
+
+
 #[allow(dead_code)]
 #[derive(Deserialize)]
 struct DiscoveryFile {
@@ -284,6 +293,8 @@ fn send_request(method: &str, params: Option<Value>) -> Result<IpcResponse, Open
     let request_line = format!("{}\n", request_json);
     write_pipe(handle, request_line.as_bytes())?;
 
+    // Wrap handle in SafeHandle so Drop auto-closes it.
+    // Only ONE owner — the spawned thread takes it, and Drop handles cleanup.
     let safe_handle = SafeHandle(handle);
     let (tx, rx) = mpsc::channel::<Result<IpcResponse, OpenPetsError>>();
 
@@ -300,16 +311,14 @@ fn send_request(method: &str, params: Option<Value>) -> Result<IpcResponse, Open
             })
         });
         let _ = tx.send(result);
-        let _ = unsafe { CloseHandle(safe_handle.0) };
+        // safe_handle is dropped here by the thread, calling CloseHandle exactly once
     });
 
     match rx.recv_timeout(Duration::from_millis(IPC_RESPONSE_TIMEOUT_MS)) {
-        Ok(result) => {
-            let _ = unsafe { CloseHandle(handle) };
-            result
-        }
+        Ok(result) => result,
         Err(_) => {
-            let _ = unsafe { CloseHandle(handle) };
+            // If timeout, the spawned thread will eventually finish and Drop
+            // will close the handle. No manual CloseHandle needed here.
             Err(OpenPetsError::Timeout("timed out waiting for OpenPets response".to_string()))
         }
     }
@@ -361,7 +370,8 @@ pub fn discover() -> OpenPetsStatus {
                     };
                 }
             };
-            let _ = unsafe { CloseHandle(handle) };
+            // SafeHandle's Drop will close when it goes out of scope
+            let _safe = SafeHandle(handle);
             OpenPetsStatus {
                 available: true,
                 default_pet_id: None,

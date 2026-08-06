@@ -33,3 +33,11 @@ windows-sys = { version = "0.59", features = [
     "Win32_System_SystemInformation",
     "Win32_Storage_FileSystem"
 ] }
+
+[profile.release]
+opt-level = "s"        # optimize for binary size
+lto = true             # link-time optimization across all crates
+codegen-units = 1      # single codegen unit for max optimization
+panic = "abort"        # no unwinding overhead
+strip = true           # strip debug symbols from binary
+incremental = false    # full optimization pass for release

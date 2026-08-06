@@ -19,7 +19,7 @@ pub struct TrackerState {
 }
 
 pub struct DbState {
-    pub conn: Mutex<rusqlite::Connection>,
+    pub conn: Arc<Mutex<rusqlite::Connection>>,
 }
 
 /// Create the main window on demand. The window is never created at startup
@@ -76,9 +76,13 @@ pub fn run() {
         commands::set_auto_start(true).ok();
     }
 
+    // Share one connection between the main thread and the background tracker
+    let shared_conn = Arc::new(Mutex::new(conn));
+
     let tracker_config = services::tracker_service::TrackerConfig {
         polling_interval_secs: Arc::clone(&polling_interval),
         idle_threshold_secs: Arc::clone(&idle_threshold),
+        conn: Arc::clone(&shared_conn),
     };
     services::tracker_service::start_background_tracker(tracker_config);
 
@@ -90,7 +94,7 @@ pub fn run() {
             idle_threshold_secs: idle_threshold,
         })
         .manage(DbState {
-            conn: Mutex::new(conn),
+            conn: shared_conn,
         })
         .setup(|app| {
             let show_item = MenuItemBuilder::with_id("show", "Show Shodasha").build(app)?;
@@ -134,6 +138,14 @@ pub fn run() {
                 // drops to the Rust-core footprint; the tray "show" rebuilds it.
                 api.prevent_close();
                 let _ = window.destroy();
+
+                // Shrink SQLite caches after the UI is gone to minimize
+                // background memory footprint.
+                let app = window.app_handle();
+                let db = app.state::<DbState>();
+                if let Ok(conn) = db.conn.lock() {
+                    let _ = conn.execute_batch("PRAGMA shrink_memory;");
+                }
             }
         })
         .invoke_handler(tauri::generate_handler![

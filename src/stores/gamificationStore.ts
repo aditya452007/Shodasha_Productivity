@@ -104,12 +104,19 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
 
     const todayStr = new Date().toISOString().split('T')[0]
 
+    // Cap trackedXPKeys to prevent unbounded memory growth
+    const updatedKeys = [...state.trackedXPKeys, key]
+    const MAX_TRACKED_KEYS = 500
+    const cappedKeys = updatedKeys.length > MAX_TRACKED_KEYS
+      ? updatedKeys.slice(updatedKeys.length - MAX_TRACKED_KEYS)
+      : updatedKeys
+
     set({
       xp: newXP,
       level: newLevel,
       lastLevelUpNotified: leveledUp ? state.level : state.lastLevelUpNotified,
       dailyXP: state.dailyXP + amount,
-      trackedXPKeys: [...state.trackedXPKeys, key],
+      trackedXPKeys: cappedKeys,
     })
 
     if (key.startsWith('habit_checkin_') && key.endsWith(`_${todayStr}`)) {
